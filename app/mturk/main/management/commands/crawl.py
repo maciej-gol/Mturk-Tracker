@@ -15,6 +15,7 @@ import datetime
 import logging
 from logging.config import fileConfig
 from optparse import make_option
+from psycopg2.pool import ThreadedConnectionPool
 
 import gevent
 from django.core.management.base import BaseCommand
