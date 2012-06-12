@@ -13,7 +13,7 @@ import re
 import sys
 import inspect
 import docutils
-#from sphinx.locale import _
+from sphinx.locale import _
 from sphinx.util.compat import Directive
 from django.utils.html import strip_tags
 from django.utils.encoding import force_unicode
@@ -45,40 +45,51 @@ def process_nodes(app, doctree, fromdocname):
     """Replaces all djangomodellist nodes with a list of the collected models.
     """
 
-    # use to hide some directives - unused in this case ?
-    # if not app.config.todo_include_todos:
-    #     for node in doctree.traverse(todo):
-    #         node.parent.remove(node)
-
     env = app.builder.env
-
     content = []
     if app.config.djmex_include_djangomodellists:
 
         for info in env.djmex_all_djangomodels:
 
-            para = docutils.nodes.paragraph()
+            # title = 'Table {0} ({1})'.format(
+            #     info['target']._meta.db_table, info['name'])
 
-            para += docutils.nodes.Text('Table: {0} ({1})'.format(
-                info['target']._meta.db_table, info['name']))
+            #content.append(docutils.nodes.literal_block())
+            block = docutils.nodes.line_block()
+            block.append(docutils.nodes.Text('Table '))
+            block.append(docutils.nodes.strong(text=info['target']._meta.db_table))
+            block.append(docutils.nodes.emphasis(
+                text=' ({0})'.format(info['name'])))
+            content.append(block)
 
-            content.append(para)
+            field_list = docutils.nodes.field_list()
+            field = docutils.nodes.field()
+            field.append(docutils.nodes.field_name(text=_('Columns')))
+            body = docutils.nodes.field_body()
+            blist = docutils.nodes.bullet_list()
+            body.append(blist)
+            field.append(body)
+            field_list.append(field)
 
             fields = info['target']._meta._fields()
             for field in fields:
                 db_column = field.db_column or field.name
-                help_text = strip_tags(force_unicode(field.help_text))
-                #verbose_name = force_unicode(field.verbose_name).capitalize()
-                ftype = u':type {0}: {1}'.format(
-                    type(field).__name__, field.attname)
-                db_index = 'Is index' if field.db_index else ''
+                help_text = ' ' + strip_tags(force_unicode(field.help_text))
+                ftype = type(field).__name__
+                db_index = ' Is index' if field.db_index else ''
 
                 para = docutils.nodes.paragraph()
-                para += docutils.nodes.Text(db_column, db_column)
-                para += docutils.nodes.Text(db_index, db_index)
+                para += docutils.nodes.strong(text=db_column)
+                para += docutils.nodes.emphasis(text=' ({0}) '.format(ftype))
                 para += docutils.nodes.Text(help_text, help_text)
-                para += docutils.nodes.Text(ftype, ftype)
-                content.append(para)
+                para += docutils.nodes.Text(db_index, db_index)
+
+                #name = docutils.nodes.field_name(text=db_column)
+                li = docutils.nodes.list_item()
+                li.append(para)
+                blist.append(li)
+
+            content.append(field_list)
 
     for node in doctree.traverse(djangomodellist):
         node.replace_self(content)
@@ -98,28 +109,28 @@ def add_djangomodel_node(app, what, name, obj, options, lines):
 
 
 def enrich_docstring(obj, lines):
-     # Grab the field list from the meta class
-        fields = obj._meta._fields()
+    # Grab the field list from the meta class
+    fields = obj._meta._fields()
 
-        for field in fields:
-            # Decode and strip any html out of the field's help text
-            help_text = strip_tags(force_unicode(field.help_text))
+    for field in fields:
+        # Decode and strip any html out of the field's help text
+        help_text = strip_tags(force_unicode(field.help_text))
 
-            # Decode and capitalize the verbose name, for use if there isn't
-            # any help text
-            verbose_name = force_unicode(field.verbose_name).capitalize()
+        # Decode and capitalize the verbose name, for use if there isn't
+        # any help text
+        verbose_name = force_unicode(field.verbose_name).capitalize()
 
-            if help_text:
-                # Add the model field to the end of the docstring as a param
-                # using the help text as the description
-                lines.append(u':param %s: %s' % (field.attname, help_text))
-            else:
-                # Add the model field to the end of the docstring as a param
-                # using the verbose name as the description
-                lines.append(u':param %s: %s' % (field.attname, verbose_name))
+        if help_text:
+            # Add the model field to the end of the docstring as a param
+            # using the help text as the description
+            lines.append(u':param %s: %s' % (field.attname, help_text))
+        else:
+            # Add the model field to the end of the docstring as a param
+            # using the verbose name as the description
+            lines.append(u':param %s: %s' % (field.attname, verbose_name))
 
-            # Add the field's type to the docstring
-            lines.append(u':type %s: %s' % (field.attname, type(field).__name__))
+        # Add the field's type to the docstring
+        lines.append(u':type %s: %s' % (field.attname, type(field).__name__))
 
 
 def process_docstring(app, what, name, obj, options, lines):
