@@ -71,7 +71,10 @@ def update_mviews():
         execute_sql("delete from hits_mv where crawl_id = %s" % crawl_id)
 
         execute_sql("""INSERT INTO
-                hits_mv
+                hits_mv (status_id, content_id, group_id, crawl_id, start_time,
+                    requester_id, hits_available, page_number, inpage_position,
+                    hit_expiration_date, reward, time_alloted, hits_diff,
+                    is_spam)
             SELECT p.id AS status_id, q.id AS content_id, p.group_id, p.crawl_id,
                 TIMESTAMP '%s',
                 q.requester_id, p.hits_available, p.page_number, p.inpage_position, p.hit_expiration_date, q.reward, q.time_alloted, null, q.is_spam

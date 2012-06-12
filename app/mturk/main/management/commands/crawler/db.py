@@ -8,7 +8,6 @@ from gevent import socket
 
 import psycopg2
 from psycopg2 import extensions
-from psycopg2.pool import ThreadedConnectionPool
 
 from django.conf import settings
 
