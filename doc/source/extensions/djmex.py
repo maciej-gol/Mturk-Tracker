@@ -6,22 +6,20 @@
     Additionally, django schema nodelist is build to display using
     djangomodelschema directive.
 
-    TODO1: Create nodes and nodelists to displays as 'djangomodelschema'
-    TODO2: Get sphinx-documented members to display along with field properties
+    Available settings:
+    djmex_include_djangomodellists -- should djangomodellists be shown (False)
+    djmex_pretty_model -- should django models be prettified (False)
+    djmex_show_django_field -- show django field type along with db type (True)
+
 """
-import re
-import sys
+
 import inspect
 import docutils
 from sphinx.locale import _
 from sphinx.util.compat import Directive
 from django.utils.html import strip_tags
 from django.utils.encoding import force_unicode
-from django.db import models
-
-
-class djangomodel(docutils.nodes.General, docutils.nodes.Element):
-    pass
+from django.db import models, connection
 
 
 class djangomodellist(docutils.nodes.General, docutils.nodes.Element):
@@ -47,21 +45,31 @@ def process_nodes(app, doctree, fromdocname):
 
     env = app.builder.env
     content = []
+
+    # generate representation
     if app.config.djmex_include_djangomodellists:
 
         for info in env.djmex_all_djangomodels:
 
-            # title = 'Table {0} ({1})'.format(
-            #     info['target']._meta.db_table, info['name'])
-
-            #content.append(docutils.nodes.literal_block())
+            # title in the form
+            # Table table_name (model_name)
             block = docutils.nodes.line_block()
             block.append(docutils.nodes.Text('Table '))
-            block.append(docutils.nodes.strong(text=info['target']._meta.db_table))
+            block.append(docutils.nodes.strong(
+                text=info['target']._meta.db_table))
             block.append(docutils.nodes.emphasis(
                 text=' ({0})'.format(info['name'])))
             content.append(block)
 
+            # add existing doc lines
+            block = docutils.nodes.line_block()
+            for l in info['lines']:
+                para = docutils.nodes.paragraph()
+                para.append(docutils.nodes.Text(l))
+                block.append(para)
+            content.append(block)
+
+            # field list is represented as a single field containing a list
             field_list = docutils.nodes.field_list()
             field = docutils.nodes.field()
             field.append(docutils.nodes.field_name(text=_('Columns')))
@@ -73,16 +81,33 @@ def process_nodes(app, doctree, fromdocname):
 
             fields = info['target']._meta._fields()
             for field in fields:
+                # adds field description in the form:
+                # db_field_name (db_field_type[, django_field_type]) details
+                # where details are: PK, Index, field.help_text
                 db_column = field.db_column or field.name
                 help_text = ' ' + strip_tags(force_unicode(field.help_text))
-                ftype = type(field).__name__
-                db_index = ' Is index' if field.db_index else ''
+                try:
+                    db_type = field.db_type(connection)
+                except:
+                    db_type = 'Unknown'
+
+                if app.config.djmex_show_django_field:
+                    ftype = ', '.join([db_type, field.get_internal_type()])
+                else:
+                    ftype = db_type
+
+                db_index = ' Index' if field.db_index else ''
+                is_pk = ' PK' if field.primary_key else ''
 
                 para = docutils.nodes.paragraph()
                 para += docutils.nodes.strong(text=db_column)
                 para += docutils.nodes.emphasis(text=' ({0}) '.format(ftype))
-                para += docutils.nodes.Text(help_text, help_text)
-                para += docutils.nodes.Text(db_index, db_index)
+
+                details = [is_pk, db_index, help_text]
+                for i, d in enumerate(details):
+                    if i > 0:
+                        para += docutils.nodes.Text(' ', ' ')
+                    para += docutils.nodes.Text(d, d)
 
                 #name = docutils.nodes.field_name(text=db_column)
                 li = docutils.nodes.list_item()
@@ -104,14 +129,14 @@ def add_djangomodel_node(app, what, name, obj, options, lines):
     env.djmex_all_djangomodels.append({
         'docname': env.docname,
         'target': obj,
-        'name': name
+        'name': name,
+        'lines': [l for l in lines],
     })
 
 
 def enrich_docstring(obj, lines):
-    # Grab the field list from the meta class
+    """Adds pretty model field listing to class description."""
     fields = obj._meta._fields()
-
     for field in fields:
         # Decode and strip any html out of the field's help text
         help_text = strip_tags(force_unicode(field.help_text))
@@ -139,11 +164,14 @@ def process_docstring(app, what, name, obj, options, lines):
 
     """
     if inspect.isclass(obj) and issubclass(obj, models.Model):
+
         # Add djangomodellist entry
         add_djangomodel_node(app, what, name, obj, options, lines)
+
         # Make pretty model description using verbose_names and help_text
         if app.config.djmex_pretty_model:
             lines = enrich_docstring(obj, lines)
+
     return lines
 
 
@@ -151,42 +179,16 @@ def setup(app):
     app.connect('autodoc-process-docstring', process_docstring)
     #app.connect('autodoc-process-signature', process_signature)
 
-    #TODO:
     # show model lists:
     app.add_config_value('djmex_include_djangomodellists', False, False)
     # settings to disable nice display of models fields
     app.add_config_value('djmex_pretty_model', False, False)
-    # settings to disable all djangoschema directives
-    # app.add_config_value('djmex_show_schema', False, False)
-    # settings to exclude modules
+    # if true, django model field type will be shown together with db type
+    app.add_config_value('djmex_show_django_field', True, False)
+    # TODO: possible feature: exclude modules
     # app.add_config_value('djmex_excluded', [], False)
 
     app.add_node(djangomodellist)
-    app.add_node(djangomodel)
     app.add_directive('djangomodellist', DjangoModellistDirective)
     app.connect('doctree-resolved', process_nodes)
     app.connect('env-purge-doc', purge_nodes)
-
-
-# def process_autoclass_nodes(app, doctree, fromdocname):
-#     for node in doctree.traverse(docutils.nodes.Text):
-#         print node
-#         #import ipdb; ipdb.set_trace()
-#         # if node.tagname == '#autoclass' and  node.parent.tagname in TEXT_NODES:
-#         #     import ipdb; ipdb.set_trace()
-#     pass
-
-
-# def doctree_read(app, doctree):
-#     for node in doctree.traverse(docutils.nodes.Text):
-#         continue
-#         print node
-#         #import ipdb; ipdb.set_trace()
-#         # if node.tagname == '#autoclass' and  node.parent.tagname in TEXT_NODES:
-#         #     import ipdb; ipdb.set_trace()
-#     pass
-
-
-# def process_signature(app, what, name, obj, options, signature, return_annotation):
-#     """Empty for now, no use for it?"""
-#     return (signature, return_annotation)

@@ -15,6 +15,12 @@ API documentation (automatically generated)
    apidoc/app/modules
    apidoc/deployment/modules
 
+Database schema documentation
+=============================
+
+.. toctree::
+
+    database
 
 Indices and tables
 ==================
@@ -23,12 +29,3 @@ Indices and tables
 * :ref:`modindex`
 * :ref:`search`
 
-Database schema
-===============
-
-.. djangomodellist::
-
-.. automodule:: app.mturk.main.models
-    :members:
-    :undoc-members:
-    :show-inheritance:
