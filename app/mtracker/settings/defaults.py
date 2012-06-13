@@ -124,9 +124,19 @@ INSTALLED_APPS = tuple(list(FOREIGN_APPS) + list(MTRACKER_APPS))
 
 SOUTH_TESTS_MIGRATE = False
 
+from logging.handlers import SysLogHandler
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': (' mturk-tracker: %(name)s %(levelname)s '
+                '%(funcName)s:%(lineno)d %(message)s')
+        },
+        'simple': {
+            'format': '%(levelname)s %(message)s'
+        },
+    },
     'filters': {
         'require_debug_false': {
             '()': 'django.utils.log.RequireDebugFalse'
@@ -137,7 +147,25 @@ LOGGING = {
             'level': 'ERROR',
             'filters': ['require_debug_false'],
             'class': 'django.utils.log.AdminEmailHandler'
-        }
+        },
+        'syslog': {
+            'level': 'WARNING',
+            'class': 'logging.handlers.SysLogHandler',
+            'formatter': 'verbose',
+            'address': '/dev/log',
+            'facility': SysLogHandler.LOG_LOCAL2,
+        },
+        # 'sentry': {
+        #     'level': 'WARNING',
+        #     'class': 'raven.contrib.django.handlers.SentryHandler',
+        # },
+    },
+    'root': {
+        'handlers': [
+            'syslog',
+            #'sentry'
+        ],
+        'level': 'INFO'
     },
     'loggers': {
         'django.request': {
