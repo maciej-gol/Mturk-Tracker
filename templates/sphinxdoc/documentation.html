@@ -9,8 +9,8 @@
 
 {% block content %}
 
-<div class="pagination-top">
-    <div class="breadcrumbs">
+<div class="pagination pagination-top">
+    <div class="breadcrumbs padded">
         <a href="{{ project.get_absolute_url }}">
             {{ project.name }} documentation</a>
     {% for p in doc.parents %}
@@ -18,18 +18,21 @@
     {% endfor %}
         » {{ doc.title|safe }}
     </div>
+    <hr />
     {% if doc.prev or doc.next %}
-    <span class="alignleft">
+    <span class="alignleft padded">
         {% if doc.prev %}
           Prev: <a href="{{ doc.prev.link }}">{{ doc.prev.title|safe }}</a>
         {% endif %}</span>
-    <span class="alignright">
+    <span class="alignright padded">
         {% if doc.next %}
           Next: <a href="{{ doc.next.link }}">{{ doc.next.title|safe }}</a>
-        {% endif %}</span><div class="clearboth">.</div>
+        {% endif %}</span>
     {% endif %}
+    <hr />
 </div>
 
+{% comment %}
 <div class="span-6">
     {% block sidebar %}
         {% block doc_toc %}
@@ -47,6 +50,7 @@
         </div>
     {% endblock sidebar %}
 </div>
+{% endcomment %}
 
 <div class="span">
     <div class="sphinx">
@@ -56,27 +60,31 @@
     </div>
 </div>
 
-<div class="pagination-bottom">
-    {% if doc.prev or doc.next %}
-    <span class="alignleft">
-        {% if doc.prev %}
-          Prev: <a href="{{ doc.prev.link }}">{{ doc.prev.title|safe }}</a>
-        {% endif %}</span>
-    <span class="alignright">
-        {% if doc.next %}
-          Next: <a href="{{ doc.next.link }}">{{ doc.next.title|safe }}</a>
-        {% endif %}</span><div class="clearboth">.</div>
-    {% endif %}
-    <div class="breadcrumbs">
-        » <a href="{{ project.get_absolute_url }}">{{ project.name }} documentation</a>
+<div class="pagination pagination-bottom">
+    <hr />
+    <div class="breadcrumbs padded">
+        <a href="{{ project.get_absolute_url }}">{{ project.name }} documentation</a>
     {% for p in doc.parents %}
         » <a href="{{ p.link }}">{{ p.title|safe }}</a>
     {% endfor %}
         » {{ doc.title|safe }}
     </div>
-    <div class="meta">
+    <hr />
+    {% if doc.prev or doc.next %}
+    <span class="alignleft padded">
+        {% if doc.prev %}
+          Prev: <a href="{{ doc.prev.link }}">{{ doc.prev.title|safe }}</a>
+        {% endif %}</span>
+    <span class="alignright padded">
+        {% if doc.next %}
+          Next: <a href="{{ doc.next.link }}">{{ doc.next.title|safe }}</a>
+        {% endif %}</span>
+    {% endif %}
+    <hr />
+    <div class="meta padded">
         Last update: {{ update_date|date:"Y-m-d H:i" }} (<a href="http://www.timeanddate.com/worldclock/city.html?n=37">CET</a>)
     </div>
+
 </div>
 {% endblock content %}
 

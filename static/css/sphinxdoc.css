@@ -1,7 +1,37 @@
+.sphinx {
+    margin: 0 5px;
+}
 #content .sphinx a.headerlink {
     font-size: 0.8em;
     padding: 0 4px 0 4px;
     text-decoration: none;
     visibility: hidden;
 }
-#content .sphinx *:hover > a.headerlink { visibility: visible; }
+#content .sphinx *:hover > a.headerlink {
+    visibility: visible;
+}
+
+.alignright {
+    float: right;
+}
+
+.alignleft {
+    float: left;
+}
+
+h1 {
+    font-size:24px;
+    line-height:28px;
+}
+
+.pagination {
+    padding: 4px;
+}
+
+.padded {
+    padding: 4px;
+}
+
+hr {
+    margin: 0;
+}
