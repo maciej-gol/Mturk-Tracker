@@ -14,6 +14,8 @@ import urllib2
 from crawler_common import get_allhit_url, get_group_url, grab_error
 from mturk.main.models import HitGroupContent
 
+log = logging.getLogger(__name__)
+
 
 ##########################################################################################
 # Fetches HIT group information from HITs list page by it's position in the pagination.
@@ -47,9 +49,9 @@ def callback_allhit(pages, **kwargs):
     for page_number in pages:
         try:
             # Downloading page
-            logging.info("Downloading page: %s" % page_number)
+            log.info("Downloading page: %s" % page_number)
             page_url = get_allhit_url(page_number)
-            logging.debug("Downloading %s" % page_url)
+            log.debug("Downloading %s" % page_url)
             response = urllib2.urlopen(page_url)
             html = response.read()
             soup = BeautifulSoup(html)
@@ -60,7 +62,7 @@ def callback_allhit(pages, **kwargs):
 
                 i = 0
                 while i < 3:
-                    logging.warn("Soup returned an empty table for page %s. Trying once more" % page_number);
+                    log.warn("Soup returned an empty table for page %s. Trying once more" % page_number)
                     response = urllib2.urlopen(page_url)
                     html = response.read()
                     soup = BeautifulSoup(html)
@@ -74,14 +76,14 @@ def callback_allhit(pages, **kwargs):
                         i = i + 1
 
                 if type(table) == type(None):
-                    logging.warn("Soup returned an empty table. This should not happen. Skipping page")
+                    log.warn("Soup returned an empty table. This should not happen. Skipping page")
                     continue
 
             table.contents = remove_newline_fields(table.contents)
 
             # Parsing and fetching information about each group
-            for i_group in range(0,len(table.contents)):
-                logging.debug("Processing group %s on page %s" % (i_group,page_number))
+            for i_group in range(0, len(table.contents)):
+                log.debug("Processing group %s on page %s" % (i_group, page_number))
                 try:
                     group_html = table.contents[i_group]
 
@@ -173,7 +175,7 @@ def callback_allhit(pages, **kwargs):
                         # Checking whether processed content is already stored in the database
                         hit_group_content = None
                         try:
-                            logging.debug("group_id=%s; requester=%s; title=%s; desc=%s; ta=%s; reward=%s" % (group_id,requester_id,title,description,time_alloted,reward))
+                            log.debug("group_id=%s; requester=%s; title=%s; desc=%s; ta=%s; reward=%s" % (group_id, requester_id, title, description, time_alloted, reward))
                             hit_group_content = HitGroupContent.objects.get(group_id=group_id,
                                                                             requester_id=requester_id,
                                                                             title=title,
@@ -212,7 +214,7 @@ def callback_allhit(pages, **kwargs):
                     group_html = None
 
                 except:
-                    logging.error("Failed to process group %s on %s page (%s)" % (i_group,page_number,sys.exc_info()[0].__name__))
+                    log.error("Failed to process group %s on %s page (%s)" % (i_group, page_number, sys.exc_info()[0].__name__))
                     errors.append(grab_error(sys.exc_info()))
                     print grab_error(sys.exc_info())
 
@@ -221,7 +223,7 @@ def callback_allhit(pages, **kwargs):
             html = None
 
         except:
-            logging.error("Failed to process page %d (%s)" % (page_number,sys.exc_info()[0].__name__))
+            log.error("Failed to process page %d (%s)" % (page_number, sys.exc_info()[0].__name__))
             errors.append(grab_error(sys.exc_info()))
             print grab_error(sys.exc_info())
 
@@ -247,7 +249,7 @@ def callback_details(data, **kwargs):
         group_id = data[i]['HitGroupStatus']['group_id']
         if not data[i]['HitGroupStatus']['hit_group_content'].group_id_hashed:
             try:
-                logging.info("Downloading group details for: %s" % group_id)
+                log.info("Downloading group details for: %s" % group_id)
                 html = None
 
                 # Downloading group details
@@ -269,7 +271,7 @@ def callback_details(data, **kwargs):
                 preview_html = None
 
             except:
-                logging.error("Failed to process group details for %s (%s)" % (group_id,
+                log.error("Failed to process group details for %s (%s)" % (group_id,
                               sys.exc_info()[0].__name__))
                 errors.append(grab_error(sys.exc_info()))
     return {'data':data,'errors':errors}

@@ -9,7 +9,7 @@ from mturk.main.models import Crawl
 from mturk.main.management.commands.diffs import update_cid
 from django.db import transaction
 
-logger = logging.getLogger('db_refresh_diffs')
+log = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):
@@ -45,4 +45,4 @@ class Command(BaseCommand):
             pid.remove_pid()
             exit()
 
-        logger.info('updating 5 crawls took: %s s', (time.time() - start_time))
+        log.info('updating 5 crawls took: %s s', (time.time() - start_time))

@@ -4,7 +4,7 @@ import re
 import datetime
 import logging
 
-log = logging.getLogger('crawler.parser')
+log = logging.getLogger(__name__)
 
 
 _RX_WHITECHARS_DUPLICATE = re.compile(r'\s{2,}')

@@ -9,7 +9,7 @@ from utils.pid import Pid
 from mturk.main.management.commands import update_crawl_agregates
 
 
-logger = logging.getLogger('db_refresh_mviews')
+log = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):
@@ -20,9 +20,9 @@ class Command(BaseCommand):
         pid = Pid('mturk_agregates', True)
         start_time = time.time()
 
-        logging.info('Updating crawl agregates')
+        log.info('Updating crawl agregates')
         update_crawl_agregates(1, only_new=True)
 
-        logging.info('db_update_agregates took: %s' % (time.time() - start_time))
+        log.info('db_update_agregates took: %s' % (time.time() - start_time))
 
         pid.remove_pid()

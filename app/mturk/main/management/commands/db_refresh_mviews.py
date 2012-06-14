@@ -8,7 +8,7 @@ from utils.pid import Pid
 from mturk.main.management.commands import clean_duplicates, update_mviews
 
 
-logger = logging.getLogger('db_refresh_mviews')
+log = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):
@@ -20,14 +20,14 @@ class Command(BaseCommand):
 
         start_time = time.time()
 
-        logging.info('cleaning up db from duplicates')
+        log.info('cleaning up db from duplicates')
         clean_duplicates()
 
-        logging.info('Refreshing hits_mv')
+        log.info('Refreshing hits_mv')
         update_mviews()
 
-        logging.info('done refreshing hits_mv')
+        log.info('done refreshing hits_mv')
 
-        logging.info('db_refresh_mviews took: %s' % (time.time() - start_time))
+        log.info('db_refresh_mviews took: %s' % (time.time() - start_time))
 
         pid.remove_pid()

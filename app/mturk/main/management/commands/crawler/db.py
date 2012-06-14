@@ -12,7 +12,7 @@ from psycopg2 import extensions
 from django.conf import settings
 
 
-log = logging.getLogger('crawler.db')
+log = logging.getLogger(__name__)
 
 
 def wait_callback(conn, timeout=None):

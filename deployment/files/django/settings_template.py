@@ -6,18 +6,20 @@ from defaults import *
 import logging
 from os.path import join as pjoin
 
-
 LOG_DIRECTORY = "%(log_dir)s"
-logging.basicConfig(
-    level=logging.DEBUG,
-    filename=pjoin(LOG_DIRECTORY, 'crawl.log'),
-    filemode='a'
-)
+
+DEBUG = False
+
+# Overriding default logger settings
+LOG_LEVEL = 'DEBUG' if DEBUG else 'INFO'
+LOGGING['loggers']['mturk.main.management.commands']['level'] = LOG_LEVEL
+LOGGING['handlers']['crawl_log']['filename'] = pjoin(LOG_DIRECTORY, 'crawl.log')
 
 log = logging.getLogger(__name__)
 
 # sudo -u postgres psql
-# CREATE USER %(db_user)s WITH CREATEDB NOCREATEUSER ENCRYPTED PASSWORD E'%(db_password)s';
+# CREATE USER %(db_user)s WITH CREATEDB NOCREATEUSER ENCRYPTED PASSWORD
+# E'%(db_password)s';
 # CREATE DATABASE %(db_name)s' WITH OWNER %(db_user)s;
 DATABASES.update({
     'default': {

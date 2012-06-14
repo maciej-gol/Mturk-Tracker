@@ -7,7 +7,7 @@ from django.db import transaction
 from utils.sql import query_to_dicts
 from mturk.main.models import Crawl, DayStats
 
-logger = logging.getLogger('db_calculate_daily_stats')
+log = logging.getLogger(__name__)
 
 
 def get_first_crawl():
@@ -37,7 +37,7 @@ class Command(BaseCommand):
         '''
         crawl = get_first_crawl()
         if not crawl:
-            logger.error("no crawls in db")
+            log.error("no crawls in db")
             return
 
         transaction.enter_transaction_management()
@@ -51,19 +51,19 @@ class Command(BaseCommand):
             crawls = Crawl.objects.filter(has_diffs=False, start_time__gte=day,
                 start_time__lt=day_end)
             if len(crawls) > 0:
-                logger.error("not all crawls from %s have diffs" % day)
+                log.error("not all crawls from %s have diffs" % day)
                 continue
 
             try:
                 DayStats.objects.get(date=day)
             except DayStats.DoesNotExist:
-                logger.info(
+                log.info(
                     "db_calculate_daily_stats: calculating stats for: %s" % day)
 
                 range_start_date = day.isoformat()
                 range_end_date = (day_end).isoformat()
 
-                logger.info("calculating arrivals")
+                log.info("calculating arrivals")
 
                 '''
                 stats for projects posted on particular day
@@ -77,7 +77,7 @@ class Command(BaseCommand):
                         and hits_diff > 0
                     ''' % (range_start_date, range_end_date)).next()
 
-                logger.info("calculating processed")
+                log.info("calculating processed")
 
                 processed = query_to_dicts('''
                     select sum(hits_diff) as "processed", sum(hits_diff*reward) as "processed_value"

@@ -125,6 +125,7 @@ INSTALLED_APPS = tuple(list(FOREIGN_APPS) + list(MTRACKER_APPS))
 SOUTH_TESTS_MIGRATE = False
 
 from logging.handlers import SysLogHandler
+LOG_LEVEL = 'DEBUG' if DEBUG else 'INFO'
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -155,17 +156,30 @@ LOGGING = {
             'address': '/dev/log',
             'facility': SysLogHandler.LOG_LOCAL2,
         },
+        'log_file': {
+            'level': LOG_LEVEL,
+            'class': 'logging.handlers.RotatingFileHandler',
+            # Override this in local settings
+            'filename': os.path.join(ROOT_PATH, 'main.log'),
+            'maxBytes': '16777216',  # 16megabytes
+            'formatter': 'verbose'
+        },
+        'crawl_log': {
+            'level': LOG_LEVEL,
+            'class': 'logging.handlers.RotatingFileHandler',
+            # Override this in local settings
+            'filename': os.path.join(ROOT_PATH, 'crawl.log'),
+            'maxBytes': '16777216',  # 16megabytes
+            'formatter': 'verbose'
+        }
         # 'sentry': {
         #     'level': 'WARNING',
         #     'class': 'raven.contrib.django.handlers.SentryHandler',
         # },
     },
     'root': {
-        'handlers': [
-            'syslog',
-            #'sentry'
-        ],
-        'level': 'INFO'
+        'handlers': ['syslog', ],  # 'sentry'],
+        'level': LOG_LEVEL,
     },
     'loggers': {
         'django.request': {
@@ -173,7 +187,12 @@ LOGGING = {
             'level': 'ERROR',
             'propagate': True,
         },
-    }
+        'mturk.main.management.commands': {
+            'handlers': ['crawl_log'],
+            'level': LOG_LEVEL,
+            'propagate': True,
+        }
+    },
 }
 
 PIPELINE_CSS = {

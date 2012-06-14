@@ -24,6 +24,8 @@ from crawler_callbacks_save import callback_database
 from crawler_common import get_allhit_url, get_group_url
 from mturk.main.models import Crawl
 
+log = logging.getLogger(__name__)
+
 
 class Command(BaseCommand):
     help = 'Runs the MTurk crawler'
@@ -178,12 +180,12 @@ class Crawler(Thread):
 
         pid = Pid('mturk_crawler', True)
 
-        logging.info('Crawler started')
+        log.info('Crawler started')
 
         start_time = datetime.datetime.now()
 
         #Fetching statistical information about groups and HITs count
-        logging.debug("Fetching stats")
+        log.debug("Fetching stats")
         main_response = urllib2.urlopen(get_allhit_url())
         main_html = main_response.read()
         main_soup = BeautifulSoup(main_html, parseOnlyThese=SoupStrainer(text=re.compile("(^[0-9,]+ HITs|of [0-9]+ Results)")))
@@ -200,14 +202,14 @@ class Crawler(Thread):
         main_soup = None
 
         #Fetching data from every mturk.com HITs list page
-        logging.debug("Allhit processing")
+        log.debug("Allhit processing")
         result_allhit = self.process_values(range(1,self.get_max_page(main_html)+1), callback_allhit,
                                             self.processes_count)
         self.data = result_allhit['data']
         self.append_errors(result_allhit['errors'])
 
         #Fetching html details for every HIT group
-        logging.debug("Details processing")
+        log.debug("Details processing")
         result_details = self.process_values(self.data, callback_details,
                                              self.processes_count)
         self.data = result_details['data']
@@ -221,7 +223,7 @@ class Crawler(Thread):
         if groups_downloaded > 0 and hits_downloaded > 0 and groups_available/groups_downloaded <= 1.5 and hits_available/hits_downloaded <= 1.5:
             success = True
 
-        logging.debug("Crawl finished with success=%s. Saving main_crawl entry" % success)
+        log.debug("Crawl finished with success=%s. Saving main_crawl entry" % success)
         crawl = Crawl(**{
             'start_time':           start_time,
             'end_time':             datetime.datetime.now(),
@@ -236,20 +238,20 @@ class Crawler(Thread):
         crawl.save()
 
         #Adding crawl FK
-        logging.debug("Adding FKs")
+        log.debug("Adding FKs")
         result_add_crawlfk = self.process_values(self.data, callback_add_crawlfk,
                                                  crawl=crawl)
         self.data = result_add_crawlfk['data']
         self.append_errors(result_add_crawlfk['errors'])
 
         #Saving results in the database
-        logging.debug("Saving results")
+        log.debug("Saving results")
         result_save_database = self.process_values(self.data, callback_database)
         self.append_errors(result_save_database['errors'])
 
         print self.errors
 
-        logging.info(
+        log.info(
             "Crawler finished %ssuccessfully in %s with %d results, %d HITs (of %d and %d) and %d errors" % (
                 "" if success else "un",
                 (datetime.datetime.now()-start_time),
@@ -292,7 +294,7 @@ class Worker(Thread):
                                                    **self.callback_kwargs)
         except:
             import traceback
-            logging.error('%s: %s' % (sys.exc_info()[0].__name__, sys.exc_info()[1]))
+            log.error('%s: %s' % (sys.exc_info()[0].__name__, sys.exc_info()[1]))
             self.errors.append({
                 'type': str(sys.exc_info()[0].__name__),
                 'value': str(sys.exc_info()[1]),

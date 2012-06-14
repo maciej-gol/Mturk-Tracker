@@ -5,7 +5,11 @@ import logging
 import sys
 import traceback
 
+
 from crawler_common import grab_error
+
+log = logging.getLogger(__name__)
+
 
 ##########################################################################################
 # saves data in a database.
@@ -70,7 +74,7 @@ def callback_database(data, **kwargs):
     if type(data) != type([]):
         raise Exception, '::callback_database() must be called with one list argument'
 
-    logging.info('Saving results to database (%s records)' % len(data))
+    log.info('Saving results to database (%s records)' % len(data))
 
     for record in data:
         try:

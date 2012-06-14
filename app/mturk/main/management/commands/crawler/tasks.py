@@ -13,7 +13,7 @@ import parser
 from db import DB
 
 
-log = logging.getLogger('crawler.tasks')
+log = logging.getLogger(__name__)
 
 
 

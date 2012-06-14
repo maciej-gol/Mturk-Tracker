@@ -27,7 +27,7 @@ from crawler import auth
 from mturk.main.models import Crawl, RequesterProfile
 
 
-log = logging.getLogger('crawl')
+log = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):

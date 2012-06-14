@@ -3,7 +3,7 @@ import logging
 
 from utils.sql import execute_sql, query_to_tuples
 
-log = logging.getLogger('db_refresh_diffs')
+log = logging.getLogger(__name__)
 
 
 def hitgroups(cid):

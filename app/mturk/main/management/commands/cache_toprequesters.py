@@ -9,7 +9,7 @@ from optparse import make_option
 
 HOURS4 = 60 * 60 * 4
 
-logger = logging.getLogger('cache_toprequesters')
+log = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):
@@ -27,17 +27,17 @@ class Command(BaseCommand):
 
         result = cache.get(key)
         if result is not None:
-            logging.info("toprequesters still in cache...")
+            log.info("toprequesters still in cache...")
             return
         days = options['days']
 
-        logging.info("toprequesters missing, refetching")
+        log.info("toprequesters missing, refetching")
         # no chache perform query:
 
         from mturk.main.views import topreq_data
         start_time = time.time()
         data = topreq_data(days)
-        logging.info("toprequesters: filled memcache in %s", time.time() - start_time)
+        log.info("toprequesters: filled memcache in %s", time.time() - start_time)
         cache.set(key, data, HOURS4)
 
         pid.remove_pid()
