@@ -37,13 +37,18 @@ class Command(BaseCommand):
         '''
         crawl = get_first_crawl()
         if not crawl:
-            log.error("no crawls in db")
+            log.error("No crawls to process.")
             return
 
         transaction.enter_transaction_management()
         transaction.managed(True)
+        created = 0
 
-        for i in range(0, (datetime.date.today() - crawl.start_day()).days):
+        start, end = (crawl.start_day(), datetime.date.today())
+        days = (end - start).days
+        log.info("Processing {0} to {1} ({2} days).".format(start, end, days))
+
+        for i in range(0, days):
 
             day = crawl.start_day() + datetime.timedelta(days=i)
             day_end = day + datetime.timedelta(days=1)
@@ -51,48 +56,56 @@ class Command(BaseCommand):
             crawls = Crawl.objects.filter(has_diffs=False, start_time__gte=day,
                 start_time__lt=day_end)
             if len(crawls) > 0:
-                log.error("not all crawls from %s have diffs" % day)
+                log.error("Not all crawls from %s have diffs" % day)
                 continue
 
             try:
                 DayStats.objects.get(date=day)
             except DayStats.DoesNotExist:
-                log.info(
-                    "db_calculate_daily_stats: calculating stats for: %s" % day)
+                log.info("Calculating stats for %s" % day)
 
                 range_start_date = day.isoformat()
                 range_end_date = (day_end).isoformat()
 
-                log.info("calculating arrivals")
-
+                log.info("Calculating arrivals.")
                 '''
                 stats for projects posted on particular day
                 '''
                 arrivals = query_to_dicts('''
-                    select sum(hits_diff) as "arrivals", sum(hits_diff*reward) as "arrivals_value"
+                    select
+                        sum(hits_diff) as "arrivals",
+                        sum(hits_diff*reward) as "arrivals_value"
                     from
                         hits_mv p
                     where
                      start_time between TIMESTAMP '%s' and TIMESTAMP '%s'
                         and hits_diff > 0
                     ''' % (range_start_date, range_end_date)).next()
+                if arrivals['arrivals'] == None:
+                    log.info('Arrivals is None, skipping.')
+                    continue
 
-                log.info("calculating processed")
-
+                log.info("Calculating processed.")
                 processed = query_to_dicts('''
-                    select sum(hits_diff) as "processed", sum(hits_diff*reward) as "processed_value"
+                    select
+                        sum(hits_diff) as "processed",
+                        sum(hits_diff*reward) as "processed_value"
                     from
                         hits_mv p
                     where
                      start_time between TIMESTAMP '%s' and TIMESTAMP '%s'
                         and hits_diff < 0
                     ''' % (range_start_date, range_end_date)).next()
+                if processed['processed'] == None:
+                    log.info('Processed is None, skipping.')
+                    continue
 
                 DayStats.objects.create(date=day,
                     arrivals=arrivals['arrivals'],
                     arrivals_value=arrivals['arrivals_value'],
                     processed=processed['processed'],
-                    processed_value=processed['processed_value']
-                    )
-
+                    processed_value=processed['processed_value'])
+                created += 1
                 transaction.commit()
+
+        log.info('Finish: {0} DayStat objects were created.'.format(created))
