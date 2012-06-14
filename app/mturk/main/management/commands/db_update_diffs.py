@@ -30,7 +30,14 @@ class Command(BaseCommand):
 
         try:
 
-            for c in Crawl.objects.filter(is_spam_computed=False).order_by('-id')[:options['limit']]:
+            items = Crawl.objects.filter(is_spam_computed=False
+                ).order_by('-id')[:options['limit']]
+            lenitems = len(items)
+
+            log.info(('Starting db_update_diffs, {0} crawls will be updated.'
+                ).format(lenitems))
+
+            for c in items:
 
                 updated = update_cid(c.id)
 
@@ -40,9 +47,12 @@ class Command(BaseCommand):
 
                 transaction.commit()
 
-        except (KeyError, KeyboardInterrupt):
+        except (KeyError, KeyboardInterrupt) as e:
+            log.info(('Exception, rolling back the transaction and exiting: {0}'
+                ).format(e))
             transaction.rollback()
             pid.remove_pid()
             exit()
 
-        log.info('updating 5 crawls took: %s s', (time.time() - start_time))
+        log.info('Success! Updating {0} crawls took: {1} s'.format(
+            lenitems, time.time() - start_time))
