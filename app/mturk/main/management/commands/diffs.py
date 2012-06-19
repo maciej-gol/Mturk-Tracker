@@ -21,6 +21,11 @@ def last_crawlid():
 
 
 def updatehitgroup(g, cid):
+    """Updates hits_mv.hits_available by subtracting current group's
+    hits_available.
+
+    """
+
     prev = execute_sql("""select hits_available from hits_mv
                 where
                     crawl_id between %s and %s and
@@ -34,7 +39,10 @@ def updatehitgroup(g, cid):
 
 
 def update_cid(cid):
+    """Updates hits_diff on hits_mv record related to crawl with id equal to
+    cid.
 
+    """
     st = time.time()
     count = 0
     for i, g in enumerate(query_to_tuples("select distinct group_id from hits_mv where crawl_id = %s", cid)):
@@ -48,6 +56,6 @@ def update_cid(cid):
     execute_sql("commit;")
 
     log.info("Updated crawl {0} in {1}. {2} groups processed".format(
-        cid, time.time() - st), count)
+        cid, time.time() - st, count))
 
     return count

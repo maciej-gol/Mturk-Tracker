@@ -15,12 +15,12 @@ API documentation (automatically generated)
    apidoc/app/modules
    apidoc/deployment/modules
 
-Database schema documentation
-=============================
+Database
+========
 
 .. toctree::
 
-    database
+    database/index
 
 Indices and tables
 ==================

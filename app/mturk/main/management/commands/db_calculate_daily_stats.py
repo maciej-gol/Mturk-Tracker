@@ -56,7 +56,7 @@ class Command(BaseCommand):
             crawls = Crawl.objects.filter(has_diffs=False, start_time__gte=day,
                 start_time__lt=day_end)
             if len(crawls) > 0:
-                log.error("Not all crawls from %s have diffs" % day)
+                log.error("Not all crawls from %s have diffs." % day)
                 continue
 
             try:

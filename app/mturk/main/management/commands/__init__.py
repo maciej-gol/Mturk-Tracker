@@ -51,6 +51,10 @@ def calculate_first_crawl_id():
 
 
 def update_mviews():
+    """Creates hits_mv records for crawls with enough groups_downloaded
+    taking data from main_hitgroupstatus and main_hitgroupcontent tables.
+
+    """
 
     missing_crawls = query_to_tuples("""select id, start_time
         from main_crawl p
@@ -172,6 +176,7 @@ def update_first_occured_agregates():
 
 
 def update_crawl_agregates(commit_threshold=10, only_new=True):
+    """Creates main_crawlagregates records for hits_mv."""
 
     results = None
 

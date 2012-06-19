@@ -13,6 +13,12 @@ log = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):
+    """Updates hits_mv.hits_diff related to last crawls.
+
+    Options:
+    limit -- the number of crawls to process
+    """
+
     option_list = NoArgsCommand.option_list + (
         make_option('--limit', dest='limit', default='100', type='int',
             help='Number of crawls to process.'),
