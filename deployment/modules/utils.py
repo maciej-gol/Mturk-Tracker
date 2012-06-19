@@ -6,9 +6,14 @@ from fabric import colors
 from fabric.api import run, sudo, hide, settings, put, env, prefix, cd, abort
 from fabric.contrib.files import upload_template
 from fabric.contrib.console import confirm
+from fabric import version as fabric_version
 
 
-PROPER_SUDO_PREFIX = "sudo -i -S -p '%s' "
+PROPER_SUDO_PREFIX = "sudo -i -S -p '%s' " \
+                     if fabric_version.VERSION < (1, 4, 2) else \
+                     "sudo -i -S -p '%(sudo_prompt)s' "
+
+print PROPER_SUDO_PREFIX, '>>>>>>>>>>>>>>>>'
 
 
 def confirm_or_abort(question="\nDo you want to continue?", default=False):
