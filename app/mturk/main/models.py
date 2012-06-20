@@ -1,26 +1,42 @@
 # -*- coding: utf-8 -*-
 
 from django.db import models, connection, transaction
-from django.utils.safestring import SafeString
 
 from mturk.fields import JSONField
 import datetime
 
 
 class Crawl(models.Model):
+    """Represents one crawl.
+    Crawls are frequent events, ran every 6 minutes.
+    During a crawl, mturk hitgroups data is saved into:
 
+    * HitGroupContent -- description of the task
+    * HitGroupStatus -- task progress, eg. currently available hits
+
+    """
     start_time = models.DateTimeField('Start Time')
     end_time = models.DateTimeField('End Time')
-    hits_available = models.IntegerField('All hits avaliable', null=True)
-    hits_downloaded = models.IntegerField('All hits downloaded', null=True)
-    groups_available = models.IntegerField('Groups available', null=True)
-    groups_downloaded = models.IntegerField('Groups downloaded', null=True)
-    success = models.BooleanField('Successfoul crawl?')
-    errors = JSONField('Errors', blank=True, null=True)
-    old_id = models.IntegerField(null=True, blank=True, unique=True, db_index=True)
-    has_diffs = models.BooleanField("Has Diffs", db_index=True, default=False)
-    is_spam_computed = models.BooleanField("Has Spam Computed", db_index=True, default=False)
-    has_hits_mv = models.BooleanField("Has hits mv", db_index=True, default=False)
+    hits_available = models.IntegerField('Hits avaliable', null=True,
+        help_text="Number of hits available")
+    hits_downloaded = models.IntegerField('Hits downloaded', null=True,
+        help_text="Number of hits downloaded")
+    groups_available = models.IntegerField('Groups available', null=True,
+        help_text="Number of groups available")
+    groups_downloaded = models.IntegerField('Groups downloaded', null=True,
+        help_text="Number of groups dowloaded")
+    success = models.BooleanField('Success',
+        help_text="If the crawl was successful")
+    errors = JSONField('Errors', blank=True, null=True,
+        help_text="Error data in JSON format")
+    old_id = models.IntegerField(null=True, blank=True, unique=True,
+        db_index=True, help_text="Old id of the crawl if it was imported")
+    has_diffs = models.BooleanField("Has Diffs", db_index=True, default=False,
+        help_text="If hits differences were calculated for this crawl")
+    is_spam_computed = models.BooleanField("Is spam computed", db_index=True,
+        default=False, help_text="If this crawl was checked for spam")
+    has_hits_mv = models.BooleanField("Has hits mv", db_index=True,
+        default=False, help_text="If corresponding hits_mv entry exists")
 
     def start_day(self):
         return datetime.date(year=self.start_time.year,
@@ -32,24 +48,36 @@ class Crawl(models.Model):
 
 
 class HitGroupContent(models.Model):
-    group_id = models.CharField('Group ID', max_length=50, db_index=True, unique=True)
-    group_id_hashed = models.BooleanField(default=False)
-    requester_id = models.CharField('Requester ID', max_length=50, db_index=True)
-    requester_name = models.CharField('Requester Name', max_length=10000)
+    """Description of a hitgroup with a given id. Only one entry per a hit
+    group.
+
+    """
+    group_id = models.CharField('Group ID', max_length=50, db_index=True,
+        unique=True)
+    group_id_hashed = models.BooleanField(default=False,
+        help_text="Group id hash")
+    requester_id = models.CharField('Requester ID', max_length=50,
+        db_index=True)
+    requester_name = models.CharField('Requester name', max_length=10000)
     reward = models.FloatField('Reward')
     html = models.TextField('HTML', max_length=100000000)
     description = models.TextField('Description', max_length=1000000)
     title = models.CharField('Title', max_length=10000)
-    keywords = models.CharField('Keywords', blank=True, max_length=10000, null=True)
-    qualifications = models.CharField('Qualifications', blank=True, max_length=10000, null=True)
-    occurrence_date = models.DateTimeField('First occurrence date', blank=True, null=True, db_index=True)
+    keywords = models.CharField('Keywords', blank=True, max_length=10000,
+        null=True)
+    qualifications = models.CharField('Qualifications', blank=True,
+        max_length=10000, null=True)
+    occurrence_date = models.DateTimeField('First occurrence date', blank=True,
+        null=True, db_index=True)
     '''
     Time in minutes
     '''
     time_alloted = models.IntegerField('Time alloted')
-    first_crawl = models.ForeignKey(Crawl, blank=True, null=True)
-    is_public = models.BooleanField(default=True)
-    is_spam = models.NullBooleanField(db_index=True)
+    first_crawl = models.ForeignKey(Crawl, blank=True, null=True,
+        verbose_name="First crawl",
+        help_text="The first crawl containing this group")
+    is_public = models.BooleanField("Is public", default=True)
+    is_spam = models.NullBooleanField("Is spam", db_index=True)
 
     def prepare_for_prediction(self):
 
@@ -77,47 +105,60 @@ class HitGroupContent(models.Model):
 
 
 class HitGroupStatus(models.Model):
+    """Contains information on hit group progress.
+    There can be many records per each hit group.
+    """
     group_id = models.CharField('Group ID', max_length=50)
-    hits_available = models.IntegerField('Hits Avaliable')
-    page_number = models.IntegerField('Page Number')
-    inpage_position = models.IntegerField('In Page Position')
+    hits_available = models.IntegerField('Hits avaliable',
+        help_text="Available hits")
+    page_number = models.IntegerField('Page number',
+        help_text="Page on which the group was found")
+    inpage_position = models.IntegerField('Inpage position',
+        help_text="Inpage position on which the group was found")
     hit_expiration_date = models.DateTimeField('Hit expiration Date')
-    hit_group_content = models.ForeignKey(HitGroupContent)
-    crawl = models.ForeignKey(Crawl)
+    hit_group_content = models.ForeignKey(HitGroupContent,
+        help_text="Hit group content", verbose_name="Hitgroup content")
+    crawl = models.ForeignKey(Crawl, verbose_name="Crawl")
 
 
 class DayStats(models.Model):
+    """Statistics for one whole day."""
 
     date = models.DateField('Date', db_index=True)
 
-    arrivals = models.IntegerField('Arrivals Hits', default=0)
-    arrivals_value = models.FloatField('Arrivals Hits Value', default=0)
-    processed = models.IntegerField('Processed Hits', default=0)
-    processed_value = models.FloatField('Processed Hits Value', default=0)
+    arrivals = models.IntegerField('Arrivals hits', default=0)
+    arrivals_value = models.FloatField('Arrivals hits value', default=0)
+    processed = models.IntegerField('Processed hits', default=0)
+    processed_value = models.FloatField('Processed hits value', default=0)
 
 
 class CrawlAgregates(models.Model):
+    """Crawl aggregation used for display."""
 
-    reward = models.FloatField()
-    hits = models.IntegerField()
-    projects = models.IntegerField()
-    start_time = models.DateTimeField(db_index=True)
-    spam_projects = models.IntegerField()
-    crawl = models.ForeignKey(Crawl)
+    reward = models.FloatField("Reward")
+    hits = models.IntegerField("Hits")
+    projects = models.IntegerField("Projects")
+    start_time = models.DateTimeField("Start time", db_index=True)
+    spam_projects = models.IntegerField("Spam projects")
+    crawl = models.ForeignKey(Crawl, verbose_name="Crawl")
 
 
 class HitGroupFirstOccurences(models.Model):
+    """Created when a hit group is first seen."""
 
-    requester_id = models.CharField(max_length=50, db_index=True)
-    group_id = models.CharField(max_length=50, db_index=True)
-    requester_name = models.CharField(max_length=500)
-    hits_available = models.IntegerField()
-    occurrence_date = models.DateTimeField(db_index=True)
-    reward = models.FloatField()
+    requester_id = models.CharField("Requester ID", max_length=50,
+        db_index=True)
+    group_id = models.CharField("Group ID", max_length=50, db_index=True)
+    requester_name = models.CharField("Requester name", max_length=500)
+    hits_available = models.IntegerField("Hits available")
+    occurrence_date = models.DateTimeField("Occurrence date", db_index=True)
+    reward = models.FloatField("Reward")
 
-    crawl = models.ForeignKey(Crawl)
-    group_status = models.ForeignKey(HitGroupStatus)
-    group_content = models.ForeignKey(HitGroupContent)
+    crawl = models.ForeignKey(Crawl, verbose_name="Crawl")
+    group_status = models.ForeignKey(HitGroupStatus,
+        verbose_name="Group status")
+    group_content = models.ForeignKey(HitGroupContent,
+        verbose_name="Group content")
 
 
 class RequesterProfileManager(models.Manager):
@@ -133,8 +174,10 @@ class RequesterProfileManager(models.Manager):
 
 
 class RequesterProfile(models.Model):
-    requester_id = models.CharField(max_length=64, primary_key=True)
-    is_public = models.BooleanField(default=True)
+
+    requester_id = models.CharField("Requester id", max_length=64,
+        primary_key=True)
+    is_public = models.BooleanField("Is public", default=True)
 
     objects = RequesterProfileManager()
 

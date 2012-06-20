@@ -85,7 +85,8 @@ def process_nodes(app, doctree, fromdocname):
                 # db_field_name (db_field_type[, django_field_type]) details
                 # where details are: PK, Index, field.help_text
                 db_column = field.db_column or field.name
-                help_text = ' ' + strip_tags(force_unicode(field.help_text))
+                help_text = field.help_text or field.verbose_name
+                help_text = ' ' + strip_tags(force_unicode(help_text))
                 try:
                     db_type = field.db_type(connection)
                 except:
@@ -103,11 +104,12 @@ def process_nodes(app, doctree, fromdocname):
                 para += docutils.nodes.strong(text=db_column)
                 para += docutils.nodes.emphasis(text=' ({0}) '.format(ftype))
 
-                details = [is_pk, db_index, help_text]
+                details = [help_text, is_pk, db_index]
                 for i, d in enumerate(details):
-                    if i > 0:
-                        para += docutils.nodes.Text(' ', ' ')
-                    para += docutils.nodes.Text(d, d)
+                    if d not in ["", None]:
+                        if i > 0:
+                            para += docutils.nodes.Text(', ', ', ')
+                        para += docutils.nodes.Text(d, d)
 
                 #name = docutils.nodes.field_name(text=db_column)
                 li = docutils.nodes.list_item()

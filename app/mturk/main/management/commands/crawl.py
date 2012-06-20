@@ -44,9 +44,6 @@ class Command(BaseCommand):
                 help='Mturk authentication password'),
     )
 
-    mturk_email = getattr(settings, 'MTURK_AUTH_EMAIL', None)
-    mturk_password = getattr(settings, 'MTURK_AUTH_PASSWORD', None)
-
     def setup_logging(self, conf_fname):
         "Basic setup for logging module"
         fileConfig(conf_fname)
@@ -77,6 +74,10 @@ class Command(BaseCommand):
         return False
 
     def handle(self, *args, **options):
+
+        self.mturk_email = getattr(settings, 'MTURK_AUTH_EMAIL', None)
+        self.mturk_password = getattr(settings, 'MTURK_AUTH_PASSWORD', None)
+
         _start_time = time.time()
         pid = Pid('mturk_crawler', True)
         log.info('crawler started: %s;;%s', args, options)
