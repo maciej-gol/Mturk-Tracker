@@ -34,7 +34,7 @@ sys.path.append(os.path.abspath(os.path.join(
     os.path.dirname(__file__), 'extensions')))
 
 extensions = [
-  'sphinx.ext.autodoc', 'djangomodel', 'djmex',
+  'sphinx.ext.autodoc', 'djangomodel', 'djmex', 'sphinx.ext.todo',
   'sphinx.ext.coverage', 'sphinx.ext.ifconfig', 'sphinx.ext.viewcode',
 ]
 
@@ -305,3 +305,6 @@ epub_copyright = u'2012, 10Clouds'
 # -- Options for django model extended -----------------------------------------
 djmex_include_djangomodellists = True
 djmex_pretty_model = True
+
+
+todo_include_todods = True

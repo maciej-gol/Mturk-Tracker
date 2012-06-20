@@ -23,7 +23,9 @@ begin
         (select group_id, hits_available from main_hitgroupstatus
           where crawl_id = i - 1) b
       on a.group_id = b.group_id);
+
     /* TODO: Missing the update part ? */
+
   END LOOP;
 END;
 

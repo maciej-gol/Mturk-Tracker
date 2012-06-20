@@ -10,6 +10,12 @@ hits_column_population_daily (main_hitgroupstatus -> main_hitgroupstatus)
     * projects_arrived, projects_completed a the count of new groups present,
     or existing groups missing respectively
 
+    .. note::
+
+        Requires extra fields on main_hitgroupstatus, which are not used by any
+        further procedures. This procedure will be skipped, but remains here,
+        should is be required later.
+
 hits_temp_population (main_hitgroupstatus -> hits_temp, main_crawlaggregates)
     selects rows from main_crawls comming from the last week (7 days), excluding
     today and:
@@ -22,7 +28,9 @@ hits_update (hits_temp -> hits_mv)
     table (mapping 'signed' field hits_temp.hits into positive hits_posted and
     hits_consumed)
 
-    NOTE: there is a hardcoded limit on this, perhaps debug/development:
+    .. note::
+
+        There is a hardcoded limit on this, perhaps debug/development:
         'crawl_id < 105489;'
 
 reward_population (hits_mv -> main_crawlagregates)
@@ -33,18 +41,65 @@ reward_population (hits_mv -> main_crawlagregates)
 Dependencies
 ------------
 Stored procedures should be ran in the following order:
-1) hits_column_population_daily
-2) hits_temp_population
-3) hits_update
-4) reward_population
+
+1) hits_temp_population
+2) hits_update
+3) reward_population
 
 Database modifications
 ======================
 
-Extra fields
-------------
+Extra columns
+-------------
 
-#TODO: add info
+A number of new columns were aded to support the stored procedures.
+
+.. todo::
+
+    add an information on which migration adds them once there is one
+
+hits_mv
+
++----------------+----------+--------------+
+|    Column      | Type     | Updated by   |
++================+==========+==============+
+| hits_posted    | integer  | hits_update  |
++----------------+----------+--------------+
+| hits_consumed  | integer  | hits_update  |
++----------------+----------+--------------+
+
+main_crawlagregates
+
++----------------------+-------------------+-----------------------+
+|    Column            | Type              | Updated by            |
++======================+===================+=======================+
+| rewards_posted       | double precision  | reward_population     |
++----------------------+-------------------+-----------------------+
+| rewards_consumed     | double precision  | reward_population     |
++----------------------+-------------------+-----------------------+
+| hitsgroups_posted    | integer           | hits_temp_population  |
++----------------------+-------------------+-----------------------+
+| hitsgroups_consumed  | integer           | hits_temp_population  |
++----------------------+-------------------+-----------------------+
+
+main_hitgroupstatus (hits_column_populate_daily)
+
+.. note::
+
+    UNUSED as it is not required in the process.
+    See hits_column_population_daily description above for more details
+
++---------------------+----------+-------------------------------+
+|    Column           | Type     | Updated by                    |
++=====================+==========+===============================+
+| projects_arrived    | integer  | hits_column_population_daily  |
++---------------------+----------+-------------------------------+
+| projects_completed  | integer  | hits_column_population_daily  |
++---------------------+----------+-------------------------------+
+| hits_arrived        | integer  | hits_column_population_daily  |
++---------------------+----------+-------------------------------+
+| hits_consumed       | integer  | hits_column_population_daily  |
++---------------------+----------+-------------------------------+
 
 hits_temp table
 ---------------
