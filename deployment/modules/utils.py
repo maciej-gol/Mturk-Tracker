@@ -13,7 +13,6 @@ PROPER_SUDO_PREFIX = "sudo -i -S -p '%s' " \
                      if fabric_version.VERSION < (1, 4, 2) else \
                      "sudo -i -S -p '%(sudo_prompt)s' "
 
-print PROPER_SUDO_PREFIX, '>>>>>>>>>>>>>>>>'
 
 
 def confirm_or_abort(question="\nDo you want to continue?", default=False):
