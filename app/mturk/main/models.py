@@ -32,22 +32,22 @@ class Crawl(models.Model):
 
 
 class HitGroupContent(models.Model):
-    group_id            = models.CharField('Group ID', max_length=50, db_index=True, unique=True)
-    group_id_hashed     = models.BooleanField(default=False)
-    requester_id        = models.CharField('Requester ID', max_length=50, db_index=True)
-    requester_name      = models.CharField('Requester Name', max_length=10000)
-    reward              = models.FloatField('Reward')
-    html                = models.TextField('HTML', max_length=100000000)
-    description         = models.TextField('Description', max_length=1000000)
-    title               = models.CharField('Title', max_length=10000)
-    keywords            = models.CharField('Keywords', blank=True, max_length=10000, null=True)
-    qualifications      = models.CharField('Qualifications', blank=True, max_length=10000, null=True)
-    occurrence_date     = models.DateTimeField('First occurrence date', blank=True, null=True, db_index=True)
+    group_id = models.CharField('Group ID', max_length=50, db_index=True, unique=True)
+    group_id_hashed = models.BooleanField(default=False)
+    requester_id = models.CharField('Requester ID', max_length=50, db_index=True)
+    requester_name = models.CharField('Requester Name', max_length=10000)
+    reward = models.FloatField('Reward')
+    html = models.TextField('HTML', max_length=100000000)
+    description = models.TextField('Description', max_length=1000000)
+    title = models.CharField('Title', max_length=10000)
+    keywords = models.CharField('Keywords', blank=True, max_length=10000, null=True)
+    qualifications = models.CharField('Qualifications', blank=True, max_length=10000, null=True)
+    occurrence_date = models.DateTimeField('First occurrence date', blank=True, null=True, db_index=True)
     '''
     Time in minutes
     '''
-    time_alloted        = models.IntegerField('Time alloted')
-    first_crawl         = models.ForeignKey(Crawl, blank=True, null=True)
+    time_alloted = models.IntegerField('Time alloted')
+    first_crawl = models.ForeignKey(Crawl, blank=True, null=True)
     is_public = models.BooleanField(default=True)
     is_spam = models.NullBooleanField(db_index=True)
 
@@ -58,8 +58,8 @@ class HitGroupContent(models.Model):
         import re
 
         num_of_qualifications = len(self.qualifications.split(',')) if self.qualifications else 0
-        sanitized_html = re.sub(r'\n', ' ', self.html )
-        sanitized_html = re.sub(r'\r', '', sanitized_html )
+        sanitized_html = re.sub(r'\n', ' ', self.html)
+        sanitized_html = re.sub(r'\r', '', sanitized_html)
 
         # out = StringIO.StringIO()
 
@@ -75,14 +75,15 @@ class HitGroupContent(models.Model):
 
         # return csvrow
 
+
 class HitGroupStatus(models.Model):
-    group_id            = models.CharField('Group ID', max_length=50)
-    hits_available      = models.IntegerField('Hits Avaliable')
-    page_number         = models.IntegerField('Page Number')
-    inpage_position     = models.IntegerField('In Page Position')
+    group_id = models.CharField('Group ID', max_length=50)
+    hits_available = models.IntegerField('Hits Avaliable')
+    page_number = models.IntegerField('Page Number')
+    inpage_position = models.IntegerField('In Page Position')
     hit_expiration_date = models.DateTimeField('Hit expiration Date')
     hit_group_content = models.ForeignKey(HitGroupContent)
-    crawl               = models.ForeignKey(Crawl)
+    crawl = models.ForeignKey(Crawl)
 
 
 class DayStats(models.Model):
@@ -102,21 +103,21 @@ class CrawlAgregates(models.Model):
     projects = models.IntegerField()
     start_time = models.DateTimeField(db_index=True)
     spam_projects = models.IntegerField()
+    crawl = models.ForeignKey(Crawl)
 
-    crawl               = models.ForeignKey(Crawl)
 
 class HitGroupFirstOccurences(models.Model):
 
-    requester_id        = models.CharField(max_length=50, db_index=True)
-    group_id            = models.CharField(max_length=50, db_index=True)
-    requester_name      = models.CharField(max_length=500)
-    hits_available      = models.IntegerField()
-    occurrence_date     = models.DateTimeField(db_index=True)
-    reward              = models.FloatField()
+    requester_id = models.CharField(max_length=50, db_index=True)
+    group_id = models.CharField(max_length=50, db_index=True)
+    requester_name = models.CharField(max_length=500)
+    hits_available = models.IntegerField()
+    occurrence_date = models.DateTimeField(db_index=True)
+    reward = models.FloatField()
 
-    crawl               = models.ForeignKey(Crawl)
-    group_status        = models.ForeignKey(HitGroupStatus)
-    group_content       = models.ForeignKey(HitGroupContent)
+    crawl = models.ForeignKey(Crawl)
+    group_status = models.ForeignKey(HitGroupStatus)
+    group_content = models.ForeignKey(HitGroupContent)
 
 
 class RequesterProfileManager(models.Manager):
