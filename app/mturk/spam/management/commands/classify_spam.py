@@ -16,7 +16,7 @@ from django.db import transaction
 import time
 
 
-log = logging.getLogger('classify_spam')
+log = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):

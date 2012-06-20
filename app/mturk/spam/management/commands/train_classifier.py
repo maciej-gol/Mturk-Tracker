@@ -6,7 +6,7 @@ from mturk.spam.management.commands import get_prediction_service
 from django.conf import settings
 
 
-log = logging.getLogger('classify_spam')
+log = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):
