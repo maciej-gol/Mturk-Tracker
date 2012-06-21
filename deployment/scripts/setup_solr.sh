@@ -1,7 +1,7 @@
 #!/bin/bash
 
 MTURK_HOME="${MTURK:-/var/www/mturk}"
-SOLR_VERSION="${SOLR_VERSION:-1.4.1}"
+SOLR_VERSION="${SOLR_VERSION:-3.6.0}"
 DL_TO=/tmp/%(project_name)s
 FILE=solr.tgz
 UPDATE=${UPDATE:-false}
@@ -11,10 +11,10 @@ if [ ! -d "$DL_TO" ]; then
     mkdir "$DL_TO"
 fi
 
-if ([ ! -f "$DL_TO/$FILE" ] || $UPDATE );
+if ([ ! -f "$DL_TO/$FILE" ]); # || $UPDATE );
 then
     echo "Downloading solr"
-    wget "ftp://mirror.nyi.net/apache/lucene/solr/1.4.1/apache-solr-$SOLR_VERSION.tgz" -O "$DL_TO/$FILE"
+    wget "ftp://mirror.nyi.net/apache/lucene/solr/$SOLR_VERSION/apache-solr-$SOLR_VERSION.tgz" -O "$DL_TO/$FILE"
     echo "Unpacking solr"
     tar -C "$DL_TO" --overwrite -xvzf "$DL_TO/$FILE"
 else
@@ -27,6 +27,7 @@ then
     cp -rf "$DL_TO/apache-solr-$SOLR_VERSION/example/lib" "$MTURK_HOME/solr"
     cp "$DL_TO/apache-solr-$SOLR_VERSION/example/start.jar" "$MTURK_HOME/solr"
     cp -rf "$DL_TO/apache-solr-$SOLR_VERSION/example/webapps" "$MTURK_HOME/solr"
+    cp -rf "$DL_TO/apache-solr-$SOLR_VERSION/dist" "$MTURK_HOME/solr"
     touch $SUCCESS_FILE
 else
     echo "Solr already installed - skipping install."
