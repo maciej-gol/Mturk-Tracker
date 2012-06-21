@@ -4,9 +4,7 @@
     <abortOnConfigurationError>true</abortOnConfigurationError>
     <lib dir="../../dist/" regex="apache-solr-cell-\d.*\.jar"/>
     <lib dir="../../dist/" regex="apache-solr-clustering-\d.*\.jar"/>
-    <lib dir="../../contrib/clustering/lib/downloads/"/>
-    <lib dir="../../contrib/clustering/lib/"/>
-    <lib dir="/total/crap/dir/ignored"/>
+    <lib dir="../../dist/" regex="apache-solr-dataimporthandler-\d.*\.jar"/>
 
     <dataDir>${solr.data.dir:./solr/en/data}</dataDir>
 
