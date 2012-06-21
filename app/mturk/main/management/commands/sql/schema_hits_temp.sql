@@ -16,8 +16,6 @@ CREATE TABLE hits_temp (
 );
 
 
-ALTER TABLE public.hits_temp OWNER TO postgres;
-
 --
 -- Name: onhits; Type: INDEX; Schema: public; Owner: postgres; Tablespace:
 --
