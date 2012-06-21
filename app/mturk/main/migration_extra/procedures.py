@@ -1,3 +1,9 @@
+"""Module for easy procedures development and deployment.
+
+Use the following to define what should be created:
+PROCEDURES_TO_CREATE, EXTRA_COLUMNS, EXTRA_TABLES.
+
+"""
 import os
 from django.db import transaction
 from utils.sql import (execute_sql, get_table_columns, add_table_columns,
@@ -21,8 +27,15 @@ def create_all():
 
 def __create_procedures():
     """Executes create or replace for each procedure mentioned in
-    PROCEDURES_TO_CREATE if a matching file is found. Procedures will be named
-    after the filename, ommmiting sql.
+    PROCEDURES_TO_CREATE.
+
+    Each procedure is defined by a filename and a procedure creating function.
+    Filename with extension stripped will be the new procedure's name and the
+    file's content it's body.
+
+    The create function should take procedure's name and the content of it's
+    file. Simplest such function is create_no_args which simply wraps procedure
+    code in a correct CREATE OR REPLACE FUNCTION statement.
 
     """
     sqls = []
@@ -49,6 +62,10 @@ def __create_extra_tables():
 
 
 def __create_extra_columns():
+    """Adds extra columns if they are not present, logging a warning should the
+    column exist with a different database field type.mro
+
+    """
     for tablename, cols in EXTRA_COLUMNS.iteritems():
         if len(cols) == 0:
             log.warning('No columns in the create list for {0}.'.format(
@@ -71,6 +88,10 @@ def __create_extra_columns():
 
 
 def create_no_args(prname, prtext):
+    """Replaces all ' found in prtext with '' and formats an sql create
+    statement.
+
+    """
     prtext = prtext.replace("'", "''")
     TEMPLATE = """
     CREATE OR REPLACE FUNCTION {prname}() RETURNS VOID AS'
@@ -79,6 +100,10 @@ def create_no_args(prname, prtext):
     """
     return TEMPLATE.format(prname=prname, prtext=prtext)
 
+"""Dictionary {procedure_file_name.sql: procedure_creting_method}.
+See __create_procedures for more details.
+
+"""
 PROCEDURES_TO_CREATE = {
     # 'hits_column_population.sql',  # disabled
     'hits_column_population_daily.sql': create_no_args,
@@ -87,6 +112,7 @@ PROCEDURES_TO_CREATE = {
     'reward_population.sql': create_no_args,
 }
 
+"""Extra columns to create. {table_name: [(colname, type), ]}."""
 EXTRA_COLUMNS = {
     u"hits_mv": [
         (u"hits_posted", u"integer"),
@@ -112,6 +138,9 @@ EXTRA_COLUMNS = {
     # ]
 }
 
+"""Extra tables to create, the key will be used to verify table existence, the
+value should contain sql required to create the table.
+"""
 EXTRA_TABLES = {
     u"hits_temp": "schema_hits_temp.sql",
 }
