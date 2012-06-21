@@ -96,7 +96,7 @@ def general(request):
     return direct_to_template(request, 'main/graphs/timeline.html', params)
 
 
-@cache_page(ONE_DAY)
+#@cache_page(ONE_DAY)
 def arrivals(request):
 
     params = {

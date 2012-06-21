@@ -111,6 +111,7 @@ FOREIGN_APPS = (
     'south',
     'bootstrap',
     'sphinxdoc',
+    'django_extensions',
 )
 
 MTRACKER_APPS = (

@@ -22,7 +22,9 @@ begin
         set hits_consumed = (-1) * REC.hits
         where group_id = REC.group_id2 and crawl_id = REC.prev_crawl_id;
     end if;
-    RAISE NOTICE 'Positive id % ',i;
+    if(i % 5000 = 0) then
+      RAISE NOTICE 'Positive id % ', i;
+    end if;
     i := i+1;
   END LOOP;
 END;

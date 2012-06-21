@@ -20,7 +20,7 @@ hits_temp_population (main_hitgroupstatus -> hits_temp, main_crawlaggregates)
     selects rows from main_crawls comming from the last week (7 days), excluding
     today and:
     * inserts hits_temp record
-    * updates main_crawlagregates hitsgroups_posted and hitsgroups_consumed as
+    * updates main_crawlagregates hitgroups_posted and hitgroups_consumed as
     the count of new groups present or old groups missing respectively
 
 hits_update (hits_temp -> hits_mv)
@@ -49,16 +49,19 @@ Stored procedures should be ran in the following order:
 Database modifications
 ======================
 
+A number of new columns and a table were aded to support the stored procedures.
+Those objects tables can be created using
+mturk.main.migration_extra.procedures.create_all function.
+That methods is by default ran as a part of 0003 migration for mturk.main,
+which enchances the CrawlAggregates models stored in main_crawlagregates table.
+
 Extra columns
 -------------
 
-A number of new columns were aded to support the stored procedures.
-
-.. todo::
-
-    add an information on which migration adds them once there is one
-
 hits_mv
+~~~~~~~
+
+Columns
 
 +----------------+----------+--------------+
 |    Column      | Type     | Updated by   |
@@ -68,26 +71,51 @@ hits_mv
 | hits_consumed  | integer  | hits_update  |
 +----------------+----------+--------------+
 
-main_crawlagregates
+Indexes:
 
-+----------------------+-------------------+-----------------------+
-|    Column            | Type              | Updated by            |
-+======================+===================+=======================+
-| rewards_posted       | double precision  | reward_population     |
-+----------------------+-------------------+-----------------------+
-| rewards_consumed     | double precision  | reward_population     |
-+----------------------+-------------------+-----------------------+
-| hitsgroups_posted    | integer           | hits_temp_population  |
-+----------------------+-------------------+-----------------------+
-| hitsgroups_consumed  | integer           | hits_temp_population  |
-+----------------------+-------------------+-----------------------+
++------------------------------+-------+-------------------------------------+
+| Name                         | Type  | Target                              |
++==============================+=======+=====================================+
+| groupid_crawlid_hitsposted   | btree | (group_id, crawl_id, hits_posted)   |
++------------------------------+-------+-------------------------------------+
+| groupid_crawlid_hitsconsumed | btree | (group_id, crawl_id, hits_consumed) |
++------------------------------+-------+-------------------------------------+
+
+main_crawlagregates
+~~~~~~~~~~~~~~~~~~~
+
+Columns
+
+
++---------------------+-------------------+-----------------------+
+|    Column           | Type              | Updated by            |
++=====================+===================+=======================+
+| rewards_posted      | double precision  | reward_population     |
++---------------------+-------------------+-----------------------+
+| rewards_consumed    | double precision  | reward_population     |
++---------------------+-------------------+-----------------------+
+| hitgroups_posted    | integer           | hits_temp_population  |
++---------------------+-------------------+-----------------------+
+| hitgroups_consumed  | integer           | hits_temp_population  |
++---------------------+-------------------+-----------------------+
+
+Indexes:
+
++-------------------------+-------+------------------------------+
+| Name                    | Type  | Target                       |
++=========================+=======+==============================+
+| crawlid_rewardsconsumed | btree | (crawl_id, rewards_posted)   |
++-------------------------+-------+------------------------------+
+| crawlid_rewardsposted   | btree | (crawl_id, rewards_consumed) |
++-------------------------+-------+------------------------------+
 
 main_hitgroupstatus (hits_column_populate_daily)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. note::
 
-    UNUSED as it is not required in the process.
-    See hits_column_population_daily description above for more details
+    UNUSED, theese modifications were NOT introduced as they are required only
+    by hits_column_population_daily which is currently unused.
 
 +---------------------+----------+-------------------------------+
 |    Column           | Type     | Updated by                    |
@@ -103,6 +131,10 @@ main_hitgroupstatus (hits_column_populate_daily)
 
 hits_temp table
 ---------------
+
+An intermediate table for calculating hits difference between two crawls for a
+single group. Columns: group_id1 and group_id2 are used to discover hit group
+arrivals and disappearances.
 
 +---------------+-----------------------+
 |    Column     |         Type          |

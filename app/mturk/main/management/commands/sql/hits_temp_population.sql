@@ -3,6 +3,7 @@ declare
   maximum integer;
   i integer; hits integer; grp1 varchar(50); grp2 varchar(50);
   prj_started integer; prj_completed integer;
+
 begin
   /* Selects crawls for last week, excluding today. */
   select max(id) into maximum from main_crawl
@@ -40,7 +41,13 @@ begin
       on a.group_id=b.group_id) where a.group_id is null;
 
     /* Updates crawlagregates. */
-    update main_crawlagregates set hitsgroups_posted = prj_started where id=i;
-    update main_crawlagregates set hitsgroups_consumed = prj_completed where id=i;
+    update main_crawlagregates
+      set hitgroups_posted = prj_started,  hitgroups_consumed = prj_completed
+      where crawl_id=i;
+
+    if(i % 100 = 0) then
+      RAISE NOTICE 'Positive id % ', i;
+    end if;
+
   END LOOP;
 END;
