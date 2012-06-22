@@ -96,12 +96,6 @@
         </httpCaching>
     </requestDispatcher>
 
-    <requestHandler name="/import_db_hits" class="org.apache.solr.handler.dataimport.DataImportHandler">
-        <lst name="defaults">
-            <str name="config">import_db_hits.xml</str>
-        </lst>
-    </requestHandler>
-
     <requestHandler name="standard" class="solr.SearchHandler" default="true">
         <lst name="defaults">
             <str name="echoParams">explicit</str>
