@@ -20,14 +20,14 @@ class HitGroupContentIndex(indexes.SearchIndex):
     occurrence_date = indexes.DateTimeField(model_attr='occurrence_date')
     time_alloted = indexes.DecimalField(model_attr='time_alloted')
 
-    def prepare_description(self, description):
-        return strip_tags(description)
+    def prepare_description(self, obj):
+        return strip_tags(obj.description)
 
-    def prepare_content(self, html):
-        return strip_tags(html)
+    def prepare_content(self, obj):
+        return strip_tags(obj.html)
 
-    def prepare_keywords(self, keywords):
-        return keywords.split(',')
+    def prepare_keywords(self, obj):
+        return obj.keywords.split(',')
 
     def index_queryset(self):
         return HitGroupContent.objects.all()
