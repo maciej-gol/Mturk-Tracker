@@ -1,3 +1,5 @@
+from django.utils.html import strip_tags
+
 from haystack import indexes
 from haystack import site
 from mturk.main.models import HitGroupContent
@@ -6,19 +8,29 @@ from mturk.main.models import HitGroupContent
 class HitGroupContentIndex(indexes.SearchIndex):
 
     text = indexes.CharField(document=True, use_template=True)
-    title = indexes.CharField(model_attr='title') #" type="textTight" indexed="true" stored="true"/>
-    description = indexes.CharField(model_attr='description') #" type="textTight" indexed="true" stored="true" required="false"/>
-    group_id = indexes.CharField(model_attr='group_id') #type="string" indexed="true" stored="true"/>
-    requester_id = indexes.CharField(model_attr='requester_id') #" type="string" indexed="true" stored="true"/>
-    requester_name = indexes.CharField(model_attr='requester_name') #" type="textTight" indexed="true" stored="true"/>
-    reward = indexes.DecimalField(model_attr='reward') #" type="double" indexed="true" stored="true"/>
-#    content#" type="text_en" indexed="true" stored="true" required="false" compressed="true"/>
-    keywords = indexes.CharField(model_attr='keywords') #" type="text_tags" indexed="true" stored="true" required="false" multiValued="true"/>
-    qualifications = indexes.CharField(model_attr='qualifications') #" type="textTight" indexed="true" stored="true"/>
-    occurrence_date = indexes.DateTimeField(model_attr='occurrence_date') #" type="date" indexed="true" stored="true"/>
-    time_alloted = indexes.DecimalField(model_attr='time_alloted') #" type="int" indexed="true" stored="true"/>
+    title = indexes.CharField(model_attr='title')
+    description = indexes.CharField(model_attr='description')
+    group_id = indexes.CharField(model_attr='group_id')
+    requester_id = indexes.CharField(model_attr='requester_id')
+    requester_name = indexes.CharField(model_attr='requester_name')
+    reward = indexes.DecimalField(model_attr='reward')
+    content = indexes.CharField(model_attr='html')
+    keywords = indexes.MultiValueField(model_attr='keywords')
+    qualifications = indexes.CharField(model_attr='qualifications')
+    occurrence_date = indexes.DateTimeField(model_attr='occurrence_date')
+    time_alloted = indexes.DecimalField(model_attr='time_alloted')
+
+    def prepare_description(self, description):
+        return strip_tags(description)
+
+    def prepare_content(self, html):
+        return strip_tags(html)
+
+    def prepare_keywords(self, keywords):
+        return keywords.split(',')
 
     def index_queryset(self):
         return HitGroupContent.objects.all()
+
 
 site.register(HitGroupContent, HitGroupContentIndex)

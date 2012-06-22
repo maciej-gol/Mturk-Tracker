@@ -104,6 +104,8 @@
     <dynamicField name="*_dt" type="date"    indexed="true"  stored="true"/>
     
 
+    <field name="project" type="slong" indexed="true" stored="true" multiValued="false" />
+
     <field name="reward" type="text" indexed="true" stored="true" multiValued="false" />
 
     <field name="description" type="text" indexed="true" stored="true" multiValued="false" />
@@ -116,9 +118,9 @@
 
     <field name="qualifications" type="text" indexed="true" stored="true" multiValued="false" />
 
-    <field name="project" type="slong" indexed="true" stored="true" multiValued="false" />
+    <field name="content" type="text" indexed="true" stored="true" multiValued="false" />
 
-    <field name="keywords" type="text" indexed="true" stored="true" multiValued="false" />
+    <field name="keywords" type="text" indexed="true" stored="true" multiValued="true" />
 
     <field name="occurrence_date" type="date" indexed="true" stored="true" multiValued="false" />
 
