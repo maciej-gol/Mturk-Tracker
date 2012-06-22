@@ -2,9 +2,9 @@
 
 <config>
     <abortOnConfigurationError>true</abortOnConfigurationError>
-    <lib dir="../../dist/" regex="apache-solr-cell-\d.*\.jar"/>
-    <lib dir="../../dist/" regex="apache-solr-clustering-\d.*\.jar"/>
-    <lib dir="../../dist/" regex="apache-solr-dataimporthandler-\d.*\.jar"/>
+    <lib dir="../dist/" regex="apache-solr-cell-\d.*\.jar"/>
+    <lib dir="../dist/" regex="apache-solr-clustering-\d.*\.jar"/>
+    <lib dir="../dist/" regex="apache-solr-dataimporthandler-\d.*\.jar"/>
 
     <dataDir>${solr.data.dir:}</dataDir>
 

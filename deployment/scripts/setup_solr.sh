@@ -11,7 +11,7 @@ if [ ! -d "$DL_TO" ]; then
     mkdir "$DL_TO"
 fi
 
-if ([ ! -f "$DL_TO/$FILE" ]); # || $UPDATE );
+if ([ ! -f "$DL_TO/$FILE" ] || $UPDATE );
 then
     echo "Downloading solr"
     wget "ftp://mirror.nyi.net/apache/lucene/solr/$SOLR_VERSION/apache-solr-$SOLR_VERSION.tgz" -O "$DL_TO/$FILE"
