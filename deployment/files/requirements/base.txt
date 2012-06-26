@@ -6,7 +6,7 @@ ipdb
 ipython
 yolk
 -e git+git://github.com/earle/django-bootstrap.git#egg=bootstrap
--e hg+https://google-api-python-client.googlecode.com/hg/#egg=gapi
+google-api-python-client==1.0b9
 #-e hg+https://bitbucket.org/ingenieroariel/django-wapi#egg=wapi
 -e hg+https://bitbucket.org/cogtree/python-solr#egg=pythonsolr
 #-e git+git@github.com:10clouds/common.git#egg=tenclouds
