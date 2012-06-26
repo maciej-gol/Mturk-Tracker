@@ -5,7 +5,6 @@ declare
   prj_started integer; prj_completed integer;
 
 begin
-  /* Selects crawls for last week, excluding today. */
 
   select min(id) into minimum from main_crawl where date(start_time) = istart;
   select max(id) into maximum from main_crawl where date(start_time) = iend;

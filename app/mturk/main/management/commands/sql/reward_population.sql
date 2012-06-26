@@ -5,7 +5,7 @@ declare
   total_reward_consumed float; prj_completed integer; total_reward_posted float;
 
 begin
-  /* Select records for past week. */
+
   select min(id) into minimum from main_crawl where date(start_time) = istart;
   select max(id) into maximum from main_crawl where date(start_time) = iend;
 
