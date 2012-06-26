@@ -14,6 +14,7 @@ DEBUG = False
 LOG_LEVEL = 'DEBUG' if DEBUG else 'INFO'
 LOGGING['loggers']['mturk.main.management.commands']['level'] = LOG_LEVEL
 LOGGING['handlers']['crawl_log']['filename'] = pjoin(LOG_DIRECTORY, 'crawl.log')
+LOGGING['handlers']['log_file']['filename'] = pjoin(LOG_DIRECTORY, 'main.log')
 
 log = logging.getLogger(__name__)
 
