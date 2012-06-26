@@ -6,10 +6,8 @@ declare
 
 begin
   /* Select records for past week. */
-  select max(id) into maximum from main_crawl
-    where date(start_time) = date(current_timestamp) - 1;
-  select min(id) into minimum from main_crawl
-    where date(start_time) = date(current_timestamp) - 3;
+  select min(id) into minimum from main_crawl where date(start_time) = istart;
+  select max(id) into maximum from main_crawl where date(start_time) = iend;
 
   RAISE NOTICE 'Positive id % % ', minimum, maximum;
   FOR i in (select id from main_crawl where id between minimum and maximum) LOOP

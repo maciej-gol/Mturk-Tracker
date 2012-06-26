@@ -3,11 +3,9 @@ i integer;
 /* Hits temp is: (hits_diff, group_id, group_id, crawl_id, crawl_id - 1) */
 CUR1 CURSOR FOR SELECT * FROM hits_temp
   where
-    crawl_id < (select max(id) from main_crawl
-                where date(start_time) = date(current_timestamp) - 1)
+    crawl_id < (select max(id) from main_crawl where date(start_time) = iend)
     and
-    crawl_id > (select min(id) from main_crawl
-                where date(start_time) = date(current_timestamp) - 3);
+    crawl_id > (select min(id) from main_crawl where date(start_time) = istart);
 
 begin
   i :=1;

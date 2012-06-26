@@ -100,6 +100,22 @@ def create_no_args(prname, prtext):
     """
     return TEMPLATE.format(prname=prname, prtext=prtext)
 
+
+def create_with_date_args(prname, prtext):
+    """Replaces all ' found in prtext with '' and formats an sql create
+    statement.
+
+    """
+    prtext = prtext.replace("'", "''")
+    TEMPLATE = """
+    CREATE OR REPLACE FUNCTION {prname}(istart TIMESTAMP, iend TIMESTAMP)
+        RETURNS VOID AS'
+        {prtext}'
+    LANGUAGE plpgsql;
+    """
+    return TEMPLATE.format(prname=prname, prtext=prtext)
+
+
 """Dictionary {procedure_file_name.sql: procedure_creting_method}.
 See __create_procedures for more details.
 
@@ -107,9 +123,9 @@ See __create_procedures for more details.
 PROCEDURES_TO_CREATE = {
     # 'hits_column_population.sql',  # disabled
     'hits_column_population_daily.sql': create_no_args,
-    'hits_temp_population.sql': create_no_args,
-    'hits_update.sql': create_no_args,
-    'reward_population.sql': create_no_args,
+    'hits_temp_population.sql': create_with_date_args,
+    'hits_update.sql': create_with_date_args,
+    'reward_population.sql': create_with_date_args,
 }
 
 """Extra columns to create. {table_name: [(colname, type), ]}."""

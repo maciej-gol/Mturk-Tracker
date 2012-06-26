@@ -40,7 +40,7 @@ class Command(BaseCommand):
         start, end = (crawl.start_day(), datetime.date.today())
         days = (end - start).days
         log.info("Processing {0} to {1} ({2} days).".format(start, end, days))
-
+        i = 0
         for i in range(0, days):
 
             day = crawl.start_day() + datetime.timedelta(days=i)
