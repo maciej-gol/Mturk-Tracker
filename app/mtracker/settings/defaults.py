@@ -255,8 +255,7 @@ PIPELINE_TEMPLATE_FUNC = 'new EJS'
 PIPELINE_TEMPLATE_NAMESPACE = 'window.Template'
 PIPELINE_TEMPLATE_EXT = '.ejs'
 
-# do not cache search API results
-USE_CACHE = False
+USE_CACHE = True
 
 API_CACHE_TIMEOUT = 60 * 60 * 24
 DYNAMIC_MEDIA = 'd/'
