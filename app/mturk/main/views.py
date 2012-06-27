@@ -48,7 +48,7 @@ def data_formater(input):
         }
 
 
-@cache_page(ONE_HOUR)
+#@cache_page(ONE_HOUR)
 def general(request):
 
     params = {
