@@ -62,10 +62,13 @@
 		<ul>
         {% include 'main/tabs.html' %}
         <li class="search">
-        <form method="post" action="/search/" onsubmit="submitForm()">
-        <input type="text" name="query" id="form_query" value="" onkeypress="return submitEnter(this,event)"/>
+        <form method="get" action="/search/" onsubmit="submitForm()">
+            <input type="text" name="q" id="form_query" value="{{ query }}" onkeypress="return submitEnter(this,event)"/>
         <input type="submit" id="form_submit" value="Search" style="display:none;"/>
-
+        <!--
+        <input type="checkbox" checked="checked" name="models" value="main.sphinxdoc.document" style="display:none;" />
+        -->
+        <input type="checkbox" checked="checked" name="models" value="main.hitgroupcontent" style="display:none;" />
         <!--
         <span class="loading"></span>
         -->
