@@ -6,7 +6,11 @@
     <lib dir="../dist/" regex="apache-solr-clustering-\d.*\.jar"/>
     <lib dir="../dist/" regex="apache-solr-dataimporthandler-\d.*\.jar"/>
 
+    <!--
     <dataDir>${solr.data.dir:}</dataDir>
+    -->
+    <!-- TODO replace path with template variables -->
+    <dataDir>/data/projects/mturktracker-staging/services/solr/solr/en/data</dataDir>
 
     <indexDefaults>
         <useCompoundFile>false</useCompoundFile>

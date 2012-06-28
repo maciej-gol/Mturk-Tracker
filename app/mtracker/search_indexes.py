@@ -15,8 +15,8 @@ class HitGroupContentIndex(indexes.SearchIndex):
     requester_name = indexes.CharField(model_attr='requester_name')
     reward = indexes.DecimalField(model_attr='reward')
     content = indexes.CharField(model_attr='html')
-    keywords = indexes.MultiValueField(model_attr='keywords')
-    qualifications = indexes.CharField(model_attr='qualifications')
+    keywords = indexes.MultiValueField(model_attr='keywords', null=True)
+    qualifications = indexes.CharField(model_attr='qualifications', null=True)
     occurrence_date = indexes.DateTimeField(model_attr='occurrence_date')
     time_alloted = indexes.DecimalField(model_attr='time_alloted')
 
