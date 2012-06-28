@@ -1,6 +1,23 @@
 Stored procedures
 =================
 
+hits_temp_population (main_hitgroupstatus -> hits_temp, main_crawlaggregates)
+    selects rows from main_crawls comming from the last week (7 days), excluding
+    today and:
+    * inserts hits_temp record
+    * updates main_crawlagregates hitgroups_posted and hitgroups_consumed as
+    the count of new groups present or old groups missing respectively
+
+hits_update (hits_temp -> hits_mv)
+    updates hits_mv hits_posted or hits_consumed using the data in hits_temp
+    table (mapping 'signed' field hits_temp.hits into positive hits_posted and
+    hits_consumed)
+
+reward_population (hits_mv -> main_crawlagregates)
+    calculates the total reward posted and consumed for each crawl from the last
+    day that has a record in hits_mv and updates related main_crawlagregates
+    record.
+
 hits_column_population_daily (main_hitgroupstatus -> main_hitgroupstatus)
     calculates the following between two most recent crawls and populates fields
     of main_hitgroupstatus:
@@ -16,35 +33,47 @@ hits_column_population_daily (main_hitgroupstatus -> main_hitgroupstatus)
         further procedures. This procedure will be skipped, but remains here,
         should is be required later.
 
-hits_temp_population (main_hitgroupstatus -> hits_temp, main_crawlaggregates)
-    selects rows from main_crawls comming from the last week (7 days), excluding
-    today and:
-    * inserts hits_temp record
-    * updates main_crawlagregates hitgroups_posted and hitgroups_consumed as
-    the count of new groups present or old groups missing respectively
-
-hits_update (hits_temp -> hits_mv)
-    updates hits_mv hits_posted or hits_consumed using the data in hits_temp
-    table (mapping 'signed' field hits_temp.hits into positive hits_posted and
-    hits_consumed)
-
-    .. note::
-
-        There is a hardcoded limit on this, perhaps debug/development:
-        'crawl_id < 105489;'
-
-reward_population (hits_mv -> main_crawlagregates)
-    calculates the total reward posted and consumed for each crawl from the last
-    day that has a record in hits_mv and updates related main_crawlagregates
-    record.
-
 Dependencies
 ------------
+
 Stored procedures should be ran in the following order:
 
 1) hits_temp_population
 2) hits_update
 3) reward_population
+
+Running
+-------
+
+All the above procedures accept two compulsory date arguments:
+
+*``start``
+*``end``
+
+All crawls between the first of start day and last on the end day will be
+processed.
+
+.. note::
+
+    Both ``start`` and ``end`` must have at least one crawl done that day for
+    process to start.
+
+Stored procedures can be executed from database shell (psql) by running:
+
+    select * from <procedure_name>(start, end)
+
+for example calling:
+
+    select * from hits_temp_population('2012-05-01', '2012-06-01');
+    select * from hits_update('2012-05-01', '2012-06-01');
+    select * from reward_population('2012-05-01', '2012-06-01');
+
+An alternative is to launch those procedures from dedicated django management
+commands. Each command has it counterpart named after the procedure name, with
+``'db_'`` prefix, for example: db_hits_temp_population.
+
+See (#TODO link to crawls.rst) for more details on running django management
+commands locally and on the host environment.
 
 Database modifications
 ======================
@@ -109,26 +138,6 @@ Indexes:
 | crawlid_rewardsposted   | btree | (crawl_id, rewards_consumed) |
 +-------------------------+-------+------------------------------+
 
-main_hitgroupstatus (hits_column_populate_daily)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. note::
-
-    UNUSED, theese modifications were NOT introduced as they are required only
-    by hits_column_population_daily which is currently unused.
-
-+---------------------+----------+-------------------------------+
-|    Column           | Type     | Updated by                    |
-+=====================+==========+===============================+
-| projects_arrived    | integer  | hits_column_population_daily  |
-+---------------------+----------+-------------------------------+
-| projects_completed  | integer  | hits_column_population_daily  |
-+---------------------+----------+-------------------------------+
-| hits_arrived        | integer  | hits_column_population_daily  |
-+---------------------+----------+-------------------------------+
-| hits_consumed       | integer  | hits_column_population_daily  |
-+---------------------+----------+-------------------------------+
-
 hits_temp table
 ---------------
 
@@ -165,3 +174,32 @@ Indexes:
 +-------------------------+-------+---------------------------------+
 | onhits_grpid_pcrawlid   | btree | (group_id1, prev_crawl_id, hits)|
 +-------------------------+-------+---------------------------------+
+
+main_hitgroupstatus (hits_column_populate_daily)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. note::
+
+    UNUSED, theese modifications were NOT introduced as they are required only
+    by hits_column_population_daily which is currently unused.
+
++---------------------+----------+-------------------------------+
+|    Column           | Type     | Updated by                    |
++=====================+==========+===============================+
+| projects_arrived    | integer  | hits_column_population_daily  |
++---------------------+----------+-------------------------------+
+| projects_completed  | integer  | hits_column_population_daily  |
++---------------------+----------+-------------------------------+
+| hits_arrived        | integer  | hits_column_population_daily  |
++---------------------+----------+-------------------------------+
+| hits_consumed       | integer  | hits_column_population_daily  |
++---------------------+----------+-------------------------------+
+
+Development
+===========
+
+To speed up development, a number of handy methods were created,
+see (#TODO link to) mturk/main/migration_extra/procedures.py).
+
+This module can be used to easily create database functions and required tables
+or table columns.
