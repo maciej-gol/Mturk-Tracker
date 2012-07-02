@@ -12,7 +12,7 @@ class HitGroupContentIndex(indexes.SearchIndex):
     description = indexes.CharField(model_attr='description')
     group_id = indexes.CharField(model_attr='group_id')
     requester_id = indexes.CharField(model_attr='requester_id')
-    requester_name = indexes.CharField(model_attr='requester_name', faceted=True)
+    requester_name = indexes.CharField(model_attr='requester_name')
     reward = indexes.DecimalField(model_attr='reward')
     content = indexes.CharField(model_attr='html')
     keywords = indexes.MultiValueField(model_attr='keywords', null=True)
