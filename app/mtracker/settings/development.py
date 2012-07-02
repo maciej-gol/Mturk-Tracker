@@ -8,6 +8,16 @@ DATABASES = {
     }
 }
 
+DATABASES.update({
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'mturk_tracker_db',
+        'USER': 'mturk_tracker',
+        'PASSWORD': 'asd',
+        'HOST': 'localhost',
+        'PORT': '',
+    },
+})
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 try:

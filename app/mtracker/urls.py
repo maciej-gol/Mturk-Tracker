@@ -1,8 +1,14 @@
 from django.conf import settings
 from django.conf.urls import patterns, include, url
-
 from django.contrib import admin
+
+from haystack.forms import FacetedSearchForm
+from haystack.query import SearchQuerySet
+from haystack.views import FacetedSearchView
+
+
 admin.autodiscover()
+searchqueryset = SearchQuerySet().facet('requester_name')
 
 
 def bad(request):
@@ -19,10 +25,14 @@ urlpatterns = patterns('mtracker',
 )
 
 urlpatterns += patterns('',
-    (r'^api/', include('mturk.api.urls')),
-    ('', include('mturk.main.urls')),
-    (r'^docs/', include('sphinxdoc.urls')),
-    (r'^search/', include('haystack.urls')),
+    url(r'^api/', include('mturk.api.urls')),
+    url('', include('mturk.main.urls')),
+    url(r'^docs/', include('sphinxdoc.urls')),
+#    (r'^search/', include('haystack.urls')),
+)
+
+urlpatterns += patterns('haystack.views',
+    url(r'^search/', FacetedSearchView(form_class=FacetedSearchForm, searchqueryset=searchqueryset), name='haystack_search'),
 )
 
 ## In DEBUG mode, serve media files through Django.
