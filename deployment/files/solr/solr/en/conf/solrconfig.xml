@@ -1,17 +1,26 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 
 <config>
+    <!--
     <abortOnConfigurationError>true</abortOnConfigurationError>
-    <lib dir="../dist/" regex="apache-solr-cell-\d.*\.jar"/>
-    <lib dir="../dist/" regex="apache-solr-clustering-\d.*\.jar"/>
-    <lib dir="../dist/" regex="apache-solr-dataimporthandler-\d.*\.jar"/>
+    <lib dir="../../dist/" regex="apache-solr-cell-\d.*\.jar"/>
+    <lib dir="../../dist/" regex="apache-solr-clustering-\d.*\.jar"/>
+    <lib dir="../../contrib/clustering/lib/downloads/"/>
+    <lib dir="../../contrib/clustering/lib/"/>
+    <lib dir="/total/crap/dir/ignored"/>
+    -->
+
+    <abortOnConfigurationError>true</abortOnConfigurationError>
+    <lib dir="../../dist/" regex="apache-solr-cell-\d.*\.jar"/>
+    <lib dir="../../dist/" regex="apache-solr-clustering-\d.*\.jar"/>
+    <lib dir="../../dist/" regex="apache-solr-dataimporthandler-\d.*\.jar"/>
+    <lib dir="../../dist/" regex="postgresql.jdbc4.jar"/>
 
     <!--
-    <dataDir>${solr.data.dir:}</dataDir>
+    <dataDir>${solr.data.dir:./solr/en/data}</dataDir>
     -->
-    <!-- TODO replace path with template variables -->
-    <dataDir>/data/projects/mturktracker-staging/services/solr/solr/en/data</dataDir>
 
+    <dataDir>/data/projects/mturktracker-staging/services/solr/solr/en/data</dataDir>
     <indexDefaults>
         <useCompoundFile>false</useCompoundFile>
 
@@ -99,6 +108,12 @@
         <httpCaching lastModifiedFrom="openTime" etagSeed="Solr">
         </httpCaching>
     </requestDispatcher>
+
+    <requestHandler name="/import_db_hits" class="org.apache.solr.handler.dataimport.DataImportHandler">
+        <lst name="defaults">
+            <str name="config">import_db_hits.xml</str>
+        </lst>
+    </requestHandler>
 
     <requestHandler name="standard" class="solr.SearchHandler" default="true">
         <lst name="defaults">
