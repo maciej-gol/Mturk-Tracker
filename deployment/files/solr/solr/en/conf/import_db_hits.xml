@@ -1,9 +1,9 @@
 <dataConfig>
     <dataSource name="mturk_crawl"
                 driver="org.postgresql.Driver"
-                url="jdbc:postgresql://localhost/mturk_tracker_db"
-                user="mturk_tracker"
-                password="asd"
+                url="jdbc:postgresql://localhost/%(db_name)s"
+                user="%(db_user)s"
+                password="%(db_password)s"
                 readOnly="true"
                 autoCommit="false"
                 transactionIsolation="TRANSACTION_READ_COMMITTED"
