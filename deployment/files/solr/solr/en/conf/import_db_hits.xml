@@ -2,8 +2,8 @@
     <dataSource name="mturk_crawl"
                 driver="org.postgresql.Driver"
                 url="jdbc:postgresql://localhost/%(db_name)s"
-                user="%(db_user)s"
-                password="%(db_password)s"
+                user="%(solr_db_user)s"
+                password="%(solr_db_password)s"
                 readOnly="true"
                 autoCommit="false"
                 maxRows="20000"
@@ -12,7 +12,7 @@
     <document>
         <entity name="hitgroupcontent" dataSource="mturk_crawl" threads="2" transformer="HTMLStripTransformer"
 
-				query="SELECT id as dj_id, group_id, requester_id, requester_name, reward, html, description, title, keywords,
+				query="SELECT id as django_id, group_id, requester_id, requester_name, reward, html, description, title, keywords,
 						qualifications, occurrence_date, time_alloted
                     FROM
                         main_hitgroupcontent
@@ -36,7 +36,7 @@
                     hgc.is_public = true
                     AND hgc.id = ${dataimporter.delta.id}">
 
-            <field column="dj_id" name="django_id" />
+            <field column="django_id" name="django_id" />
             <field column="group_id" name="group_id"/>
             <field column="requester_id" name="requester_id"/>
             <field column="requester_name" name="requester_name"/>

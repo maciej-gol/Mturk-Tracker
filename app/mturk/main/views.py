@@ -1,18 +1,20 @@
-from django.conf import settings
-from django.core.cache import cache
-from django.views.generic.simple import direct_to_template
-from utils.sql import query_to_dicts, query_to_tuples, execute_sql
-from django.views.decorators.cache import cache_page, never_cache
-from django.core.urlresolvers import reverse
-from mturk.main.templatetags.graph import text_row_formater
-from django.shortcuts import get_object_or_404
-from mturk.main.models import HitGroupContent
-
 import datetime
 import time
 
+from django.conf import settings
+from django.core.cache import cache
+from django.core.urlresolvers import reverse
+from django.shortcuts import get_object_or_404
+from django.views.generic.simple import direct_to_template
+from django.views.decorators.cache import cache_page, never_cache
+from haystack.views import SearchView
+
 import admin
 import plot
+
+from mturk.main.models import HitGroupContent
+from mturk.main.templatetags.graph import text_row_formater
+from utils.sql import query_to_dicts, query_to_tuples, execute_sql
 
 GENERAL_COLUMNS =  (
                ('date','Date'),
@@ -298,3 +300,7 @@ def search(request):
 
     return direct_to_template(request, 'main/search.html', params)
 
+@never_cache
+def haystack_search(request):
+    search_view = SearchView()
+    return search_view(request)

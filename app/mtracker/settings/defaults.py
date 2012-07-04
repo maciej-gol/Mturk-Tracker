@@ -285,6 +285,10 @@ PREDICTION_API_DATA_SET = "mturk-tracker/spam-training-data-20110506.txt"
 MTURK_AUTH_EMAIL = None
 MTURK_AUTH_PASSWORD = None
 
+SOLR_MAIN_PATH = "http://127.0.0.1:8983/solr"
+SOLR_CORE_NAME = "en"
+SOLR_PATH = "{}/{}".format(SOLR_MAIN_PATH, SOLR_CORE_NAME)
+
 HAYSTACK_SITECONF = "mtracker.search_sites"
 HAYSTACK_SEARCH_ENGINE = 'solr'
-HAYSTACK_SOLR_URL = 'http://127.0.0.1:8983/solr/en'
+HAYSTACK_SOLR_URL = SOLR_PATH
