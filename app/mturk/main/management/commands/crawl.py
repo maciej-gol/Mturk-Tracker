@@ -68,9 +68,9 @@ class Command(BaseCommand):
                     password=self.mturk_password)
             if resp.getcode() != 200:
                 raise Exception('Authentiaction error: %s' % resp.read())
-            log.debug('Mturk authentication done')
+            log.info('Mturk authentication done')
             return True
-        log.debug('No mturk authentication')
+        log.warning('No mturk authentication')
         return False
 
     def handle(self, *args, **options):
@@ -93,8 +93,8 @@ class Command(BaseCommand):
         if options.get('debug', False):
             self.setup_debug()
             print 'Current proccess pid: %s' % pid.actual_pid
-            print 'To debug, type: python -c "import os,signal; os.kill(%s, signal.SIGUSR1)"\n' % \
-                    pid.actual_pid
+            print ('To debug, type: python -c "import os,signal; '
+                'os.kill(%s, signal.SIGUSR1)"\n') % pid.actual_pid
 
         self.maxworkers = options['workers']
         if self.maxworkers > 9:
@@ -128,13 +128,15 @@ class Command(BaseCommand):
         # are public or not
         reqesters = RequesterProfile.objects.all_as_dict()
 
-        dbpool = ThreadedConnectionPool(10, 90, 'dbname=%s user=%s password=%s' % \
-            (settings.DATABASE_NAME, settings.DATABASE_USER, settings.DATABASE_PASSWORD))
+        dbpool = ThreadedConnectionPool(10, 90,
+            'dbname=%s user=%s password=%s' % (settings.DATABASE_NAME,
+                settings.DATABASE_USER, settings.DATABASE_PASSWORD))
         # collection of group_ids that were already processed - this should
         # protect us from duplicating data
         processed_groups = set()
         total_reward = 0
         hitgroups_iter = self.hits_iter()
+
         for hg_pack in hitgroups_iter:
             jobs = []
             for hg in hg_pack:
@@ -151,6 +153,7 @@ class Command(BaseCommand):
                     job.kill()
 
             if len(processed_groups) >= groups_available:
+                log.info('Skipping empty groups.')
                 # there's no need to iterate over empty groups.. break
                 break
 
@@ -172,6 +175,12 @@ class Command(BaseCommand):
         log.info('processed hits groups available: %s', groups_available)
         log.info('work time: %.2fsec', work_time)
 
+        if crawl.groups_downloaded < groups_available * 0.9:
+            log.warning('More than 10% of hit groups were not downloaded, '
+                'please check if current mturk account is not used on '
+                'multiple machines or if there were any network-related '
+                'problems.')
+
     def hits_iter(self):
         """Hits group lists generator.
 
@@ -183,8 +192,10 @@ class Command(BaseCommand):
 
         counter = count(1, self.maxworkers)
         for i in counter:
-            jobs = [gevent.spawn(tasks.hits_groups_info, page_nr) \
-                        for page_nr in range(i, i + self.maxworkers)]
+            pages = range(i, i + self.maxworkers)
+            log.debug('Processing pages: {0}'.format(pages))
+            jobs = [gevent.spawn(tasks.hits_groups_info, page_nr)
+                for page_nr in pages]
             gevent.joinall(jobs)
 
             # get data from completed tasks & remove empty results
@@ -196,6 +207,8 @@ class Command(BaseCommand):
             # if no data was returned, end - previous page was probably the
             # last one with results
             if not hgs:
+                log.info('None of the pages {0} contains data, assuming all '
+                    'pages were processed, exiting.'.format(pages))
                 break
 
             log.debug('yielding hits group: %s', len(hgs))
