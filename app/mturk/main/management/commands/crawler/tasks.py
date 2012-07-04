@@ -16,7 +16,6 @@ from db import DB
 log = logging.getLogger(__name__)
 
 
-
 def _get_html(url, timeout=10):
     """Get page code using given url. If server won't response in `timeout`
     seconds, return empty string.
@@ -27,20 +26,25 @@ def _get_html(url, timeout=10):
         log.error('%s;;%s;;%s', type(e).__name__, url, e.args)
     return ''
 
+
 def hitsearch_url(page=1):
     return 'https://www.mturk.com/mturk/viewhits?searchWords=&selectedSearchType=hitgroups&sortType=LastUpdatedTime:1&pageNumber=' + str(page) + '&searchSpec=HITGroupSearch%23T%231%2310%23-1%23T%23!%23!LastUpdatedTime!1!%23!'
 
+
 def group_url(id):
-   return "https://www.mturk.com/mturk/preview?groupId=%s" % id
+    return "https://www.mturk.com/mturk/preview?groupId=%s" % id
+
 
 def amazon_review_url(id):
     return "http://www.amazon.com/review/%s" % id
+
 
 def hits_mainpage_total():
     """Get total available hits from mturk main page"""
     url = 'https://www.mturk.com/mturk/welcome'
     html = _get_html(url)
     return parser.hits_mainpage(html)
+
 
 def hits_groups_info(page_nr, retry_if_empty=2):
     """Return info about every hits group from given page number
@@ -55,12 +59,17 @@ def hits_groups_info(page_nr, retry_if_empty=2):
         info['inpage_position'] = n + 1
         rows.append(info)
     log.debug('hits_groups_info done: %s;;%s', page_nr, len(rows))
-    if not rows and retry_if_empty:
-        wait_time = 10 - (3 * retry_if_empty)
-        log.debug('fetch retry for page: %s (in %ss)', page_nr, wait_time)
-        gevent.sleep(wait_time)
-        return hits_groups_info(page_nr, retry_if_empty - 1)
+    if not rows:
+        if retry_if_empty:
+            wait_time = 10 - (3 * retry_if_empty)
+            log.info('fetch retry for page: %s (in %ss)', page_nr, wait_time)
+            gevent.sleep(wait_time)
+            return hits_groups_info(page_nr, retry_if_empty - 1)
+        else:
+            log.warning('Retry limit exceeded for page: {0}.'.format(page_nr))
+
     return rows
+
 
 def hits_group_info(group_id):
     """Return info about given hits group"""
@@ -76,11 +85,13 @@ def hits_group_info(group_id):
         data['html'] = ''
     return data
 
+
 def hits_groups_total():
     """Return total number of hits groups or None"""
     url = "https://www.mturk.com/mturk/findhits?match=false"
     html = _get_html(url)
     return parser.hits_group_total(html)
+
 
 def process_group(hg, crawl_id, requesters, processed_groups, dbpool):
     """Gevent worker that should process single hitgroup.
