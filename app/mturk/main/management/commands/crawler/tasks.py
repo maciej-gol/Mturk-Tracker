@@ -46,10 +46,18 @@ def hits_mainpage_total():
     return parser.hits_mainpage(html)
 
 
-def hits_groups_info(page_nr, retry_if_empty=2):
-    """Return info about every hits group from given page number
+def hits_groups_info(page_nr, retries=50, sleep=0.1):
+    """Returns info about every hit group on the given page.
 
-    If retry_if_empty is 0, do not retry to fetch hits group info.
+    Since mturk.com enforces a limit on the number of connections to the
+    website, often the process must retry downloads. Retries will continue as
+    long as the html downloaded is empty or includes limit exceeded message.
+
+    Keyword arguments:
+    page_nr -- page to process
+    retries -- number of retries to make, by default a big number
+    sleep -- how long to wait between each retry
+
     """
     url = hitsearch_url(page_nr)
     html = _get_html(url)
@@ -59,14 +67,21 @@ def hits_groups_info(page_nr, retry_if_empty=2):
         info['inpage_position'] = n + 1
         rows.append(info)
     log.debug('hits_groups_info done: %s;;%s', page_nr, len(rows))
+
     if not rows:
-        if retry_if_empty:
-            wait_time = 10 - (3 * retry_if_empty)
-            log.info('fetch retry for page: %s (in %ss)', page_nr, wait_time)
-            gevent.sleep(wait_time)
-            return hits_groups_info(page_nr, retry_if_empty - 1)
+        if retries:
+            if html == '' or parser.is_limit_exceeded(html):
+                msg = ('Refetching page: {0}, ({2} retries remaining)'
+                    ).format(page_nr, sleep, retries)
+                log.debug(msg)
+                gevent.sleep(sleep)
+                return hits_groups_info(page_nr, retries - 1)
+            else:
+                log.debug('No content in page {0}, returning'.format(page_nr))
         else:
-            log.warning('Retry limit exceeded for page: {0}.'.format(page_nr))
+            log.warning('Retry limit exceeded for page: {0}. Either the limit'
+                'is too small, some unknown bug was encountered or there is a '
+                'connection error.'.format(page_nr))
 
     return rows
 
@@ -115,7 +130,7 @@ def process_group(hg, crawl_id, requesters, processed_groups, dbpool):
 
     if hg['group_id'] in processed_groups:
         # this higroup was already processed
-        log.info('duplicated group: %s;;%s', crawl_id, hg['group_id'])
+        log.debug('Duplicated group: %s;;%s', crawl_id, hg['group_id'])
         return False
 
     conn = dbpool.getconn(thread.get_ident())

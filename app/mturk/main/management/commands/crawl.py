@@ -175,11 +175,21 @@ class Command(BaseCommand):
         log.info('processed hits groups available: %s', groups_available)
         log.info('work time: %.2fsec', work_time)
 
+        crawl_time_warning = 300
+        if work_time > crawl_time_warning:
+            log.warning("Crawl took {0} s which seems a bit too long (more than"
+                "{0} s), you might consider checking if correct mturk account"
+                " is used.".format(crawl_time_warning))
         if crawl.groups_downloaded < groups_available * 0.9:
             log.warning('More than 10% of hit groups were not downloaded, '
-                'please check if current mturk account is not used on '
-                'multiple machines or if there were any network-related '
-                'problems.')
+                'please check mturk account configuration and/or if there are '
+                'any network-related problems.')
+        crawl_downloaded_pc = 0.6
+        if crawl.groups_downloaded < groups_available * crawl_downloaded_pc:
+            log.warning("This crawl contains far too few groups downloaded to "
+                "available: ({0} < {1} * {2}) and will be considered as "
+                "erroneous".format(crawl.groups_downloaded, groups_available,
+                crawl_downloaded_pc))
 
     def hits_iter(self):
         """Hits group lists generator.
@@ -187,6 +197,14 @@ class Command(BaseCommand):
         As long as available, return lists of parsed hits group. Because this
         method is using concurent download, number of returned elements on
         each list cannot be greater that maximum number of workers.
+
+        On start, the number of pages could be estimated using fetched
+        groups_avaialable and the number of crawls per page. However the number
+        will change during the crawl as tasks are posted and completed and can
+        be only estimated with precision of roughly 1-3 page.
+
+        Therefore finding an empty page is the stop condition.
+
         """
         self._authenticate_if_possible()
 

@@ -251,3 +251,12 @@ def hits_group_total(html):
         return None
     res = rx.groupdict()
     return int(res['total_grouphits'])
+
+
+def is_limit_exceeded(html):
+    """Searchs the html for limit exceeded message.
+    Used to distinguish empty page from temporary wait.
+
+    """
+    return html.find("You have exceeded the maximum allowed page"
+        " request rate for this website.") != -1
