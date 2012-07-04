@@ -17,7 +17,7 @@ _RX_HITS_MAINPAGE = \
         </\w+?>
         \s*?
         available
-    ''', re.M|re.X)
+    ''', re.M | re.X)
 
 _RX_HITS_TOTALGROUPS = \
     re.compile(r'''
@@ -26,7 +26,7 @@ _RX_HITS_TOTALGROUPS = \
         (?P<total_grouphits>\d+)
         \s+
         Results
-    ''', re.M|re.X)
+    ''', re.M | re.X)
 
 _RX_HITS_LIST = \
     re.compile(r'''
@@ -107,7 +107,7 @@ _RX_HITS_LIST = \
         <tr[^>]*>
             (?P<qualifications>.*?)
         </table>
-    ''', re.M|re.X|re.S)
+    ''', re.M | re.X | re.S)
 
 _RX_HITS_LIST_KEYWORDS = \
     re.compile(r'''
@@ -116,7 +116,7 @@ _RX_HITS_LIST_KEYWORDS = \
             (.+?)
         </a>
         \s*
-    ''', re.M|re.X|re.S)
+    ''', re.M | re.X | re.S)
 
 _RX_HITS_LIST_QUALIFICATIONS = \
     re.compile(r'''
@@ -125,7 +125,7 @@ _RX_HITS_LIST_QUALIFICATIONS = \
                 (.+?)
             \s*
         </td>
-    ''', re.M|re.X|re.S)
+    ''', re.M | re.X | re.S)
 
 _RX_HITS_DETAILS = \
         re.compile(r'''
@@ -151,8 +151,7 @@ _RX_HITS_DETAILS = \
             \s*?
             </form>
         )
-    ''', re.M|re.X|re.S)
-
+    ''', re.M | re.X | re.S)
 
 
 def human_timedelta_seconds(hd):
@@ -182,9 +181,11 @@ def human_timedelta_seconds(hd):
         total += _to_seconds(*delta)
     return total
 
+
 def rm_dup_whitechas(s, replacer=' '):
     """Replace every two or more whitechars with single space"""
     return _RX_WHITECHARS_DUPLICATE.sub(replacer, s)
+
 
 def hits_mainpage(html):
     """Return number of available hits fetched from given html (should be
@@ -198,6 +199,7 @@ def hits_mainpage(html):
         return None
     matched = rx.groups()[0]
     return int(matched.replace(',', ''))
+
 
 def hits_group_listinfo(html):
     """Yield info about every hits group found in given html string
@@ -215,7 +217,8 @@ def hits_group_listinfo(html):
                 res['hit_expiration_date'], '%b %d, %Y')
         res['hits_available'] = int(res['hits_available'])
         res['keywords'] = _RX_HITS_LIST_KEYWORDS.findall(res['keywords'])
-        qualifications = _RX_HITS_LIST_QUALIFICATIONS.findall( res['qualifications'])
+        qualifications = _RX_HITS_LIST_QUALIFICATIONS.findall(
+            res['qualifications'])
         res['qualifications'] = [rm_dup_whitechas(q) for q in qualifications]
         # group id is not always available
         res['group_id'] = res.get('group_id', None)
@@ -223,6 +226,7 @@ def hits_group_listinfo(html):
         res['time_alloted'] = human_timedelta_seconds(res['time_alloted'])
 
         yield res
+
 
 def hits_group_details(html):
     """Get more details info about single group of hits"""
@@ -234,6 +238,7 @@ def hits_group_details(html):
     res['html'] = res.get('html', None)
     res['duration'] = human_timedelta_seconds(res['duration'])
     return res
+
 
 def hits_group_total(html):
     """Return total number of available hits groups.
