@@ -37,7 +37,7 @@ def configure():
             upload_template_with_perms(
                 source, destination, context, mode="644")
 
-    scripts = ['supervisorctl_shell.sh']
+    scripts = ['supervisorctl.sh', 'supervisord.sh']
     for script_name in scripts:
         source = pjoin(cget("local_root"), 'deployment', 'scripts', script_name)
         destination = pjoin(cget("script_dir"), script_name)
