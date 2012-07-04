@@ -16,5 +16,7 @@ SCRIPT_NAME="manage_py_exec_silent"
 #25      1       *       *       *       root    cd $PROJECT_ROOT; /$SCRIPT_ROOT/$SCRIPT_NAME db_calculate_daily_stats
 #15      2       *       *       *       root    cd $PROJECT_ROOT; /$SCRIPT_ROOT/$SCRIPT_NAME solr_sync --clean-queue
 #45      *       *       *       *       root    cd $PROJECT_ROOT; /$SCRIPT_ROOT/$SCRIPT_NAME solr_sync
+#
+*/2      *       *       *       *       root    cd $PROJECT_ROOT; /$SCRIPT_ROOT/$SCRIPT_NAME solr_import_data --import-type="delta-import" --clear
 
 50	*/3	*	*	*	%(user)s cd $PROJECT_ROOT; /$SCRIPT_ROOT/$SCRIPT_NAME cache_toprequesters
