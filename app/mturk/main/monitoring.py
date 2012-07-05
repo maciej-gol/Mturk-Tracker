@@ -5,14 +5,15 @@ from django.utils.timezone import now
 from mturk.main.models import Crawl
 
 
-def print_arrivals(age=datetime.timedelta(hours=2), sleep=15, limit=None):
-    """Util for displaying latest crawls and their details."""
+def print_crawls(age=datetime.timedelta(hours=2), sleep=15, limit=None):
+    """Script for displaying latest crawls and their details."""
 
     while True:
         crawls = Crawl.objects.filter(start_time__gt=now() - age
             ).order_by('start_time')
         if limit:
             crawls = crawls[:limit]
+        print '-----------------------------'
         print '(H, M, avail, down, statuses)'
         print '-----------------------------'
         for c in crawls:
