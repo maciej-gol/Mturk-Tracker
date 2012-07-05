@@ -54,17 +54,30 @@ def update_mviews():
     """Creates hits_mv records for crawls with enough groups_downloaded
     taking data from main_hitgroupstatus and main_hitgroupcontent tables.
 
-    """
+    Filtering out incomplete anonymous crawls
+    -----------------------------------------
+    Note: this is covered by the latter case
 
-    missing_crawls = query_to_tuples("""select id, start_time
-        from main_crawl p
+    There is a 20 page limit for anonymous mturk.com users, each page having
+    10 hitgroups, while usual number of hitgroups is at least 100.
+    Thus all crawls with 200 or less crawls should be excluded.
+
+    Filtering erronous crawls
+    -------------------------
+    Usually, the difference between hitgroups_downloaded and higroups_available
+    exceeding 20% denotes a crawl error. Such crawls should be excluded from
+    creating hits_mv and main_crawlagregate records.
+
+    """
+    query = """
+    select id, start_time from main_crawl p
     where
-        p.success = true and
-        not exists (select id from main_crawlagregates where crawl_id = p.id ) and
-        old_id is null and
-        groups_downloaded > 200 and
-        has_hits_mv = false
-    order by id desc""")
+        p.success = true and old_id is null and has_hits_mv = false and
+        not exists (select id from main_crawlagregates where crawl_id = p.id)
+        and p.groups_available * 0.8 > p.groups_downloaded
+    order by id desc"""
+
+    missing_crawls = query_to_tuples(query)
 
     for row in missing_crawls:
 
