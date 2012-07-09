@@ -4,7 +4,7 @@ import time
 from django.conf import settings
 from django.core.cache import cache
 from django.core.urlresolvers import reverse
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, render
 from django.views.generic.simple import direct_to_template
 from django.views.decorators.cache import cache_page, never_cache
 from haystack.views import SearchView
@@ -300,7 +300,98 @@ def search(request):
 
     return direct_to_template(request, 'main/search.html', params)
 
+from itertools import product
+from django import forms
+from haystack.forms import SearchForm
+
+class HitGroupContentSearchForm(SearchForm):
+
+    ORDERS = ("asc", "desc")
+    ORDERS_STRINGS = ("Ascending", "Descending")
+
+    FIELDS = ("title", "description", "content", "keywords")
+    FIELDS_STRINGS = map(lambda s: "{}{}".format(s[0].upper(), s[1:]), FIELDS)
+
+    SEARCH_IN_CHOICES = zip(FIELDS, FIELDS_STRINGS)
+    SORT_BY_CHOICES = zip(map(lambda order: "{}_{}".format(order[0], order[1]),
+                              product(ORDERS, FIELDS)),
+                          map(lambda order: "{} ({})".format(order[1], order[0]),
+                              product(ORDERS_STRINGS, FIELDS_STRINGS)))
+    PAGE_SIZES = ("5", "10", "20", "50")
+    HITS_PER_PAGE_CHOICES = zip(PAGE_SIZES, PAGE_SIZES)
+
+    search_in = forms.MultipleChoiceField(
+            choices=SEARCH_IN_CHOICES,
+            required=False
+        )
+    sort_by = forms.ChoiceField(
+            choices=SORT_BY_CHOICES,
+            required=False
+        )
+    hits_per_page = forms.ChoiceField(
+            choices=HITS_PER_PAGE_CHOICES,
+            required=False
+        )
+
+    def cleaned_data_or_empty(self):
+        try:
+            cleaned_data = self.cleaned_data
+        except AttributeError:
+            cleaned_data = { }
+        return cleaned_data
+
+    def search(self):
+        search_queryset = super(HitGroupContentSearchForm, self).search()
+        cleaned_data = self.cleaned_data_or_empty()
+        query = cleaned_data.get("q", "")
+        if not query:
+            return search_queryset
+        search_in = cleaned_data.get("search_in", self.FIELDS)
+        sort_by = cleaned_data.get("sort_by", "asc_title").split("_")
+        sort_by = "{}{}".format("" if sort_by[0] == "asc" else "-", sort_by[1])
+        kwargs = {}
+        for field in search_in:
+            kwargs[field] = query
+        print kwargs
+        search_queryset = search_queryset.filter_and(**kwargs)
+        search_queryset = search_queryset.order_by(sort_by)
+        return search_queryset
+
+    def submit_url(self):
+        cleaned_data = self.cleaned_data_or_empty()
+        query = cleaned_data.get("q", "")
+        search_in = "".join(map(lambda f: "&search_in={}".format(f),
+                            cleaned_data.get("search_in", [])))
+        sort_by = "".join(map(lambda o: "&sort_by={}".format(o),
+                          [cleaned_data.get("sort_by", "title")]))
+        hits_per_page = "".join(map(lambda hpp: "&hits_per_page={}".format(hpp),
+                                [cleaned_data.get("hits_per_page", "5")]))
+        return "?q={}{}{}{}".format(query, search_in, sort_by, hits_per_page)
+
+
+class HitGroupContentSearchView(SearchView):
+
+    def build_page(self):
+        form = self.form
+        if form is not None:
+            cleaned_data = form.cleaned_data_or_empty()
+        self.results_per_page = int(cleaned_data.get("hits_per_page", "5"))
+        return super(HitGroupContentSearchView, self).build_page()
+
+    def extra_context(self):
+        context = super(HitGroupContentSearchView, self).extra_context()
+        submit_url = ""
+        form = self.form
+        if form is not None:
+            submit_url = form.submit_url()
+        results = self.results
+        if results is None:
+            results = []
+        context.update({"submit_url": submit_url})
+        context.update({"total_count": results.count()})
+        return context
+
 @never_cache
 def haystack_search(request):
-    search_view = SearchView()
+    search_view = HitGroupContentSearchView(form_class=HitGroupContentSearchForm)
     return search_view(request)

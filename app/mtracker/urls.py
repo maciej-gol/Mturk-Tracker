@@ -22,7 +22,6 @@ urlpatterns += patterns('',
     url(r'^api/', include('mturk.api.urls')),
     url('', include('mturk.main.urls')),
     url(r'^docs/', include('sphinxdoc.urls')),
-    url(r'^search/', include('haystack.urls')),
 )
 
 ## In DEBUG mode, serve media files through Django.
