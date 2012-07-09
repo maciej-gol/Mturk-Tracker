@@ -13,8 +13,8 @@ def clean_duplicates():
     ids = query_to_dicts("select group_id from main_hitgroupcontent group by group_id having count(*) > 1;")
 
     for id in ids:
-        print "deleting %s" % id['group_id']
-        log.info("deleting %s" % id['group_id'])
+
+        log.info("Deleting duplicate group %s" % id['group_id'])
 
         execute_sql("""delete from main_hitgroupstatus where
                         hit_group_content_id  in (
@@ -65,8 +65,8 @@ def update_mviews():
     Filtering erronous crawls
     -------------------------
     Usually, the difference between hitgroups_downloaded and higroups_available
-    exceeding 20% denotes a crawl error. Such crawls should be excluded from
-    creating hits_mv and main_crawlagregate records.
+    exceeding 10 percent denotes a crawl error. Such crawls should be excluded
+    from creating hits_mv and further table records.
 
     """
     query = """
@@ -74,7 +74,7 @@ def update_mviews():
     where
         p.success = true and old_id is null and has_hits_mv = false and
         not exists (select id from main_crawlagregates where crawl_id = p.id)
-        and p.groups_available * 0.8 > p.groups_downloaded
+        and p.groups_available * 0.9 > p.groups_downloaded
     order by id desc"""
 
     missing_crawls = query_to_tuples(query)
@@ -92,18 +92,22 @@ def update_mviews():
                     requester_id, hits_available, page_number, inpage_position,
                     hit_expiration_date, reward, time_alloted, hits_diff,
                     is_spam)
-            SELECT p.id AS status_id, q.id AS content_id, p.group_id, p.crawl_id,
-                TIMESTAMP '%s',
-                q.requester_id, p.hits_available, p.page_number, p.inpage_position, p.hit_expiration_date, q.reward, q.time_alloted, null, q.is_spam
+            SELECT p.id AS status_id, q.id AS content_id, p.group_id,
+                p.crawl_id, TIMESTAMP '%s',
+                q.requester_id, p.hits_available, p.page_number,
+                p.inpage_position, p.hit_expiration_date, q.reward,
+                q.time_alloted, null, q.is_spam
             FROM
                 main_hitgroupstatus p
             JOIN
-                main_hitgroupcontent q ON (q.group_id::text = p.group_id::text AND p.hit_group_content_id = q.id)
+                main_hitgroupcontent q ON (q.group_id::text = p.group_id::text
+                                           AND p.hit_group_content_id = q.id)
             WHERE
                 p.crawl_id = %s;
         """ % (start_time, crawl_id))
 
-        execute_sql("update main_crawl set has_hits_mv = true where id = %s" % crawl_id)
+        execute_sql(("update main_crawl set has_hits_mv = true where"
+            " id = %s") % crawl_id)
 
         execute_sql('commit;')
 

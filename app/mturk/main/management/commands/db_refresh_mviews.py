@@ -20,13 +20,13 @@ class Command(BaseCommand):
 
         start_time = time.time()
 
-        log.info('cleaning up db from duplicates')
+        log.info('Removing duplicate hitgroupcontent and hitgroupstatuses.')
         clean_duplicates()
 
         log.info('Refreshing hits_mv')
         update_mviews()
 
-        log.info('done refreshing hits_mv')
+        log.info('Done refreshing hits_mv')
 
         log.info('db_refresh_mviews took: %s' % (time.time() - start_time))
 
