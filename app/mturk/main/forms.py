@@ -79,7 +79,7 @@ class HitGroupContentSearchForm(SearchForm):
     def hits_per_page_or_default(self):
         cleaned_data = self.cleaned_data_or_empty()
         try:
-            hits_per_page = int(cleaned_data["hits_per_page"])
+            hits_per_page = int(cleaned_data.get("hits_per_page", ""))
         except ValueError:
             hits_per_page = 5
         return hits_per_page
