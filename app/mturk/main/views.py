@@ -4,7 +4,7 @@ import time
 from django.conf import settings
 from django.core.cache import cache
 from django.core.urlresolvers import reverse
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, render
 from django.views.generic.simple import direct_to_template
 from django.views.decorators.cache import cache_page, never_cache
 from haystack.views import SearchView
@@ -12,6 +12,7 @@ from haystack.views import SearchView
 import admin
 import plot
 
+from mturk.main.forms import HitGroupContentSearchForm
 from mturk.main.models import HitGroupContent
 from mturk.main.templatetags.graph import text_row_formater
 from utils.sql import query_to_dicts, query_to_tuples, execute_sql
@@ -300,7 +301,31 @@ def search(request):
 
     return direct_to_template(request, 'main/search.html', params)
 
+
+class HitGroupContentSearchView(SearchView):
+
+    def build_page(self):
+        form = self.form
+        if form is not None:
+            cleaned_data = form.cleaned_data_or_empty()
+        self.results_per_page = int(cleaned_data.get("hits_per_page", "5"))
+        return super(HitGroupContentSearchView, self).build_page()
+
+    def extra_context(self):
+        context = super(HitGroupContentSearchView, self).extra_context()
+        submit_url = ""
+        form = self.form
+        if form is not None:
+            submit_url = form.submit_url()
+        results = self.results
+        if results is None:
+            results = []
+        context.update({"submit_url": submit_url})
+        context.update({"total_count": results.count()})
+        return context
+
+
 @never_cache
 def haystack_search(request):
-    search_view = SearchView()
+    search_view = HitGroupContentSearchView(form_class=HitGroupContentSearchForm)
     return search_view(request)

@@ -6,7 +6,7 @@
                 password="%(solr_db_password)s"
                 readOnly="true"
                 autoCommit="false"
-                maxRows="20000"
+                maxRows="0"
                 transactionIsolation="TRANSACTION_READ_COMMITTED"
                 holdability="CLOSE_CURSORS_AT_COMMIT"/>
     <document>
