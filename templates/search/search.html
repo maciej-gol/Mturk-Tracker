@@ -35,7 +35,7 @@
                 <select multiple="multiple" name="search_in" class="chzn-select"
                     style="width: 80%" id="id_search_in">
                     {% for option in form.fields.search_in.choices %}
-                    <option {% if option.0 in form.search_in_selected %}selected="selected"{% endif %} value="{{ option.0 }}">{{ option.1 }}</option>
+                    <option {% if option.0 in form.cleaned_data.search_in %}selected="selected"{% endif %} value="{{ option.0 }}">{{ option.1 }}</option>
                     {% endfor %}
                 </select>
             </div>
@@ -58,7 +58,7 @@
             <div class="span-5">
                 <select name="sort_by" id="id_sort_by">
                     {% for option in form.fields.sort_by.choices %}
-                    <option value="{{ option.0 }}">{{ option.1 }}</option>
+                    <option {% if option.0 in form.cleaned_data.sort_by %}selected="selected"{% endif %} value="{{ option.0 }}">{{ option.1 }}</option>
                     {% endfor %}
                 </select>
             </div>
@@ -68,7 +68,7 @@
             <div class="span-3">
                 <select name="hits_per_page" id="id_hits_per_page">
                     {% for option in form.fields.hits_per_page.choices %}
-                    <option value="{{ option.0 }}">{{option.1 }}</option>
+                    <option {% if option.0 in form.cleaned_data.hits_per_page %}selected="selected"{% endif %} value="{{ option.0 }}">{{option.1 }}</option>
                     {% endfor %}
                 </select>
             </div>
