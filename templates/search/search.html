@@ -11,83 +11,88 @@
         });
     </script>
     <style>
-        input, select {
-            margin-bottom: 1px;
-            margin-left: 0px;
-            margin-right: 0px;
-            margin-top: 1px;
-            padding-bottom: 5px;
-            padding-left: 5px;
-            padding-right: 5px;
+        select, input[type=text] {
             padding-top: 5px;
-        };
+            padding-bottom: 5px;
+            padding-left: 2px;
+            padding-right: 2px;
+        }
+        input[type=submit] {
+            padding-top: 4px;
+            padding-bottom: 4px;
+            padding-left: 2px;
+            padding-right: 2px;
+        }
     </style>
 {% endblock %}
 
 {% block content %}
     
     <form method="get" action=".">
-        <div class="span-24">
-            <div class="span-2">
-                <label>search in</label>
-            </div>
-            <div class="span-8">
-                <select multiple="multiple" name="search_in" class="chzn-select"
-                    style="width: 80%" id="id_search_in">
-                    {% for option in form.fields.search_in.choices %}
-                    <option {% if option.0 in form.cleaned_data.search_in %}selected="selected"{% endif %} value="{{ option.0 }}">{{ option.1 }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="span-2">
-                <label>keywords</label>
-            </div>
-            <div class="span-8">
-                <input type="text" name="q" value="{{ query }}" class="default" />
-                &nbsp;
-                <input type="submit" value="Search" />
-            </div>
-        </div>
-        <div class="span-24">
-            <div class="span-10">
-                &nbsp;
-            </div>
-            <div class="span-2">
-                <label>sort by</label>
-            </div>
-            <div class="span-5">
-                <select name="sort_by" id="id_sort_by">
-                    {% for option in form.fields.sort_by.choices %}
-                    <option {% if option.0 in form.cleaned_data.sort_by %}selected="selected"{% endif %} value="{{ option.0 }}">{{ option.1 }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="span-3">
-                <label>hits per page</label>
-            </div>
-            <div class="span-3">
-                <select name="hits_per_page" id="id_hits_per_page">
-                    {% for option in form.fields.hits_per_page.choices %}
-                    <option {% if option.0 in form.cleaned_data.hits_per_page %}selected="selected"{% endif %} value="{{ option.0 }}">{{option.1 }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            {% if query and total_count %}
-                <div class="span-2">
-                    <label>items found: </label>{{ total_count }}
+        <fieldset style="width: 96%;">
+            <div class="span-24">
+                <div class="span-2" style="margin-top: 5px;">
+                    <label>search in</label>
                 </div>
-            {% endif %}
-        </div>
-
+                <div class="span-8">
+                    <select multiple="multiple" name="search_in"
+                        class="chzn-select"
+                        style="width: 80%" id="id_search_in">
+                        {% for option in form.fields.search_in.choices %}
+                        <option {% if option.0 in form.cleaned_data.search_in %}selected="selected"{% endif %} value="{{ option.0 }}">{{ option.1 }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="span-2" style="margin-top: 3px;">
+                    <label>keywords</label>
+                </div>
+                <div class="span-8" style="margin-top: -8px;">
+                    <input type="text" name="q" value="{{ query }}"
+                           style="width: 57%;" />
+                    &nbsp;
+                    <input type="submit" value="Search" />
+                </div>
+            </div>
+            <div class="span-24">
+                <div class="span-10">
+                    &nbsp;
+                </div>
+                <div class="span-2" style="margin-top: 10px;">
+                    <label>sort by</label>
+                </div>
+                <div class="span-5">
+                    <select name="sort_by" id="id_sort_by" style="width: 96%;">
+                        {% for option in form.fields.sort_by.choices %}
+                        <option {% if option.0 in form.cleaned_data.sort_by %}selected="selected"{% endif %} value="{{ option.0 }}">{{ option.1 }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="span-2" style="margin-top: 3px;">
+                    <label>hits per page</label>
+                </div>
+                <div class="span-2">
+                    <select name="hits_per_page" id="id_hits_per_page">
+                        {% for option in form.fields.hits_per_page.choices %}
+                        <option {% if option.0 in form.cleaned_data.hits_per_page %}selected="selected"{% endif %} value="{{ option.0 }}">{{option.1 }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                {% if query and total_count %}
+                    <div class="span-2" style="margin-top: 3px;">
+                        <label>items found: </label>{{ total_count }}
+                    </div>
+                {% endif %}
+            </div>
+        </fieldset>
     </form>
     <div class="span-24">&nbsp;</div>
-
+    <div class="span-24 last">
     {% if query %}
-        <table cellspacing="0" cellpadding="0" style="border: 2px solid black;
+        {% with page.object_list as results %}
+            {% for result in results %}
+                <table cellspacing="0" cellpadding="0" style="border: 2px solid black;
                                                       border-collapse: collapse;">
-            <tbody>
-                {% with page.object_list as results %}
-                    {% for result in results %}
+                    <tbody>
                         <tr style="border-top: 1px solid black;">
                             <td style="border-right: 1px solid #AAA;">
                                 <span style="font-size: 120%/1.5;">
@@ -148,7 +153,11 @@
                                 {{ result.description|safe }}
                             </td>
                         </tr>
+                    </table>
                     {% empty %}
+                    <table cellspacing="0" cellpadding="0" style="border: 2px solid black;
+                                                      border-collapse: collapse;">
+                    <tbody>
                         <tr>
                             <td colspan="5">
                                 <span style="font-weight: bold;">
@@ -156,10 +165,11 @@
                                 </span>
                             </td>
                         </tr>
-                    {% endfor %}
-                {% endwith %}
-            </tbody>
-        </table>
+                    </tbody>
+                </table>
+            {% endfor %}
+        {% endwith %}
+        </div>
         {% if page.has_previous or page.has_next %}
             <div>
                 {% if page.has_previous %}

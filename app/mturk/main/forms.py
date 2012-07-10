@@ -34,7 +34,7 @@ class HitGroupContentSearchForm(SearchForm):
         )
     sort_by = forms.ChoiceField(
             choices=SORT_BY_CHOICES,
-            required=False
+            required=False,
         )
     hits_per_page = forms.ChoiceField(
             choices=HITS_PER_PAGE_CHOICES,
@@ -75,3 +75,11 @@ class HitGroupContentSearchForm(SearchForm):
         hits_per_page = "".join(map(lambda hpp: "&hits_per_page={}".format(hpp),
                                 [cleaned_data.get("hits_per_page", "5")]))
         return "?q={}{}{}{}".format(query, search_in, sort_by, hits_per_page)
+
+    def hits_per_page_or_default(self):
+        cleaned_data = self.cleaned_data_or_empty()
+        try:
+            hits_per_page = int(cleaned_data["hits_per_page"])
+        except ValueError:
+            hits_per_page = 5
+        return hits_per_page

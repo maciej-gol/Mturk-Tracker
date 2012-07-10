@@ -307,8 +307,7 @@ class HitGroupContentSearchView(SearchView):
     def build_page(self):
         form = self.form
         if form is not None:
-            cleaned_data = form.cleaned_data_or_empty()
-        self.results_per_page = int(cleaned_data.get("hits_per_page", "5"))
+            self.results_per_page = form.hits_per_page_or_default()
         return super(HitGroupContentSearchView, self).build_page()
 
     def extra_context(self):
