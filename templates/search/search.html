@@ -1,4 +1,6 @@
 {% extends "base.html" %}
+<!-- This dirty template is only a prototype. All inline styles and form fields
+     will be replaced by bootstrap and django automatic field generation. -->
 {% block head %}
     <link rel="stylesheet" href="{{ STATIC_URL }}/css/chosen.css" type="text/css" />
     <script src="{{ STATIC_URL }}/js/jquery-1.7.2.js"></script>
@@ -33,7 +35,7 @@
                 <select multiple="multiple" name="search_in" class="chzn-select"
                     style="width: 80%" id="id_search_in">
                     {% for option in form.fields.search_in.choices %}
-                    <option {% if option.0 in form.search_in %}selected="selected"{% endif %} value="{{ option.0 }}">{{ option.1 }}</option>
+                    <option {% if option.0 in form.search_in_selected %}selected="selected"{% endif %} value="{{ option.0 }}">{{ option.1 }}</option>
                     {% endfor %}
                 </select>
             </div>
@@ -70,7 +72,7 @@
                     {% endfor %}
                 </select>
             </div>
-            {% if query %}
+            {% if query and total_count %}
                 <div class="span-2">
                     <label>items found: </label>{{ total_count }}
                 </div>
@@ -81,11 +83,12 @@
     <div class="span-24">&nbsp;</div>
 
     {% if query %}
-        <table cellspacing="0" cellpadding="0" style="border: 1px solid black;">
+        <table cellspacing="0" cellpadding="0" style="border: 2px solid black;
+                                                      border-collapse: collapse;">
             <tbody>
                 {% with page.object_list as results %}
                     {% for result in results %}
-                        <tr>
+                        <tr style="border-top: 1px solid black;">
                             <td style="border-right: 1px solid #AAA;">
                                 <span style="font-size: 120%/1.5;">
                                     <a href="{% url hit_group_details result.group_id %}">
@@ -115,6 +118,11 @@
                                     {{ result.time_alloted }}
                                 </span>
                             </td>
+                            <!--
+                            <td rowspan="2" style="vertical-align: top;">
+                                <span>Info</span>
+                            </td>
+                            -->
                         </tr>
                         <tr>
                             <td style="border-right: 1px solid #AAA;">
@@ -135,9 +143,17 @@
                         </tr>
                         <tr>
                             <td style="border-top: 1px solid #AAA;
-                                       border-bottom: 1px solid #AAA;" 
+                                       border-bottom: 2px solid black;" 
                                 colspan="5">
                                 {{ result.description|safe }}
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="5">
+                                <span style="font-weight: bold;">
+                                    No items found.
+                                </span>
                             </td>
                         </tr>
                     {% endfor %}
