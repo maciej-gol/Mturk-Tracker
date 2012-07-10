@@ -21,7 +21,7 @@ class Command(BaseCommand):
         start_time = time.time()
 
         log.info('Updating crawl agregates')
-        update_crawl_agregates(1, only_new=True)
+        update_crawl_agregates(only_new=True)
 
         log.info('db_update_agregates took: %s' % (time.time() - start_time))
 
