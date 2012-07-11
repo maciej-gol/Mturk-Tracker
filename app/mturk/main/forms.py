@@ -112,9 +112,9 @@ class HitGroupContentSearchForm(SearchForm):
         search_in = "".join(map(lambda f: "&search_in={}".format(f),
                             cleaned_data.get("search_in", [])))
         sort_by = "".join(map(lambda o: "&sort_by={}".format(o),
-                          [cleaned_data.get("sort_by", "title")]))
+                          [cleaned_data.get("sort_by", DEFAULT_SORT_BY)]))
         hits_per_page = "".join(map(lambda hpp: "&hits_per_page={}".format(hpp),
-                                [cleaned_data.get("hits_per_page", "5")]))
+                                [cleaned_data.get("hits_per_page", DEFAULT_HITS_PER_PAGE)]))
         return "?q={}{}{}{}".format(query, search_in, sort_by, hits_per_page)
 
     def hits_per_page_or_default(self):
