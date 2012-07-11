@@ -28,7 +28,7 @@
                     created > '${dataimporter.last_index_time}'
                 "
 
-                deltaImportQuery="SELECT group_id, requester_id, requester_name, reward, html, description, title, keywords,
+                deltaImportQuery="SELECT id as django_id group_id, requester_id, requester_name, reward, html, description, title, keywords,
 					qualifications, occurrence_date, time_alloted
                 FROM
                     main_hitgroupcontent hgc
