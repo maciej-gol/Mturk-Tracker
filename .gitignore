@@ -47,4 +47,6 @@ doc/source/apidoc/*
 # deployment files to ignore
 deployment/files/ssh/*
 deployment/files/django/settings/local.py
+deployment/files/postgresql/9.1/main/pg_hba.conf
+deployment/files/postgresql/9.1/main/postgresql.conf
 *ec2.json
