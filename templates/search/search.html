@@ -95,31 +95,31 @@
                                                       border-collapse: collapse;">
                     <tbody>
                         <tr style="border-top: 1px solid black;">
-                            <td style="border-right: 1px solid #AAA;">
+                            <td class="span-10" style="border-right: 1px solid #AAA;">
                                 <span style="font-size: 120%/1.5;">
                                     <a href="{% url hit_group_details result.group_id %}">
                                         {{ result.title|safe }}
                                     </a>
                                 </span>
                             </td>
-                            <td style="vertical-align: top;" rowspan="2">
+                            <td class="span-2" style="vertical-align: top;" rowspan="2">
                                 <span style="color: #AAA;">
                                     keywords:
                                 </span>
                             </td>
-                            <td style="vertical-align: top;" rowspan="2">
+                            <td class="span-8" style="vertical-align: top;" rowspan="2">
                                 <span style="font-weight: bold;">
                                 {% for keyword in result.keywords %}
-                                    {{ keyword }}{% if not forloop.last %},&nbsp;{% endif %}
+                                    {{ keyword }}{% if not forloop.last %}, {% endif %}
                                 {% endfor %}
                                 </span>
                             </td>
-                            <td style="border-left: 1px solid #AAA;">
+                            <td class="span-2" style="border-left: 1px solid #AAA;">
                                 <span style="color: #AAA;">
                                     time alloted:
                                 </span>
                             </td>
-                            <td>
+                            <td class="span-2 last">
                                 <span style="font-weight: bold;">
                                     {{ result.time_alloted }}
                                 </span>
