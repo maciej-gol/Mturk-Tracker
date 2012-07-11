@@ -20,6 +20,11 @@ class HitGroupContentIndex(indexes.SearchIndex):
     occurrence_date = indexes.DateTimeField(model_attr='occurrence_date')
     time_alloted = indexes.DecimalField(model_attr='time_alloted')
 
+    # Additional fields for sorting.
+    title_sort = indexes.CharField()
+    description_sort = indexes.CharField()
+    requester_name = indexes.CharField()
+
     def prepare_description(self, obj):
         return strip_tags(obj.description)
 

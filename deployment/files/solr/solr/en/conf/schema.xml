@@ -75,26 +75,31 @@
     </types>
 
     <fields>
-        <!--
-    <field name="id" type="string" indexed="true" stored="true" multiValued="false" required="true"/>
-    -->
-    <field name="id" type="uuid" indexed="true" stored="true" multiValued="false" required="false" default="NEW" />
-    <field name="django_ct" type="string" indexed="true" stored="true" multiValued="false" default="main.hitgroupcontent" />
-    <field name="django_id" type="string" indexed="true" stored="true" multiValued="false" />
+        <!-- Fields required by django-haystack. -->
+        <field name="id" type="uuid" indexed="true" stored="true" multiValued="false" required="false" default="NEW"/>
+        <!-- XXX note that django_ct is set by hand and can not be used for other models. -->
+        <field name="django_ct" type="string" indexed="true" stored="true" multiValued="false" default="main.hitgroupcontent"/>
+        <field name="django_id" type="string" indexed="true" stored="true" multiValued="false"/>
 
+        <!-- TODO try to improve index size (some fields are not necessarily stored). -->
 		<field name="group_id" type="string" indexed="true" stored="true"/>
 		<field name="requester_id" type="string" indexed="true" stored="true"/>
 		<field name="requester_name" type="textTight" indexed="true" stored="true"/>
-		<field name="reward" type="double" indexed="true" stored="true"/>
+		<field name="reward" type="double" indexed="true" stored="true" />
 		<field name="content" type="text_en" indexed="true" stored="true" required="false" compressed="true"/>
 		<field name="description" type="textTight" indexed="true" stored="true" required="false"/>
 		<field name="title" type="textTight" indexed="true" stored="true"/>
 		<field name="keywords" type="text_tags" indexed="true" stored="true" required="false" multiValued="true"/>
-		<field name="qualifications" type="textTight" indexed="true" stored="true"/>
+        <field name="qualifications" type="textTight" indexed="true" stored="true"/>
 		<field name="occurrence_date" type="date" indexed="true" stored="true"/>
 		<field name="time_alloted" type="int" indexed="true" stored="true"/>
 
-		<field name="search_field" type="text_en" indexed="true" stored="false" multiValued="true"/>
+        <field name="search_field" type="text_en" indexed="true" stored="false" multiValued="true"/>
+
+        <!-- Additional fields for sorting. -->
+        <field name="title_sort" type="string" indexed="true" stored="false" multiValued="false"/>
+        <field name="description_sort" type="string" indexed="true" stored="false" multiValued="false"/>
+        <field name="requester_name_sort" type="string" indexed="true" stored="false" multiValued="false"/>
 
     </fields>
 
@@ -103,7 +108,9 @@
 	<copyField source="description" dest="search_field"/>
 	<copyField source="title" dest="search_field"/>
 	<copyField source="keywords" dest="search_field"/>
-	<copyField source="qualifications" dest="search_field"/>
+    <copyField source="title" dest="title_sort"/>
+    <copyField source="description" dest="description_sort"/>
+    <copyField source="requester_name" dest="requester_name_sort"/>
 
     <uniqueKey>group_id</uniqueKey>
     <defaultSearchField>search_field</defaultSearchField>

@@ -6,7 +6,8 @@ from haystack.forms import SearchForm
 
 
 FIELDS = ("title", "description", "content", "requester_name", "reward",
-          "occurrence_date", "time_alloted", "keywords","qualifications")
+          "occurrence_date", "time_alloted", "titlesort", "keywords",
+          "qualifications")
 FIELDS_PRETTY = tuple(
         map(
             lambda s: " ".join(map(string.capitalize, s.split("_"))),
@@ -15,7 +16,7 @@ FIELDS_PRETTY = tuple(
 FIELDS_PRETTY_DICT = dict(zip(FIELDS, FIELDS_PRETTY))
 ORDERS = ("asc", "desc")
 ORDERS_STRINGS = ("ascending", "descending")
-SORT_BY_FIELDS = tuple(FIELDS[:7])
+SORT_BY_FIELDS = tuple(FIELDS[:8])
 PAGE_SIZES = ("5", "10", "20", "50")
 SEARCH_IN_CHOICES = zip(FIELDS, FIELDS_PRETTY)
 SORT_BY_CHOICES = zip(map(lambda order: "{}_{}".format(order[0], order[1]),
