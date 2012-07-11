@@ -5,42 +5,76 @@ from django import forms
 from haystack.forms import SearchForm
 
 
-FIELDS = ("title", "description", "content", "requester_name", "reward",
-          "occurrence_date", "time_alloted", "titlesort", "keywords",
-          "qualifications")
+# Fields names.
+TITLE_SORT = "title_sort"
+DESCRIPTION_SORT = "description_sort"
+REQUESTER_NAME_SORT = "requester_name_sort"
+REWARD = "reward"
+OCCURRENCE_DATE = "occurrence_date"
+TIME_ALLOTED = "time_alloted"
+
+TITLE = "title"
+DESCRIPTION = "description"
+REQUESTER_ID = "requester_id"
+REQUESTER_NAME = "requester_name"
+CONTENT = "content"
+KEYWORDS = "keywords"
+QUALIFICATIONS = "qualifications"
+
+FIELDS = (TITLE, DESCRIPTION, CONTENT, REQUESTER_ID, REQUESTER_NAME, REWARD,
+          OCCURRENCE_DATE, TIME_ALLOTED, KEYWORDS, QUALIFICATIONS,
+          TITLE_SORT, DESCRIPTION_SORT, REQUESTER_NAME_SORT)
+
+SEARCH_IN_FIELDS = (TITLE, DESCRIPTION, REQUESTER_ID, REQUESTER_NAME, CONTENT)
+
+SORT_BY_FIELDS = (TITLE_SORT, DESCRIPTION_SORT, REQUESTER_NAME_SORT, REWARD,
+                  OCCURRENCE_DATE, TIME_ALLOTED)
+
+ORDERS = ("asc", "desc")
+HITS_PER_PAGES = ("5", "10", "20", "50")
+
 FIELDS_PRETTY = tuple(
         map(
             lambda s: " ".join(map(string.capitalize, s.split("_"))),
             FIELDS
         ))
+
 FIELDS_PRETTY_DICT = dict(zip(FIELDS, FIELDS_PRETTY))
-ORDERS = ("asc", "desc")
-ORDERS_STRINGS = ("ascending", "descending")
-SORT_BY_FIELDS = tuple(FIELDS[:8])
-PAGE_SIZES = ("5", "10", "20", "50")
-SEARCH_IN_CHOICES = zip(FIELDS, FIELDS_PRETTY)
-SORT_BY_CHOICES = zip(map(lambda order: "{}_{}".format(order[0], order[1]),
-                          product(ORDERS, SORT_BY_FIELDS)),
-                      map(lambda order: "{} ({})".format(
-                                FIELDS_PRETTY_DICT[order[1]],
-                                order[0]),
-                          product(ORDERS_STRINGS, SORT_BY_FIELDS)))
-HITS_PER_PAGE_CHOICES = zip(PAGE_SIZES, PAGE_SIZES)
+FIELDS_PRETTY_DICT[TITLE_SORT] = FIELDS_PRETTY_DICT[TITLE]
+FIELDS_PRETTY_DICT[DESCRIPTION_SORT] = FIELDS_PRETTY_DICT[DESCRIPTION]
+FIELDS_PRETTY_DICT[REQUESTER_NAME_SORT] = FIELDS_PRETTY_DICT[REQUESTER_NAME]
+
+ORDERS_PRETTY = ("ascending", "descending")
+
+SEARCH_IN_CHOICES = zip(
+        SEARCH_IN_FIELDS,
+        map(
+            FIELDS_PRETTY_DICT.get,
+            SEARCH_IN_FIELDS
+        ))
+
+SORT_BY_CHOICES = zip(
+        map(
+            lambda tupl: "{}_{}".format(tupl[0], tupl[1]),
+            product(SORT_BY_FIELDS, ORDERS)
+        ),
+        map(
+            lambda tupl: "{} ({})".format(FIELDS_PRETTY_DICT[tupl[0]], tupl[1]),
+            product(SORT_BY_FIELDS, ORDERS_PRETTY)
+        ))
+
+HITS_PER_PAGE_CHOICES = zip(HITS_PER_PAGES, HITS_PER_PAGES)
+
+DEFAULT_SEARCH_IN = SEARCH_IN_FIELDS # all fields
+DEFAULT_SORT_BY = SORT_BY_CHOICES[0][0] # title_sort_asc
+DEFAULT_HITS_PER_PAGE = HITS_PER_PAGES[0] # 5
 
 class HitGroupContentSearchForm(SearchForm):
-
-    search_in = forms.MultipleChoiceField(
-            choices=SEARCH_IN_CHOICES,
-            required=False
-        )
-    sort_by = forms.ChoiceField(
-            choices=SORT_BY_CHOICES,
-            required=False,
-        )
-    hits_per_page = forms.ChoiceField(
-            choices=HITS_PER_PAGE_CHOICES,
-            required=False
-        )
+    search_in = forms.MultipleChoiceField(choices=SEARCH_IN_CHOICES,
+                                          required=False)
+    sort_by = forms.ChoiceField(choices=SORT_BY_CHOICES, required=False)
+    hits_per_page = forms.ChoiceField(choices=HITS_PER_PAGE_CHOICES,
+                                      required=False)
 
     def cleaned_data_or_empty(self):
         try:
@@ -50,15 +84,20 @@ class HitGroupContentSearchForm(SearchForm):
         return cleaned_data
 
     def search(self):
+        """ Returns a search queryset. """
         search_queryset = super(HitGroupContentSearchForm, self).search()
+
         cleaned_data = self.cleaned_data_or_empty()
         query = cleaned_data.get("q", "")
         if not query:
             return search_queryset
-        search_in = cleaned_data.get("search_in", FIELDS)
-        sort_by = cleaned_data.get("sort_by", "asc_title").split("_")
-        sort_by = "{}{}".format("" if sort_by[0] == "asc" else "-",
-                                "_".join(sort_by[1:]))
+        # Get fields for search in.
+        search_in = cleaned_data.get("search_in", DEFAULT_SEARCH_IN)
+        # Get field and order for sorting.
+        sort_by = cleaned_data.get("sort_by", DEFAULT_SORT_BY).rsplit("_", 1)
+        # Prepare for SearchQuerySet API.
+        sort_by = "{}{}".format("" if sort_by[1] == "asc" else "-",
+                                sort_by[0])
         kwargs = {}
         for field in search_in:
             kwargs[field] = query
@@ -67,6 +106,7 @@ class HitGroupContentSearchForm(SearchForm):
         return search_queryset
 
     def submit_url(self):
+        """ Builds an url for simple state holding between pages. """
         cleaned_data = self.cleaned_data_or_empty()
         query = cleaned_data.get("q", "")
         search_in = "".join(map(lambda f: "&search_in={}".format(f),
@@ -80,7 +120,9 @@ class HitGroupContentSearchForm(SearchForm):
     def hits_per_page_or_default(self):
         cleaned_data = self.cleaned_data_or_empty()
         try:
-            hits_per_page = int(cleaned_data.get("hits_per_page", ""))
+            hits_per_page = int(cleaned_data.get("hits_per_page",
+                                                 DEFAULT_HITS_PER_PAGE))
         except ValueError:
-            hits_per_page = 5
+            # If value is an empty string (or something else).
+            hits_per_page = DEFAULT_HITS_PER_PAGE
         return hits_per_page
