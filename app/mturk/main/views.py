@@ -326,5 +326,6 @@ class HitGroupContentSearchView(SearchView):
 
 @never_cache
 def haystack_search(request):
-    search_view = HitGroupContentSearchView(form_class=HitGroupContentSearchForm)
+    search_view = HitGroupContentSearchView(form_class=HitGroupContentSearchForm,
+                                            template="main/search.html")
     return search_view(request)

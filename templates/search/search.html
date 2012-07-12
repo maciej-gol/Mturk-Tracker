@@ -102,12 +102,12 @@
                                     </a>
                                 </span>
                             </td>
-                            <td class="span-2" style="vertical-align: top;" rowspan="2">
+                            <td class="span-2" style="vertical-align: top;" rowspan="3">
                                 <span style="color: #AAA;">
                                     keywords:
                                 </span>
                             </td>
-                            <td class="span-8" style="vertical-align: top;" rowspan="2">
+                            <td class="span-6" style="vertical-align: top;" rowspan="3">
                                 <span style="font-weight: bold;">
                                 {% for keyword in result.keywords %}
                                     {{ keyword }}{% if not forloop.last %}, {% endif %}
@@ -119,7 +119,7 @@
                                     time alloted:
                                 </span>
                             </td>
-                            <td class="span-2 last">
+                            <td class="span-4 last">
                                 <span style="font-weight: bold;">
                                     {{ result.time_alloted }}
                                 </span>
@@ -131,7 +131,7 @@
                             -->
                         </tr>
                         <tr>
-                            <td style="border-right: 1px solid #AAA;">
+                            <td style="border-right: 1px solid #AAA;" rowspan="2">
                                 <a href="{% url requester_details result.requester_id %}">
                                     {{ result.requester_name|safe }}
                                 </a>
@@ -144,6 +144,18 @@
                             <td>
                                 <span style="font-weight: bold;">
                                     {{ result.reward }}
+                                </span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="border-left: 1px solid #AAA;">
+                                <span style="color: #AAA;">
+                                    posted:
+                                </span>
+                            </td>
+                            <td>
+                                <span style="font-weight: bold;">
+                                    {{ result.occurrence_date }}
                                 </span>
                             </td>
                         </tr>

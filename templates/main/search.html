@@ -1,212 +1,196 @@
-{% extends 'base.html' %}
-{% load webdesign %}
-
-{% block title %}
-	{{block.super}}: Search
-{% endblock %}
-
+{% extends "base.html" %}
+<!-- This dirty template is only a prototype. All inline styles and form fields
+     will be replaced by bootstrap and django automatic field generation. -->
 {% block head %}
-
-	<link rel="stylesheet" href="{{STATIC_URL}}css/search.css" type="text/css" />
-
-	<script>
-
-        var metadataQuery = '';
-        var metadataOffset = -1;
-        var metadataResultsCount = -1;
-        var metadataResultsPP = -1;
-
-		function submitEnter(field, e) {
-		    var keycode;
-
-		    if (window.event) keycode = window.event.keyCode;
-		    else if (e) keycode = e.which;
-		    else return true;
-
-		    if (keycode == 13) {
-		        $('#form_submit').click();
-		        return false;
-		    }
-		    else return true;
-		}
-
-        function submitForm() {
-            $('#form_submit').click();
+    <link rel="stylesheet" href="{{ STATIC_URL }}/css/chosen.css" type="text/css" />
+    <script src="{{ STATIC_URL }}/js/jquery-1.7.2.js"></script>
+    <script src="{{ STATIC_URL }}/js/chosen.jquery.js"></script>
+    <script type='text/javascript'>
+        $(document).ready(function() { 
+            $(".chzn-select").chosen({"width": "100px"}); 
+        });
+    </script>
+    <style>
+        select, input[type=text] {
+            padding-top: 5px;
+            padding-bottom: 5px;
+            padding-left: 2px;
+            padding-right: 2px;
         }
-
-        function nextPageFn() {
-            $('html,body').animate({ scrollTop: 0 }, 'slow');
-            loadResults(metadataQuery, metadataOffset+metadataResultsPP);
+        input[type=submit] {
+            padding-top: 4px;
+            padding-bottom: 4px;
+            padding-left: 2px;
+            padding-right: 2px;
         }
-
-        function previousPageFn() {
-            $('html,body').animate({ scrollTop: 0 }, 'slow');
-            loadResults(metadataQuery, metadataOffset-metadataResultsPP);
-        }
-
-        function keywordFn() {
-            $('html,body').animate({ scrollTop: 0 }, 'slow');
-            $('#form_query').val($(this).text());
-            $('#form_submit').click();
-        }
-
-        function loadResults(query, offset) {
-
-                    $.ajax({
-                        type: 'GET',
-                        url: '/api/1.0/search/search.json',
-                        timeout: 10000,
-                        data: ({
-                            q: query,
-                            start: offset
-                        }),
-                        dataType: "json",
-                        beforeSend:
-                            function (msg) {
-                                if ($('#form_query').val() != '') {
-                                    $('.loading').show();
-                                }
-                            },
-                        error:
-                            function (msg) {
-                                $('.loading').fadeOut('slow');
-                                $('#response').html('<p class="error">Error</p>');
-                            },
-                        success:
-                            function (msg) {
-
-                                $('.loading').fadeOut('slow');
-                                var metadata = msg[0];
-                                var results = metadata['results'];
-
-                                offset = parseInt(metadata['offset']);
-                                results_count = parseInt(metadata['results_count']);
-                                results_pp = parseInt(metadata['results_per_page']);
-
-                                metadataQuery = query;
-                                metadataOffset = offset;
-                                metadataResultsCount = results_count;
-                                metadataResultsPP = results_pp;
-
-                                var response = '';
-
-                                metadataBox = '<div class="metadata-box"><div class="ui-widget-header metadata">' + (offset+results_pp)/results_pp +
-                                    '/' + Math.ceil(results_count/results_pp) + ' <span class="nav-button previous_page">&nbsp;&laquo;&nbsp;</span>' +
-                                    '&nbsp;<span class="nav-button next_page">&nbsp;&raquo;&nbsp;</span></div></div>';
-
-                                //response += metadataBox;
-
-                                response += '<div id="results">';
-
-                                var resultsLength = results.length;
-                                for (var i = 0; i < resultsLength; i++) {
-                                    var r = results[i];
-                                    var keywords = '';
-                                    var keywordsArr = r['keywords'][0].split(',');
-
-                                    response += '<table class="result"><thead><tr><td><a href="/hit/' +
-                                        r['group_id'] + '/">' + r['title'] + '</a></td></tr></thead><tbody>';
-                                    response += '<tr><td class="result-date"><div class="label">Date:</div><div class="content">' +
-                                        r['occurrence_date'].substring(0,10) + '</div></td></tr>';
-                                    response += '<tr><td class="result-requester"><div class="label">Requester:</div><div class="content"><a href="/requester_details/' +
-                                        r['requester_id'] + '/">' + r['requester_name'] + '</a></div></td></tr>';
-
-                                    if (r['description'] && r['description'].trim() !== 'None') {
-                                        response += '<tr><td class="result-description"><div class="label">Description:</div><div class="content">' +
-                                            r['description'] + '</div></td></tr>';
-                                    }
-
-                                    if (r['snippet']) response += '<tr><td class="result-snippet"><div class="label">Snippet:</div><div class="content">' +
-                                        r['snippet'] + '</div></td></tr>';
-
-                                    if (r['qualifications'] && r['qualifications'].trim() !== 'None') {
-                                        response += '<tr><td class="result-qualifications"><div class="label">Qualifications:</div><div class="content">' +
-                                            r['qualifications'] + '</div></td></tr>';
-                                    }
-
-                                    response += '<tr><td class="result-reward"><div class="label">Reward</div><div class="content">$' + r['reward'] +
-                                        '<div/></td></tr>';
-
-                                    if (r['keywords'] !== 'None') {
-                                        response += '<tr><td class="result-keywords">';
-                                        for (var ki = 0; ki < keywordsArr.length; ki++) {
-                                            response += '<a class="keyword">' + keywordsArr[ki] + '</a>';
-                                            if (ki < keywordsArr.length - 1) response += ', ';
-                                        }
-                                        response += '</td></tr>';
-                                    }
-
-                                    response += '</tbody></table>';
-                                }
-
-                                response += '</div>';
-                                response += metadataBox;
-
-                                $('#response').html(response);
-                                $('.keyword').unbind('click').bind('click', keywordFn);
-
-                                if (offset > 0) {
-                                    $('.previous_page').unbind('click').bind('click', previousPageFn);
-                                } else {
-                                    $('.previous_page').css('background-color', '#C8C8C8');
-                                    $('.previous_page').css('cursor', 'auto');
-                                }
-                                if (results_count > offset + results_pp) {
-                                    $('.next_page').bind('click', nextPageFn);
-                                } else {
-                                    $('.next_page').css('background-color', '#C8C8C8');
-                                    $('.next_page').css('cursor', 'auto');
-                                }
-
-                            }
-                    });
-        }
-
-		$(document).ready( function() {
-
-            {% if query %}
-                $('#form_query').val('{{query}}');
-                loadResults('{{query}}', 0);
-            {% endif %}
-
-			$('#form_submit').click( function () {
-
-				if ($('#form_query').val().length > 0){
-				    query = $('#form_query').val();
-				    loadResults(query, 0);
-		        }
-
-				return false;
-			});
-
-
-		});
-	</script>
-
+    </style>
 {% endblock %}
 
 {% block content %}
-
-<div class="span-24">
-
-<!--
-	<div id="query">
-		<form method="post" action="#" onsubmit="submitForm()">
-			<div id="query_in">
-                <input class="text ui-widget-content ui-corner-all" type="text" name="query" id="form_query" value="" onkeypress="return submitEnter(this,event)"/>
-                <input class="ui-state-default ui-corner-all submit" type="submit" id="form_submit" value="Search"/>
-                <span class="loading"></span>
+    
+    <form method="get" action=".">
+        <fieldset style="width: 96%;">
+            <div class="span-24">
+                <div class="span-2" style="margin-top: 5px;">
+                    <label>search in</label>
+                </div>
+                <div class="span-8">
+                    <select multiple="multiple" name="search_in"
+                        class="chzn-select"
+                        style="width: 80%" id="id_search_in">
+                        {% for option in form.fields.search_in.choices %}
+                        <option {% if option.0 in form.cleaned_data.search_in %}selected="selected"{% endif %} value="{{ option.0 }}">{{ option.1 }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="span-2" style="margin-top: 3px;">
+                    <label>keywords</label>
+                </div>
+                <div class="span-8" style="margin-top: -8px;">
+                    <input type="text" name="q" value="{{ query }}"
+                           style="width: 57%;" />
+                    &nbsp;
+                    <input type="submit" value="Search" />
+                </div>
             </div>
-		</form>
-	</div>
--->
-
-	<center><span class="loading"></span></center>
-
-    <div style="clear:both;"/></div>
-	<div id="response"></div>
-</div>
-
-<div></div>
-
+            <div class="span-24">
+                <div class="span-10">
+                    &nbsp;
+                </div>
+                <div class="span-2" style="margin-top: 10px;">
+                    <label>sort by</label>
+                </div>
+                <div class="span-5">
+                    <select name="sort_by" id="id_sort_by" style="width: 96%;">
+                        {% for option in form.fields.sort_by.choices %}
+                        <option {% if option.0 in form.cleaned_data.sort_by %}selected="selected"{% endif %} value="{{ option.0 }}">{{ option.1 }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="span-2" style="margin-top: 3px;">
+                    <label>hits per page</label>
+                </div>
+                <div class="span-2">
+                    <select name="hits_per_page" id="id_hits_per_page">
+                        {% for option in form.fields.hits_per_page.choices %}
+                        <option {% if option.0 in form.cleaned_data.hits_per_page %}selected="selected"{% endif %} value="{{ option.0 }}">{{option.1 }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                {% if query and total_count %}
+                    <div class="span-2" style="margin-top: 3px;">
+                        <label>items found: </label>{{ total_count }}
+                    </div>
+                {% endif %}
+            </div>
+            <input type="text" name="models" value="main.hitgroupcontent" style="display:none;" />
+        </fieldset>
+    </form>
+    <div class="span-24">&nbsp;</div>
+    <div class="span-24 last">
+    {% if query %}
+        {% with page.object_list as results %}
+            {% for result in results %}
+                <table cellspacing="0" cellpadding="0" style="border: 2px solid black;
+                                                      border-collapse: collapse;">
+                    <tbody>
+                        <tr style="border-top: 1px solid black;">
+                            <td class="span-10" style="border-right: 1px solid #AAA;">
+                                <span style="font-size: 120%/1.5;">
+                                    <a href="{% url hit_group_details result.group_id %}">
+                                        {{ result.title|safe }}
+                                    </a>
+                                </span>
+                            </td>
+                            <td class="span-2" style="vertical-align: top;" rowspan="2">
+                                <span style="color: #AAA;">
+                                    keywords:
+                                </span>
+                            </td>
+                            <td class="span-8" style="vertical-align: top;" rowspan="2">
+                                <span style="font-weight: bold;">
+                                {% for keyword in result.keywords %}
+                                    {{ keyword }}{% if not forloop.last %}, {% endif %}
+                                {% endfor %}
+                                </span>
+                            </td>
+                            <td class="span-2" style="border-left: 1px solid #AAA;">
+                                <span style="color: #AAA;">
+                                    time alloted:
+                                </span>
+                            </td>
+                            <td class="span-2 last">
+                                <span style="font-weight: bold;">
+                                    {{ result.time_alloted }}
+                                </span>
+                            </td>
+                            <!--
+                            <td rowspan="2" style="vertical-align: top;">
+                                <span>Info</span>
+                            </td>
+                            -->
+                        </tr>
+                        <tr>
+                            <td style="border-right: 1px solid #AAA;">
+                                <a href="{% url requester_details result.requester_id %}">
+                                    {{ result.requester_name|safe }}
+                                </a>
+                            </td>
+                            <td style="border-left: 1px solid #AAA;">
+                                <span style="color: #AAA;">
+                                    reward:
+                                </span>
+                            </td>
+                            <td>
+                                <span style="font-weight: bold;">
+                                    {{ result.reward }}
+                                </span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="border-top: 1px solid #AAA;
+                                       border-bottom: 2px solid black;" 
+                                colspan="5">
+                                {{ result.description|safe }}
+                            </td>
+                        </tr>
+                    </table>
+                    {% empty %}
+                    <table cellspacing="0" cellpadding="0" style="border: 2px solid black;
+                                                      border-collapse: collapse;">
+                    <tbody>
+                        <tr>
+                            <td colspan="5">
+                                <span style="font-weight: bold;">
+                                    No items found.
+                                </span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            {% endfor %}
+        {% endwith %}
+        </div>
+        {% if page.has_previous or page.has_next %}
+            <div>
+                {% if page.has_previous %}
+                    <a href="{{ submit_url }}&amp;page={{ page.previous_page_number }}">
+                {% endif %}
+                &laquo; Previous
+                {% if page.has_previous %}
+                    </a>
+                {% endif %}
+                |
+                {% if page.has_next %}
+                    <a href="{{ submit_url }}&amp;page={{ page.next_page_number }}">
+                {% endif %}
+                Next &raquo;
+                {% if page.has_next %}
+                    </a>
+                {% endif %}
+            </div>
+        {% endif %}
+    {% else %}
+        {# Show some example queries to run, maybe query syntax, something else? #}
+    {% endif %}
 {% endblock %}
