@@ -11,6 +11,7 @@ from gevent import thread
 
 import parser
 from db import DB
+from django.conf import settings
 
 
 log = logging.getLogger(__name__)
@@ -46,7 +47,9 @@ def hits_mainpage_total():
     return parser.hits_mainpage(html)
 
 
-def hits_groups_info(page_nr, retries=50, sleep=0.1):
+def hits_groups_info(page_nr,
+        retries=getattr(settings, 'CRAWLER_RETRY_COUNT', 200),
+        sleep=getattr(settings, 'CRAWLER_RETRY_SLEEP', 0.1)):
     """Returns info about every hit group on the given page.
 
     Since mturk.com enforces a limit on the number of connections to the

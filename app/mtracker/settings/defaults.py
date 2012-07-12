@@ -292,3 +292,11 @@ SOLR_PATH = "{}/{}".format(SOLR_MAIN_PATH, SOLR_CORE_NAME)
 HAYSTACK_SITECONF = "mtracker.search_sites"
 HAYSTACK_SEARCH_ENGINE = 'solr'
 HAYSTACK_SOLR_URL = SOLR_PATH
+
+
+# Fine tuning of crawls,
+# Settings affect the number of retries and lenght of waits after failure when
+# requesting a hitgroup page. Increasing the value may be the solution for
+# 'limit exceeded for page xx' messages, caused by crawler timeouts.
+CRAWLER_RETRY_SLEEP = 0.1
+CRAWLER_RETRY_COUNT = 200
