@@ -38,6 +38,11 @@ ARRIVALS_COLUMNS =  (
                ('number','Rewards($)'),
 )
 
+HIT_DETAILS_COLUMNS = (
+                ('date', 'Date'),
+                ('number', '#HITs'),
+)
+
 
 ONE_DAY = 60 * 60 * 24
 ONE_HOUR = 60 * 60
@@ -285,12 +290,34 @@ def requester_details(request, requester_id):
 
     return _requester_details(request, requester_id)
 
-cache_page(ONE_DAY)
+#cache_page(ONE_DAY)
 def hit_group_details(request, hit_group_id):
 
-    hit = get_object_or_404(HitGroupContent, group_id = hit_group_id)
+    hit_group = get_object_or_404(HitGroupContent, group_id=hit_group_id)
+    data = query_to_dicts("select hits_available from hits_mv where group_id = "
+                          "'{}' order by start_time asc".format(hit_group_id))
+    params = {
+        'multichart': False,
+        'columns': HIT_DETAILS_COLUMNS,
+        'title': '#Hits'
+    }
 
-    return direct_to_template(request, 'main/hit_group_details.html', {'hit':hit})
+    def hit_group_details_data_formater(input):
+        for cc in input:
+            yield {
+                'date': cc['start_time'],
+                'row': (str(cc['hits_available'])),
+            }
+    hit_group = get_object_or_404(HitGroupContent, group_id=hit_group_id)
+    dicts = query_to_dicts(
+                """ select start_time, hits_available from hits_mv where group_id = '{}'
+                    order by start_time asc """.format(hit_group_id))
+    data = hit_group_details_data_formater(dicts)
+    params['date_from'] = hit_group.occurrence_date
+    params['date_to'] = datetime.datetime.utcnow()
+    params['data'] = data
+    params['hit_group'] = hit_group
+    return direct_to_template(request, 'main/hit_group_details.html', params)
 
 def search(request):
 

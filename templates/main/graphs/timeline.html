@@ -9,6 +9,9 @@
 
 {% block content %}
 
+{% block content_before %}
+{% endblock %}
+
 <script type='text/javascript'>
 
 	$(document).ready( function() {
@@ -53,6 +56,8 @@
     <div style="clear:both"></div>
 	</div>
 
-	{% google_timeline columns data %}
+    {% google_timeline columns data %}
 
+    {% block content_after %}
+    {% endblock %}
 {% endblock %}
