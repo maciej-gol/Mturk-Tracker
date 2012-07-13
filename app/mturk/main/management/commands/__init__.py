@@ -201,6 +201,7 @@ def update_crawl_agregates(commit_threshold=1000, only_new=True):
     results = None
 
     query = """SELECT id FROM main_crawl p WHERE {0}
+        groups_available * 0.9 < groups_downloaded AND
         NOT exists(SELECT id FROM main_crawlagregates WHERE crawl_id = p.id)
     """
     query = query.format('old_id is NULL AND' if only_new else '')
