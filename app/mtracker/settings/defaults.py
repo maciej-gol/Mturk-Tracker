@@ -145,6 +145,11 @@ LOGGING = {
         }
     },
     'handlers': {
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose'
+        },
         'mail_admins': {
             'level': 'ERROR',
             'filters': ['require_debug_false'],
@@ -189,7 +194,7 @@ LOGGING = {
             'propagate': True,
         },
         'mturk.main.management.commands': {
-            'handlers': ['crawl_log'],
+            'handlers': ['crawl_log', 'console'],
             'level': LOG_LEVEL,
             'propagate': True,
         }
