@@ -47,7 +47,7 @@ class Command(BaseCommand):
         pid = Pid('remove_bad_crawl_related', True)
 
         self.having_hits_mv = not options.get('all')
-        self.chunk_size = options.get('chunk_size')
+        self.chunk_size = options.get('chunk-size')
         self.chunked = not options.get('simple')
         self.limit = options.get('limit')
 
@@ -125,7 +125,7 @@ class Command(BaseCommand):
 
     def do_deletes_simple(self, ids):
         """Simple version - each query is ran once per crawl."""
-        qs = self.__get_delete_queries(['hits_mv', 'hits_temp'], '=')
+        qs = list(self.__get_delete_queries(['hits_mv', 'hits_temp'], '='))
         for i, crawl_id in enumerate(ids, start=1):
             if self.limit and i > self.limit:
                 break
@@ -162,17 +162,17 @@ class Command(BaseCommand):
     def do_deletes_chunked(self, ids):
         """More complex version, does multiple crawls at a time."""
         processed = 0
-        qs = self.__get_delete_queries(['hits_mv', 'hits_temp'], 'in')
+        qs = list(self.__get_delete_queries(['hits_mv', 'hits_temp'], 'in'))
         for chunk in self.read_chunks(
                 ids, limit=self.limit, chunk_size=self.chunk_size):
-            chunk_str = self.__chunk_str(ids)
+            chunk_str = self.__chunk_str(chunk)
             for q in qs:
                 execute_sql(q.format(chunk_str))
             execute_sql(("update main_crawl set has_hits_mv = false where"
                 " id in {0}").format(chunk_str))
             processed += len(chunk)
-            log.info("{0}/{1} crawls processed.".format(
-                processed, self.crawl_count))
+            log.info('Processed crawls: {0}, {1}/{2} in {3}s.'.format(
+                chunk, processed, self.crawl_count, self.time_elapsed()))
             transaction.commit_unless_managed()
 
         return processed
