@@ -3,6 +3,7 @@ import time
 import logging
 from optparse import make_option
 
+from django.db import transaction
 from django.core.management.base import BaseCommand
 from utils.pid import Pid
 from utils.sql import query_to_tuples, execute_sql
@@ -28,13 +29,11 @@ class Command(BaseCommand):
             help="Command will print the number of records requiring"
             " processing and exit."),
         make_option("--chunk-size", dest="chunk-size", type="int",
-            default=500, help="Number of crawls in a chunk for the chunked "
+            default=10, help="Number of crawls in a chunk for the chunked "
             "delete mode."),
         make_option("--simple", dest="simple",
             default=False, action="store_true",
-            help="If present, each crawl related data will be deleted "
-                "individually. In chunked mode, data will be selected using "
-                "chunked qeries, eg. select where crawl_id in [...]."),
+            help="Turns chunked delete off."),
         make_option("--all", dest="all", default=False, action="store_true",
             help="Decides if crawls with has_hits_mv=False should be included, "
             "use to filter out already processed records."),
@@ -43,42 +42,44 @@ class Command(BaseCommand):
 
     def handle(self, **options):
 
-        pid = Pid('clear_bad_crawl_related', True)
+        self.start_time = time.time()
+
+        pid = Pid('remove_bad_crawl_related', True)
+
         self.having_hits_mv = not options.get('all')
+        self.chunk_size = options.get('chunk_size')
+        self.chunked = not options.get('simple')
+        self.limit = options.get('limit')
 
-        self.handle_count_only(options.get('count-only'))
-
-        start_time = time.time()
-        limit = options.get('limit')
-        crawl_count = self.get_crawls_count()
+        self.crawl_count = self.get_crawls_count()
+        if options.get('count-only') or self.crawl_count == 0:
+            self.handle_count_only()
 
         # if limit is specified, show X/Y instead of just Y
         log.info('Starting bad crawl related data removal, {0}{1} records will '
-            'be processed.'.format('{0}/'.format(limit) if limit else '',
-            crawl_count))
+            'be processed.'.format(
+                '{0}/'.format(self.limit) if self.limit else '',
+                self.crawl_count))
 
         ids = self.get_crawl_ids()
-        deleted = self.do_deletes(
-            not options.get('simple'), options.get('chunk-size'),
-            ids, crawl_count, limit)
+        deleted = self.do_deletes(ids)
 
         log.info('Command took: {0}, {1} crawls processed.'.format(
-            time.time() - start_time, deleted))
+            self.time_elapsed(), deleted))
 
         pid.remove_pid()
 
-    def handle_count_only(self, count_only):
+    def time_elapsed(self):
+        return time.time() - self.start_time
+
+    def handle_count_only(self):
         """Handles the count_only option."""
-        if count_only:
-            msg = '{0} records to process.'.format(
-                self.get_crawls_count())
-            print msg
-            log.info(msg)
-            sys.exit(0)
+        log.info('{0} records to process.'.format(self.crawl_count))
+        sys.exit(0)
 
     def get_crawl_ids(self):
         """Returns an iterator containing the ids of records to delete."""
-        return query_to_tuples(self.__get_crawls_query())
+        return [a for (a, ) in query_to_tuples(self.__get_crawls_query())]
 
     def get_crawls_count(self):
         """Counts the records to delete."""
@@ -103,35 +104,49 @@ class Command(BaseCommand):
     #
     # Deleting
     #
-    def do_deletes(self, chunked=True, chunk_size=None, *args, **kwargs):
-        if chunked:
+    def do_deletes(self, *args, **kwargs):
+        """"""
+        log.info('Deleting crawl agregates.')
+        self.delete_crawl_agregates(*args, **kwargs)
+
+        log.info('Starting hits_mv and hits_temp rows delete.')
+        if self.chunked:
             return self.do_deletes_chunked(*args, **kwargs)
         else:
             return self.do_deletes_simple(*args, **kwargs)
 
-    def do_deletes_simple(self, ids, total_len, limit=None):
+    def delete_crawl_agregates(self, ids):
+        """This will be done separately, as it'a a much faster query with
+        immediately visible effect.
+        """
+        qq = self.__get_delete_queries(['main_crawlagregates'], 'in').next()
+        execute_sql(qq.format(self.__chunk_str(ids)))
+        transaction.commit_unless_managed()
+
+    def do_deletes_simple(self, ids):
         """Simple version - each query is ran once per crawl."""
-        qs = self._get_delete_queries('=')
-        for i, (crawl_id, ) in enumerate(ids, start=1):
-            if limit and i > limit:
+        qs = self.__get_delete_queries(['hits_mv', 'hits_temp'], '=')
+        for i, crawl_id in enumerate(ids, start=1):
+            if self.limit and i > self.limit:
                 break
             for q in qs:
                 execute_sql(q.format(crawl_id))
-            if i % 50 == 0:
-                log.info("{0}/{1} crawls processed.".format(i, total_len))
-                execute_sql("COMMIT;")
+            if i % 10 == 0:
+                log.info(("{0}/{1} crawls processed, {2}s elapsed so far."
+                    ).format(i, self.crawl_count), self.time_elapsed())
+                transaction.commit_unless_managed()
             execute_sql(("update main_crawl set has_hits_mv = false where"
                 " id = {0};").format(crawl_id))
 
-        execute_sql("COMMIT;")
+        transaction.commit_unless_managed()
         return i
 
-    def read_chunks(self, iterator, chunk_size=100, limit=None):
+    def read_chunks(self, iterator, chunk_size=10, limit=None):
         """Returns a list of next ``chunk_size`` elements, up to ``limit``
         total from given ``iterator``.
         """
         items = list()
-        for i, (crawl_id, ) in enumerate(iterator, start=1):
+        for i, crawl_id in enumerate(iterator, start=1):
             if limit and i > limit:
                 break
             items.append(crawl_id)
@@ -141,26 +156,31 @@ class Command(BaseCommand):
         if items:
             yield items
 
-    def do_deletes_chunked(self, ids, total_len, limit=None, chunk_size=None):
+    def __chunk_str(self, ids):
+        return "({0})".format(",".join([str(a) for a in ids]))
+
+    def do_deletes_chunked(self, ids):
         """More complex version, does multiple crawls at a time."""
         processed = 0
-        qs = self._get_delete_queries('in')
-        for chunk in self.read_chunks(ids, limit=limit, chunk_size=chunk_size):
-            chunk_str = "({0})".format(", ".join([str(a) for a in chunk]))
+        qs = self.__get_delete_queries(['hits_mv', 'hits_temp'], 'in')
+        for chunk in self.read_chunks(
+                ids, limit=self.limit, chunk_size=self.chunk_size):
+            chunk_str = self.__chunk_str(ids)
             for q in qs:
                 execute_sql(q.format(chunk_str))
             execute_sql(("update main_crawl set has_hits_mv = false where"
-                " id in {0};").format(chunk_str))
+                " id in {0}").format(chunk_str))
             processed += len(chunk)
-            log.info("{0}/{1} crawls processed.".format(processed, total_len))
-            execute_sql("COMMIT;")
+            log.info("{0}/{1} crawls processed.".format(
+                processed, self.crawl_count))
+            transaction.commit_unless_managed()
 
         return processed
 
-    def _get_delete_queries(self, comparator='='):
+    def __get_delete_queries(self, tables, comparator='='):
         """Returns delete queries for all related tables, cmparator argument can
         be used to get 'crawl_id =' or 'crawl_id in' queries.
         """
-        for t in ['hits_mv', 'main_crawlagregates', 'hits_temp']:
+        for t in tables:
             yield "delete from {0} where crawl_id {1} {{0}};".format(
                 t, comparator)
