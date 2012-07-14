@@ -1,3 +1,4 @@
+import sys
 import time
 import logging
 from optparse import make_option
@@ -132,7 +133,7 @@ class Command(BaseCommand):
                 execute_sql(q.format(crawl_id))
             if i % 10 == 0:
                 log.info(("{0}/{1} crawls processed, {2}s elapsed so far."
-                    ).format(i, self.crawl_count), self.time_elapsed())
+                    ).format(i, self.crawl_count, self.time_elapsed()))
                 transaction.commit_unless_managed()
             execute_sql(("update main_crawl set has_hits_mv = false where"
                 " id = {0}").format(crawl_id))
