@@ -29,14 +29,22 @@ class Command(BaseCommand):
             help="Command will print the number of records requiring"
             " processing and exit."),
         make_option("--chunk-size", dest="chunk-size", type="int",
-            default=10, help="Number of crawls in a chunk for the chunked "
-            "delete mode."),
+            default=20000, help="Number of crawls in a chunk for the chunked "
+            "delete mode. By default a 'big enough' number to fit the whole "
+            "query, alter this if you want to split the query, but keep in "
+            "mind it will all be slower overall."),
         make_option("--simple", dest="simple",
             default=False, action="store_true",
             help="Turns chunked delete off."),
         make_option("--all", dest="all", default=False, action="store_true",
             help="Decides if crawls with has_hits_mv=False should be included, "
             "use to filter out already processed records."),
+        make_option("--fix-interrupted", dest="fix-interrupted", default=False,
+            action="store_true",
+            help="If this option is provided, the command will search for "
+            "crawls having groups_downloaded = groups_available and set "
+            "groups_downloaded to the count of actually created hitgroupstatus"
+            " rows."),
     )
     help = "Removes data related to bad crawls."
 
@@ -50,10 +58,13 @@ class Command(BaseCommand):
         self.chunk_size = options.get('chunk-size')
         self.chunked = not options.get('simple')
         self.limit = options.get('limit')
+        self.fix_interrupted = options.get('fix-interrupted')
 
         self.crawl_count = self.get_crawls_count()
         if options.get('count-only') or self.crawl_count == 0:
             self.handle_count_only()
+
+        self.fix_interrupted and self.update_interrupted_crawl_stats()
 
         # if limit is specified, show X/Y instead of just Y
         log.info('Starting bad crawl related data removal, {0}{1} records will '
@@ -105,7 +116,11 @@ class Command(BaseCommand):
     # Deleting
     #
     def do_deletes(self, *args, **kwargs):
-        """"""
+        """Main function, performs crawl agregates delete, then moves to either
+        simple or chunked delete.
+
+        """
+
         log.info('Deleting crawl agregates.')
         self.delete_crawl_agregates(*args, **kwargs)
 
@@ -124,7 +139,7 @@ class Command(BaseCommand):
         transaction.commit_unless_managed()
 
     def do_deletes_simple(self, ids):
-        """Simple version - each query is ran once per crawl."""
+        """Performs a query per crawl and per table."""
         qs = list(self.__get_delete_queries(['hits_mv', 'hits_temp'], '='))
         for i, crawl_id in enumerate(ids, start=1):
             if self.limit and i > self.limit:
@@ -184,3 +199,24 @@ class Command(BaseCommand):
         for t in tables:
             yield "delete from {0} where crawl_id {1} {{0}};".format(
                 t, comparator)
+
+    recount_query = """
+    UPDATE main_crawl c
+      SET groups_downloaded = (
+        SELECT count(*) FROM main_hitgroupstatus WHERE crawl_id = c.id)
+      WHERE c.id in (
+        SELECT id FROM main_crawl
+        WHERE groups_downloaded = groups_available);
+    """
+
+    def update_interrupted_crawl_stats(self):
+        """Checks for crawls that were interrupted before updating the number
+        of downloaded hit groups.
+
+        Currently those crawls can be found by checking for crawls having
+        groups_downloaded = groups_available, since at the begining of the crawl
+        those values are set to be equal.
+
+        """
+        execute_sql(self.recount_query)
+        transaction.commit_unless_managed()
