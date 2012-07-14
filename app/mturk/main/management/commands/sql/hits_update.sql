@@ -2,12 +2,11 @@ declare
 i integer;
 /* Hits temp is: (hits_diff, group_id, group_id, crawl_id, crawl_id - 1) */
 CUR1 CURSOR FOR SELECT * FROM hits_temp
-  where
-    crawl_id < (select max(id) from main_crawl where date(start_time) = iend)
-    and
-    crawl_id > (select min(id) from main_crawl where date(start_time) = istart);
+  WHERE crawl_id IN (
+    SELECT id FROM main_crawl WHERE start_time BETWEEN istart AND iend);
 
 begin
+  RAISE NOTICE 'Processing crawls from % to %.', istart, iend;
   i :=1;
   FOR REC IN CUR1
   LOOP
@@ -26,8 +25,8 @@ begin
         set hits_consumed = (-1) * REC.hits
         where group_id = REC.group_id2 and crawl_id = REC.prev_crawl_id;
     end if;
-    if(i % 5000 = 0) then
-      RAISE NOTICE 'Positive id % ', i;
+    if(i % 1000 = 0) then
+      RAISE NOTICE 'Processing crawl % ', i;
     end if;
     i := i+1;
   END LOOP;
