@@ -21,7 +21,7 @@ class DBProcedureCommand(BaseCommand):
 
     option_list = BaseCommand.option_list + (
         make_option('--start', dest="start", default=None,
-            help='Processed interval start, defaults to now - 4 hours.'),
+            help='Processed interval start, defaults to 2 hours.'),
         make_option('--end', dest="end", default=None,
             help='Processed interval end, defaults to now.'),
         make_option('--minutes', dest="minutes", default=None, type='int',
@@ -38,10 +38,12 @@ class DBProcedureCommand(BaseCommand):
 
         try:
 
-            if options.get('minutes') or options.get('hours'):
+            if (options.get('minutes') is not None or
+                options.get('hours') is not None):
+
                 timedelta = datetime.timedelta(
-                    minutes=options.get('minutes', 0),
-                    hours=options.get('hours', 0))
+                    minutes=options.get('minutes') or 0,
+                    hours=options.get('hours') or 0)
             else:
                 timedelta = datetime.timedelta(hours=2)
 
