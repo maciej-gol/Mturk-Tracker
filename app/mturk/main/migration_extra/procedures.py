@@ -108,7 +108,8 @@ def create_with_date_args(prname, prtext):
     """
     prtext = prtext.replace("'", "''")
     TEMPLATE = """
-    CREATE OR REPLACE FUNCTION {prname}(istart TIMESTAMP, iend TIMESTAMP)
+    CREATE OR REPLACE FUNCTION {prname}(istart TIMESTAMP WITH TIME ZONE,
+                                        iend TIMESTAMP WITH TIME ZONE)
         RETURNS VOID AS'
         {prtext}'
     LANGUAGE plpgsql;
