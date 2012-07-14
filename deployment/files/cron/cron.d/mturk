@@ -4,7 +4,7 @@ SCRIPT_ROOT="%(script_dir)s"
 SCRIPT_NAME="manage_py_exec_silent"
 
 */6     *       *       *       *       root    cd $PROJECT_ROOT; /$SCRIPT_ROOT/$SCRIPT_NAME crawl --workers=4;
-#40		1		*		*		*		root	cd $PROJECT_ROOT; /$SCRIPT_ROOT/$SCRIPT_NAME db_update_diffs --limit=200;
+30      *       *       *       *       root    cd $PROJECT_ROOT; /$SCRIPT_ROOT/$SCRIPT_NAME db_remove_bad_crawl_related --fix-interrupted;
 5       *       *       *       *       root    cd $PROJECT_ROOT; /$SCRIPT_ROOT/$SCRIPT_NAME db_refresh_mviews;
 15      *       *       *       *       root    cd $PROJECT_ROOT; /$SCRIPT_ROOT/$SCRIPT_NAME db_update_agregates; /$SCRIPT_ROOT/$SCRIPT_NAME classify_spam --limit=40;
 
