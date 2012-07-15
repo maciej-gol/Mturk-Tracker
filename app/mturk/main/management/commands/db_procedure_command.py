@@ -3,6 +3,7 @@ import time
 import datetime
 import logging
 
+import dateutil.parser
 from optparse import make_option
 from django.db import connection
 from django.utils.timezone import now
@@ -31,6 +32,11 @@ class DBProcedureCommand(BaseCommand):
         )
 
     def process_args(self, options):
+
+        if isinstance(options.get('start'), basestring):
+            options['start'] = dateutil.parser.parse(options.get('start'))
+        if isinstance(options.get('end'), basestring):
+            options['end'] = dateutil.parser.parse(options.get('end'))
 
         if (options.get('minutes') is not None or
             options.get('hours') is not None):

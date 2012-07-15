@@ -3,6 +3,7 @@
 import time
 import datetime
 import logging
+import dateutil.parser
 
 from optparse import make_option
 from django.utils.timezone import now
@@ -16,7 +17,8 @@ log = logging.getLogger('mturk.arrivals.db_arrivals')
 
 class Command(BaseCommand):
 
-    help = "Command that wraps all 3 commands that need to be ran in order to "
+    help = ("Wraps all 3 commands that need to be ran in order to "
+        "calculate data for day stats.")
 
     option_list = BaseCommand.option_list + (
         make_option('--start', dest="start", default=None,
@@ -32,6 +34,11 @@ class Command(BaseCommand):
         )
 
     def process_args(self, options):
+
+        if isinstance(options.get('start'), basestring):
+            options['start'] = dateutil.parser.parse(options.get('start'))
+        if isinstance(options.get('end'), basestring):
+            options['end'] = dateutil.parser.parse(options.get('end'))
 
         self.chunk_size = options.get('chunk-size')
 
@@ -115,9 +122,10 @@ class Command(BaseCommand):
                 # so that the data is processed correctly
                 for c in self.COMMANDS:
                     log.info('Calling {0}, {1}.'.format(c, self.short_date()))
+                    ctime = time.time()
                     call_command(c, start=start, end=end, pidfile='arrivals',
                         verbosity=0)
-                    log.info('{0}s elapsed.'.format(self.get_elapsed()))
+                    log.info('{0}s elapsed.'.format(time.time() - ctime))
 
                 done += len(chunk) - 1
                 log.info('Chunk processed in {0}s, {1}/{2} done.'.format(
