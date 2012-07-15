@@ -15,6 +15,7 @@ boto>=2.4.1
 psycopg2
 gevent
 django-extensions
+python-dateutil
 
 # sphinx documentation as a part of the site
 Sphinx

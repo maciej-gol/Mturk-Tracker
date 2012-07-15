@@ -1,63 +1,65 @@
 declare
-  minimum integer;
-  maximum integer;
   lag_id integer; cur_id integer;
-  hits integer; grp1 varchar(50); grp2 varchar(50);
   prj_started integer; prj_completed integer;
 
 begin
 
   RAISE NOTICE 'Processing crawls from % to % ', istart, iend;
 
-  FOR lag_id, cur_id in (
-    select (lag(id, 1, null) over (order by start_time desc)), id
-     from main_crawl
-      where
-        istart <= start_time and start_time <= iend and
+  -- cur_id - the one we are updating
+  -- lag_id - previous correct crawl
+  FOR cur_id, lag_id IN (
+    SELECT (lag(id, 1, NULL) OVER (ORDER BY start_time DESC)), id
+     FROM main_crawl
+      WHERE
+        start_time BETWEEN istart AND iend AND
         groups_available * 0.9 < groups_downloaded
-      order by start_time desc)
+      ORDER BY start_time DESC)
   LOOP
-    RAISE NOTICE 'lag_id % cur_id % ', lag_id, cur_id;
-    IF(lag_id <> null AND cur_id <> null AND lag_id <> cur_id) THEN
-      /* Inserts (hits_diff, group_id, group_id, crawl_id, crawl_id - 1) into
+    IF(lag_id IS NOT NULL AND cur_id IS NOT NULL AND lag_id <> cur_id) THEN
+      RAISE NOTICE 'lag_id % cur_id % ', lag_id, cur_id;
+
+      /* Inserts (hits_diff, group_id, group_id, crawl_id, prev_crawl_id) into
        * hits_temp.
        *
-       * We are saving both group_ids later to find crawls where the group
-       * appeared (first group_id is null) or
-       * disappeared (second group_id is null)
+       * Note that we are saving both a.group_id and b.group_id. This can be
+       * used to find moments where a project has disappeared.
+       * HOWEVER repeating the join is a faster query than selecting from newly
+       * created hits_temp.
       */
-      insert into hits_temp(
-        select (coalesce(a.hits_available, 0) - coalesce(b.hits_available, 0)),
-          a.group_id, b.group_id, cur_id, lag_id from (
-            (select group_id, hits_available from main_hitgroupstatus
-              where crawl_id = cur_id) a
-            full outer join
-            (select group_id, hits_available from main_hitgroupstatus
-              where crawl_id = lag_id) b
-            on a.group_id = b.group_id));
+      DELETE FROM hits_temp WHERE crawl_id=cur_id;
+      INSERT INTO hits_temp(
+        SELECT (coalesce(a.hits_available, 0) - coalesce(b.hits_available, 0)),
+          a.group_id, b.group_id, cur_id, lag_id FROM (
+            (SELECT group_id, hits_available FROM main_hitgroupstatus
+              WHERE crawl_id = cur_id) a
+            FULL OUTER JOIN
+            (SELECT group_id, hits_available FROM main_hitgroupstatus
+              WHERE crawl_id = lag_id) b
+            ON a.group_id = b.group_id));
 
       /* Finds the count of hitgroups started between the crawls. */
-      select count(1) into prj_started from (
-        (select group_id from main_hitgroupstatus where crawl_id=cur_id) a
-        full outer join
-        (select group_id from main_hitgroupstatus where crawl_id=lag_id) b
-        on a.group_id=b.group_id) where b.group_id is null;
+      SELECT count(1) INTO prj_started FROM (
+        (SELECT group_id FROM main_hitgroupstatus WHERE crawl_id=cur_id) a
+        FULL OUTER JOIN
+        (SELECT group_id FROM main_hitgroupstatus WHERE crawl_id=lag_id) b
+        ON a.group_id=b.group_id) WHERE b.group_id IS NULL;
 
       /* Finds the count of hitgroups completed between the crawls. */
-      select count(1) into prj_completed from (
-        (select group_id from main_hitgroupstatus where crawl_id=cur_id) a
-        full outer join
-        (select group_id from main_hitgroupstatus where crawl_id=lag_id) b
-        on a.group_id=b.group_id) where a.group_id is null;
+      SELECT count(1) INTO prj_completed FROM (
+        (SELECT group_id FROM main_hitgroupstatus WHERE crawl_id=cur_id) a
+        FULL OUTER JOIN
+        (SELECT group_id FROM main_hitgroupstatus WHERE crawl_id=lag_id) b
+        ON a.group_id=b.group_id) WHERE a.group_id IS NULL;
 
       /* Updates crawlagregates. */
-      update main_crawlagregates
-        set hitgroups_posted = prj_started,  hitgroups_consumed = prj_completed
-        where crawl_id=cur_id;
+      UPDATE main_crawlagregates
+        SET hitgroups_posted = prj_started, hitgroups_consumed = prj_completed
+        WHERE crawl_id=cur_id;
     END IF;
 
     if(cur_id % 100 = 0) then
-      RAISE NOTICE 'Positive id % ', cur_id;
+      RAISE NOTICE 'Processing id % ', cur_id;
     end if;
 
   END LOOP;

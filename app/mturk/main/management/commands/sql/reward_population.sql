@@ -1,17 +1,13 @@
 declare
-  minimum integer;
-  maximum integer;
-  i integer; crawl integer; grp1 varchar(50); grp2 varchar(50);
-  total_reward_consumed float; prj_completed integer; total_reward_posted float;
+  i integer; crawl integer;
+  total_reward_consumed float; total_reward_posted float;
 
-begin
+BEGIN
 
-  select min(id) into minimum from main_crawl where date(start_time) = istart;
-  select max(id) into maximum from main_crawl where date(start_time) = iend;
-
-  RAISE NOTICE 'Positive id % % ', minimum, maximum;
-  FOR i in (select id from main_crawl where id between minimum and maximum) LOOP
-
+  RAISE NOTICE 'Processing crawls from % to %.', istart, iend;
+  FOR i IN (SELECT id FROM main_crawl
+            WHERE start_time BETWEEN istart AND iend)
+  LOOP
     /* Calculate the total reward consumed from hits_mv. */
     select crawl_id, sum(coalesce(hits_consumed, 0) * reward)
       into crawl, total_reward_consumed from hits_mv
@@ -28,8 +24,8 @@ begin
           rewards_posted = total_reward_posted
       where crawl_id = i;
 
-    if((i - minimum) % 1000 = 0) then
-      RAISE NOTICE 'Positive id % ', i;
+    if (i % 1000 = 0) then
+      RAISE NOTICE 'Processing crawl % ', i;
     end if;
 
   END LOOP;

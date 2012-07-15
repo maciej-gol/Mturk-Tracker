@@ -145,6 +145,11 @@ LOGGING = {
         }
     },
     'handlers': {
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose'
+        },
         'mail_admins': {
             'level': 'ERROR',
             'filters': ['require_debug_false'],
@@ -172,7 +177,15 @@ LOGGING = {
             'filename': os.path.join(ROOT_PATH, 'crawl.log'),
             'maxBytes': '16777216',  # 16megabytes
             'formatter': 'verbose'
-        }
+        },
+        'arrivals_log': {
+            'level': LOG_LEVEL,
+            'class': 'logging.handlers.RotatingFileHandler',
+            # Override this in local settings
+            'filename': os.path.join(ROOT_PATH, 'arrivals.log'),
+            'maxBytes': '16777216',  # 16megabytes
+            'formatter': 'simple'
+        },
         # 'sentry': {
         #     'level': 'WARNING',
         #     'class': 'raven.contrib.django.handlers.SentryHandler',
@@ -189,7 +202,12 @@ LOGGING = {
             'propagate': True,
         },
         'mturk.main.management.commands': {
-            'handlers': ['crawl_log'],
+            'handlers': ['crawl_log', 'console'],
+            'level': LOG_LEVEL,
+            'propagate': True,
+        },
+        'mturk.arrivals': {
+            'handlers': ['arrivals_log', 'console'],
             'level': LOG_LEVEL,
             'propagate': True,
         }

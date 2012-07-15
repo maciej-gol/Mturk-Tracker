@@ -8,4 +8,4 @@ class Command(DBProcedureCommand):
     help = ('Updates hits_mv hits_posted and hits_consumed using date from'
         ' hits_temp.')
     proc_name = 'hits_update'
-    logger = logging.getLogger(__name__)
+    logger = logging.getLogger('mturk.arrivals.db_hits_update')
