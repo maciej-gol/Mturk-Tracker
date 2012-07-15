@@ -291,11 +291,10 @@ def requester_details(request, requester_id):
     return _requester_details(request, requester_id)
 
 #cache_page(ONE_DAY)
+@never_cache
 def hit_group_details(request, hit_group_id):
 
     hit_group = get_object_or_404(HitGroupContent, group_id=hit_group_id)
-    data = query_to_dicts("select hits_available from hits_mv where group_id = "
-                          "'{}' order by start_time asc".format(hit_group_id))
     params = {
         'multichart': False,
         'columns': HIT_DETAILS_COLUMNS,
@@ -306,12 +305,14 @@ def hit_group_details(request, hit_group_id):
         for cc in input:
             yield {
                 'date': cc['start_time'],
-                'row': (str(cc['hits_available'])),
+                'row': (str(cc['hits_available']),),
             }
+            print cc['start_time'], '>>>', cc['hits_available']
     hit_group = get_object_or_404(HitGroupContent, group_id=hit_group_id)
     dicts = query_to_dicts(
-                """ select start_time, hits_available from hits_mv where group_id = '{}'
-                    order by start_time asc """.format(hit_group_id))
+                """ select start_time, hits_available from hits_mv
+                    where group_id = '{}' order by start_time asc """
+                .format(hit_group_id))
     data = hit_group_details_data_formater(dicts)
     params['date_from'] = hit_group.occurrence_date
     params['date_to'] = datetime.datetime.utcnow()

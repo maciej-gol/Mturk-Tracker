@@ -37,7 +37,7 @@ def text_row_formater(input):
         yield "["+','.join(row)+"]"
 
 @register.simple_tag
-def google_timeline(context, columns, data, multirow=False):
+def google_timeline(context, columns, data, multirow=False, adjust_zoom=False):
     '''
     http://code.google.com/apis/visualization/documentation/gallery/annotatedtimeline.html
     '''
@@ -45,6 +45,7 @@ def google_timeline(context, columns, data, multirow=False):
             'data': row_formater(data),
             'columns': columns,
             'multichart': context.get('multichart', False),
+            'adjust_zoom': adjust_zoom,
         }
     return ctx
 

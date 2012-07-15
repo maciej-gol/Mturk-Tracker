@@ -1,26 +1,101 @@
-{% extends 'main/graphs/timeline.html' %}
+{% extends "base.html" %}
 
 {% load graph %}
 
 {% block title %}{{block.super}}: {{title}}{% endblock %}
 {% block header_text %}{{block.super}} <br/>{{hit_group.title}}{% endblock %}
 
-{% block content_after %}
+{% block content %}
 
-<h2>Hit details:</h2>
-<dl>
-    <dt>Requester</dt><dd>{{ hit_group.requester_name }}</dd>
-    <dt>Reward</dt><dd>{{ hit_group.reward }}</dd>
-    <dt>Time alloted</dt><dd>{{ hit_group.time_alloted }}</dd>
-    <dt>Occurrence date</dt><dd>{{ hit_group.occurrence_date }}</dd>
-    <dt>Description</dt><dd>{{ hit_group.description }}</dd>
-    <dt>Keywords</dt><dd>{{ hit_group.keywords }}</dd>
-    <dt>Qualifications</dt><dd>{{ hit_group.qualifications }}</dd>
-</dl>
+<script type='text/javascript'>
 
+	$(document).ready( function() {
+
+		$.datepicker.setDefaults($.extend(
+			{
+				dateFormat: 'mm/dd/yy',
+				showMonthAfterYear: false
+			}
+		));
+
+		$('.datepick_from').datepicker();
+		$('.datepick_to').datepicker();
+
+		var nowDate = new Date();
+		nowDate.setDate(nowDate.getDate()+1);
+
+		$('.datepick_from').each( function() {
+			{% if not date_from %}$(this).datepicker('setDate', -30);{% endif %}
+			$(this).datepicker('option', 'maxDate', nowDate);
+		});
+
+		$('.datepick_to').each( function() {
+			{% if not date_to %}$(this).datepicker('setDate', nowDate);{% endif %}
+			$(this).datepicker('option', 'maxDate', nowDate);
+		});
+
+	});
+</script>
+<div class="span-10">
+    <h2>Hit details:</h2>
+</div>
+<div class="span-14 last">
+	<div id="timeline_top">
+        <div id="datepick">
+            <img src="{{STATIC_URL}}img/m_icon_clock.png" alt="" style=" float:left;"/>
+            <form method="get" action="">
+                <input class="datepick datepick_from" type="text" name="date_from" id="form_date_from" value="{% if date_from %}{{date_from}}{% else %}date from{% endif %}"/>
+                <input class="datepick datepick_to " type="text" name="date_to" id="form_date_to" value="{% if date_to %}{{date_to}}{% else %}date to{% endif %}"/>
+                <input class="submit" type="submit" id="form_submit" value="Adjust chart"/>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="span-10">
+    <table>
+        <thead>
+            <tr>
+                <th style="vertical-align: top;">Requester</th>
+                <td>{{ hit_group.requester_name }}</td>
+            </tr>
+            <tr>
+                <th style="vertical-align: top;">Reward</th>
+                <td>{{ hit_group.reward }}</td>
+            </tr>
+            <tr>
+                <th style="vertical-align: top;">Time alloted</th>
+                <td>{{ hit_group.time_alloted }}</td>
+            </tr>
+            <tr>
+                <th style="vertical-align: top;">Occurrence date</th>
+                <td>{{ hit_group.occurrence_date }}</td>
+            </tr>
+            <tr>
+                <th style="vertical-align: top;">Description</th>
+                <td>{{ hit_group.description }}</td>
+            </tr>
+            <tr>
+                <th style="vertical-align: top;">Keywords</th>
+                <td>{{ hit_group.keywords }}</td>
+            </tr>
+            <tr>
+                <th style="vertical-align: top;">Qualifications</th>
+                <td>{{ hit_group.qualifications }}</td>
+            </tr>
+        </thead>
+    </table>
+</div>
+
+<div class="span-14 last">
+    {% google_timeline columns data adjust_zoom=1 %}
+</div>
 {% if hit_group.html %} 
-<div id="hit_group" style="padding:10px;border:1px solid black">
-	{{hit_group.html|safe}}
+<div style="clear:both"></div>
+<div class="span-24">
+    <div id="hit_group" style="margin-top:15px;padding:10px;border:1px solid black">
+    {{ hit_group.html|safe }}
+    </div>
 </div>
 {% endif %}
 

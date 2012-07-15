@@ -99,11 +99,16 @@
                 {% for row in data %}
                     data.addRow({{row}});
                 {% endfor %}
-
+                
+                {% if adjust_zoom %}
                 /* List data from the last week */
+                var currentdate = null;
+                var pastdate = null;
+                {% else %}
                 var currentdate = new Date();
                 var pastdate = new Date();
                 pastdate.setDate(currentdate.getDate() - 7);
+                {% endif %}
 
                 var chart = new google.visualization.AnnotatedTimeLine(document.getElementById('chart_div'));
                 chart.draw(data, {
