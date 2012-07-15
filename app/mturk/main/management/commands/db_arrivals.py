@@ -95,6 +95,11 @@ class Command(BaseCommand):
             crawls = Crawl.objects.filter(start_time__gt=self.start,
                 start_time__lt=self.end).order_by('-start_time')
             total_count = len(crawls)
+
+            if total_count < 2:
+                log.info("Not enough crawls to process.")
+                return
+
             done = 1
             log.info("""
             Starting arrivals calculation.
