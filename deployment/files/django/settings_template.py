@@ -13,8 +13,10 @@ DEBUG = False
 # Overriding default logger settings
 LOG_LEVEL = 'DEBUG' if DEBUG else 'INFO'
 LOGGING['loggers']['mturk.main.management.commands']['level'] = LOG_LEVEL
+LOGGING['loggers']['mturk.arrivals']['level'] = LOG_LEVEL
 LOGGING['handlers']['crawl_log']['filename'] = pjoin(LOG_DIRECTORY, 'crawl.log')
 LOGGING['handlers']['log_file']['filename'] = pjoin(LOG_DIRECTORY, 'main.log')
+LOGGING['handlers']['arrivals_log']['filename'] = pjoin(LOG_DIRECTORY, 'arrivals.log')
 
 log = logging.getLogger(__name__)
 
