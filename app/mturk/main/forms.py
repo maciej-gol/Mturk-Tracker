@@ -3,6 +3,7 @@ from itertools import product
 
 from django import forms
 from haystack.forms import SearchForm
+from haystack.query import SearchQuerySet, EmptySearchQuerySet
 
 
 # Fields names.
@@ -80,28 +81,35 @@ class HitGroupContentSearchForm(SearchForm):
         try:
             cleaned_data = self.cleaned_data
         except AttributeError:
-            cleaned_data = { }
+            cleaned_data = {}
         return cleaned_data
 
     def search(self):
         """ Returns a search queryset. """
-        search_queryset = super(HitGroupContentSearchForm, self).search()
 
         cleaned_data = self.cleaned_data_or_empty()
-        query = cleaned_data.get("q", "")
-        if not query:
-            return search_queryset
-        # Get fields for search in.
+
         search_in = cleaned_data.get("search_in", DEFAULT_SEARCH_IN)
+        query = cleaned_data.get("q", "")
+
+        if not query:
+            return EmptySearchQuerySet()
+
+        if not search_in:
+            # The following returns result of a SearchQuerySet.autoquery()
+            search_queryset = super(HitGroupContentSearchForm, self).search()
+        else:
+            # Pass query to each field, which you want to search in.
+            search_queryset = SearchQuerySet()
+            for field in search_in:
+                key = "{}__exact".format(field)
+                search_queryset = search_queryset.filter_or(**{key: query})
+
         # Get field and order for sorting.
         sort_by = cleaned_data.get("sort_by", DEFAULT_SORT_BY).rsplit("_", 1)
         # Prepare for SearchQuerySet API.
         sort_by = "{}{}".format("" if sort_by[1] == "asc" else "-",
                                 sort_by[0])
-        kwargs = {}
-        for field in search_in:
-            kwargs[field] = query
-        search_queryset = search_queryset.filter_and(**kwargs)
         search_queryset = search_queryset.order_by(sort_by)
         return search_queryset
 
