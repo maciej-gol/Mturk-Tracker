@@ -1,113 +1,128 @@
 Getting started
 ===============
 
-Mturk-Tracker is a Django web application and is setup within python
-virtualenv and requires a working python envioroment and PostgreSQL database.
-
-Required libraries
-------------------
-
-Mturk-Tracker requires base packages::
-
-    $ sudo apt-get install python-virtualenv subversion mercurial \
-            postgresql-8.4 postgresql-server-dev-8.4  python2.6-dev \
-            libevent-dev
-
+Mturk-Tracker is a Django web application and it is setup within python
+virtualenv and requires a working python environment, PostgreSQL database and
+Solr search engine.
 
 Project setup
 -------------
 
-To initialize project, virtualenv_ python package is required (you may also
-want to use virtualenvwrapper_ extension). First, create and activate new
-virtual python environment::
+Currently deployment scripts should cover everything you need to setup the project.
+Only basic system configuration is required. First, create an user account which will 
+have ownership to the project files and run ssh-server deamon.
 
-    $ virtualenv mturk --no-site-packages
-    $ cd  mturk
-    $ . bin/activate
+Most things in the project are parametrized. The project configuration is based on json
+files that contain these parameters. Code responsible for deployment process exists in
+deployment/ subdirectory (in main project directory). There is a fabric script responsible
+for most deployment logic and templates of configuration files that are filled with
+deployment parameters. 
 
-or::
+Two major files that contains deployment parameters: 
 
-    $ mkvirtualenv mturk --no-site-packages
-    $ workon mturk
-    $ cd $VIRTUAL_ENV
+#. ``default.json`` - contains settings common across all project instances, such as the repository url.
+#. ``site-name.json`` - contains settings specific for certain project. It also contains sensitive data thus it does not exist in the repository.
 
-if using virtualenvwrapper_.
+There is antoher file that contains custom Django settings called local.py.
 
-After that, clone mturk code from repository and install all
-dependencies using pip_ (you have to install *mercurial* and *subversion*
-first)::
+The structure of ``default.json`` file
+--------------------------------------
 
-	$ git clone git://github.com/mickek/Mturk-Tracker.git src
-	$ cd src
-	$ git fetch
-	$ git checkout -b virtualenv --track origin/virtualenv
-	$ echo "mturk.settings.base" > DJANGO_SETTINGS_MODULE
-	$ pip install -r requirements.txt
+This file should contain instance invariant deployment parameters:
 
-Libraries update
-~~~~~~~~~~~~~~~~
+* ``source_url`` - repository url
+* ``project_inner`` - inner directory of the repository containing settings files
+* ``default_prefix`` - should be a slug of project name or something, common to all instances
+* ``projects_dir`` - root directory for projects on target host, you will most likely want to override this between different deployment targets
+* ``django_project_name`` - name of the project folder (comes from the fact that Django 1.4 - project is at the same level as apps
 
-Because ``pip`` should take care of all libraries, use it to update already
-existing configuration. Whenever new dependency appears, run ``pip -r
-requirements.txt`` just to update.
+This file exists in the repository.
 
+The structure of ``site-name.json`` file
+----------------------------------------
 
-Choosing custom settings module
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+This file should contain instance specyfic deployment parameters:
 
-By default ``mturk.settings.defaults`` configuration module is being used. To add
-custom variables you can add code to:
+* ``projects_dir`` - path to the destination directory where the project root directory is created;
+* ``settings_name`` - name of the resultant settings file;
+* ``db_name`` - name of the database;
+* ``db_user`` - name of the database user;
+* ``db_password`` - password for this user;
+* ``solr_db_user`` - name of the database user used by Solr during data import;
+* ``sorl_db_password`` - password for this user;
+* ``pip_requirements`` - files that contanins lists of Python packages to be installed;
+* ``system_requirements`` - files that constains lists of system packages to be installed;
+* ``locals_path`` - path to the custom Django settings file that you want to upload to the server;
+* ``branch`` - name of the repository branch.
 
-- ``mturk.settings.default`` - project default variables visible for all other
-  configuration files
+Example ``site-name.json`` file:
 
-You can also setup any other configuration module by setting
-``DJANGO_SETTINGS_MODULE`` shell variable or file as given in example above.
+::
 
+	{
+    	"projects_dir": "/data/projects",
+    	"settings_name": "example-site-name",
+    	"db_name": "db",
+    	"db_user": "db_user",
+    	"db_password": "****",
+	    "solr_db_user": "db_solr_user",
+    	"solr_db_password": "*****",
+    	"pip_requirements": ["base.txt", "devel.txt", "production.txt", "tests.txt"],
+    	"system_requirements": ["system_requirements.txt"],
+    	"locals_path": /path/to/your/requirements/on/local/machine/local.py",
+    	"branch": "master"
+	}
 
-Setting up Database
-~~~~~~~~~~~~~~~~~~~
+The structure of custom Django settings file
+--------------------------------------------
 
-Make sure that django app can connect to database, the best way to do that is to allow postgres to accept local connections by editing pg_hba.conf file.
-Check if you can connect to database::
+This file is uploaded during each deployment to the settings directory. It is imported to the main Django settings file.
+Example configuration may look like the following:
 
-	$ psql -U postgres
+::
 
-In order to setup a clean db you have to create the database and populate it with tables::
+	import os
+	from defaults import DATABASES, PROJECT_PATH, ROOT_PATH
 
-	$ createdb -U postgres  mturk_tracker
-	$ createlang plpgsql -U postgres -d mturk_tracker
-	$ python manage.py syncdb
-	$ python manage.py migrate
+	MEDIA_ROOT = os.path.join(ROOT_PATH, 'media')
+	STATIC_ROOT = os.path.join(PROJECT_PATH, 'collected_static')
+	STATIC_URL = '/static/'
 
-Running django appliaction
---------------------------
+	TIME_ZONE = 'UTC'
+	CACHE_BACKEND = 'dummy:///'
 
-Nothing special, just type::
+	DB = DATABASES['default']
+	DATABASE_NAME = DB['NAME']
+	DATABASE_USER = DB['USER']
+	DATABASE_PASSWORD = DB['PASSWORD']
 
-    $ sudo python manage.py runserver
+	MTURK_AUTH_EMAIL = 'user@email.com'
+	MTURK_AUTH_PASSWORD = '******'
 
-in django project directory. And then point your browser to
-http://localhost:8000/
+	USE_CACHE = True
 
-Crawling mturk
---------------
+Running the deployment script
+-----------------------------
 
-You may launch initial crawl by::
+If all is already properly configured go to the deployment subdirectory:
 
-	$ python manage.py crawl --workers=6 --logconf=logging.conf
+::
 
-Logs will be saved in ``/tmp/crawler.log``. Because mturk requires
-authentication for HITs listings pagination, use ``--mturk-email`` and
-``--mturk-password`` flags to authenticate and crawl as mturk worker.
+	$ cd path/to/Mturk-Tracker/deployment/
 
-To generate data that will be displayed on graphs you need to launch scripts::
+and run the fabric script. The following will install all requirements (including system packages):
 
-	$ python manage.py db_refresh_mviews
-	$ python manage.py db_update_agregates
-	$ python manage.py db_calculate_daily_stats
+::
 
-Solr
-----
+	$ fab deploy:conf_file="path/to/site-name.json",setup_environment=True -H 127.0.0.1 -u user
+
+or you may want to update only project source (for example in order to apply changes from the repository):
+
+::
+
+	$ fab deploy:conf_file="path/to/site-name.json",requirements=False -H 127.0.0.1 -u user
+
+Troubleshooting
+---------------
 
 TODO
