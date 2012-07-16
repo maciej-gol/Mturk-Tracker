@@ -26,7 +26,7 @@ Two major files that contains deployment parameters:
 There is antoher file that contains custom Django settings called local.py.
 
 The structure of ``default.json`` file
---------------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This file should contain instance invariant deployment parameters:
 
@@ -39,7 +39,7 @@ This file should contain instance invariant deployment parameters:
 This file exists in the repository.
 
 The structure of ``site-name.json`` file
-----------------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This file should contain instance specyfic deployment parameters:
 
@@ -60,21 +60,21 @@ Example ``site-name.json`` file:
 ::
 
 	{
-    	"projects_dir": "/data/projects",
-    	"settings_name": "example-site-name",
-    	"db_name": "db",
-    	"db_user": "db_user",
-    	"db_password": "****",
-	    "solr_db_user": "db_solr_user",
-    	"solr_db_password": "*****",
-    	"pip_requirements": ["base.txt", "devel.txt", "production.txt", "tests.txt"],
-    	"system_requirements": ["system_requirements.txt"],
-    	"locals_path": /path/to/your/requirements/on/local/machine/local.py",
-    	"branch": "master"
+		"projects_dir": "/data/projects",
+		"settings_name": "example-site-name",
+		"db_name": "db",
+		"db_user": "db_user",
+		"db_password": "****",
+		"solr_db_user": "db_solr_user",
+		"solr_db_password": "*****",
+		"pip_requirements": ["base.txt", "devel.txt", "production.txt", "tests.txt"],
+		"system_requirements": ["system_requirements.txt"],
+		"locals_path": /path/to/your/requirements/on/local/machine/local.py",
+		"branch": "master"
 	}
 
 The structure of custom Django settings file
---------------------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This file is uploaded during each deployment to the settings directory. It is imported to the main Django settings file.
 Example configuration may look like the following:
@@ -102,7 +102,7 @@ Example configuration may look like the following:
 	USE_CACHE = True
 
 Running the deployment script
------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 If all is already properly configured go to the deployment subdirectory:
 
