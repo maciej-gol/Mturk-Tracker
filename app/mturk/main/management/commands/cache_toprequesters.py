@@ -21,7 +21,7 @@ class Command(BaseCommand):
 
     def handle(self, **options):
 
-        pid = Pid('mturk_agregates', True)
+        pid = Pid('mturk_cache_topreq', True)
 
         key = 'TOPREQUESTERS_CACHED'
 
