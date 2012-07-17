@@ -53,7 +53,7 @@ class Command(BaseCommand):
                          Q(hitgroups_consumed__gt=0))
 
             if len(aggregates) == 0:
-                log.error("No crawl aggregates for %s." % day)
+                log.info("No crawl aggregates for %s." % day)
                 continue
 
             res = [0, 0, 0, 0]
