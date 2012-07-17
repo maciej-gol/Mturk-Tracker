@@ -16,6 +16,8 @@ class Command(BaseCommand):
     option_list = NoArgsCommand.option_list + (
         make_option('--days', dest='days', default='30',
             help='Number of days from which the history data is grabbed.'),
+        make_option('--force', dest='force', action="store_true", default=False,
+            help='Enforces overriding existing entry in the cache.'),
     )
     help = 'Make sure top requesters are in cache.'
 
@@ -26,14 +28,18 @@ class Command(BaseCommand):
         key = 'TOPREQUESTERS_CACHED'
 
         result = cache.get(key)
-        if result is not None:
+	force = options['force']
+        if result is not None and not force:
             log.info("toprequesters still in cache...")
             return
+	
+	if not force:
+            log.info("toprequesters missing, refetching")
+        else:
+            log.info("refetching toprequesters")
+
         days = options['days']
-
-        log.info("toprequesters missing, refetching")
         # no chache perform query:
-
         from mturk.main.views import topreq_data
         start_time = time.time()
         data = topreq_data(days)
