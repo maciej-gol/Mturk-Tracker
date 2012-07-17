@@ -6,6 +6,7 @@ import logging
 import dateutil.parser
 
 from optparse import make_option
+from django.db.models import F
 from django.utils.timezone import now
 from django.core.management.base import BaseCommand
 from django.core.management import call_command
@@ -92,15 +93,18 @@ class Command(BaseCommand):
         try:
 
             # query crawls in the period we want to process
-            crawls = Crawl.objects.filter(start_time__gt=self.start,
-                start_time__lt=self.end).order_by('-start_time')
+            crawls = Crawl.objects.filter(
+                start_time__gt=self.start,
+                start_time__lt=self.end,
+                groups_downloaded__gt=F('groups_available') * 0.9
+                ).order_by('-start_time')
             total_count = len(crawls)
 
             if total_count < 2:
                 log.info("Not enough crawls to process.")
                 return
 
-            done = 1
+            done = 0
             log.info("""
             Starting arrivals calculation.
 
@@ -115,7 +119,7 @@ class Command(BaseCommand):
                 crawls[0].id, crawls[total_count - 1].id))
 
             # iterate over overlapping chunks of crawls list
-            for chunk in self.chunks(crawls, self.chunk_size, overlap=1):
+            for chunk in self.chunks(crawls, self.chunk_size + 1, overlap=1):
                 start, end = (chunk[-1].start_time, chunk[0].start_time)
                 log.info(('Chunk of {0} crawls: {1}\nstart_time {2} to '
                     '{3}.').format(len(chunk), [c.id for c in chunk],
@@ -125,16 +129,18 @@ class Command(BaseCommand):
                 # run commands responsible for populating data
                 # it's important that they query the crawls in a similar way
                 # so that the data is processed correctly
+                chunk_time = time.time()
                 for c in self.COMMANDS:
                     log.info('Calling {0}, {1}.'.format(c, self.short_date()))
                     ctime = time.time()
                     call_command(c, start=start, end=end, pidfile='arrivals',
-                        verbosity=0)
+                        verbosity=0, logger='mturk.arrivals')
                     log.info('{0}s elapsed.'.format(time.time() - ctime))
 
                 done += len(chunk) - 1
-                log.info('Chunk processed in {0}s, {1}/{2} done.'.format(
-                    self.get_elapsed(), done, total_count))
+                log.info(('Chunk processed in {0}s, total {1}s, {2}/{3}'
+                    ' done.').format(time.time() - chunk_time,
+                    self.get_elapsed(), done, total_count - 1))
 
         except Exception as e:
             log.exception(e)
