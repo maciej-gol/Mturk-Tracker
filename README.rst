@@ -32,7 +32,7 @@ How does it work?
 Website
 -------
 
-As is mentioned before Mturk-Tracker site is written in Django Python web
+As it mentioned before Mturk-Tracker site is written in Django Python web
 framework.
 
 Crawlers
@@ -322,30 +322,35 @@ https://github.com/10clouds/Mturk-Tracker/tree/master/deployment/files/solr/solr
 to ``path/to/your/solr/`` and manually replace the following
 
 ::
+
     user="%(solr_db_user)s"
     password="%(solr_db_password)s"
 
 with
 
 ::
+
     user="your_solr_db_user"
     password="your_solr_db_password"
 
-in file ``path/to/your/solr/solr/en/conf/import_db_hits.xml``. Next restart
+in file ``path/to/your/solr/solr/en/conf/import_db_hits.xml`` (this is done 
+automatically in the case of automatic project setup). Next restart
 Solr server and visit http://127.0.0.1:8983/solr/en/select?q= (an empty xml
 response should be returned).
 
-Populating search index
-~~~~~~~~~~~~~~~~~~~~~~~
+Populating the search index
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 If the Solr server is properly configured and some crawler data is generated
 try to fill up the index with the following command
 
 ::
+
     python manage.py solr_data_import --verbose
 
 You can also check Solr's status at any time. Simply type
 
 ::
+
     python manage.py solr_status
 
