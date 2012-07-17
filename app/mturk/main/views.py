@@ -181,9 +181,9 @@ def topreq_data(days):
         SELECT
             h.requester_id,
             h.requester_name,
-            count(*) as "projects",
-            sum(mv.hits_available) as "hits",
-            sum(mv.hits_available*h.reward) as "reward",
+            coalesce(count(*), 0) as "projects",
+            coalesce(sum(mv.hits_available), 0) as "hits",
+            coalesce(sum(mv.hits_available*h.reward), 0) as "reward",
             max(h.occurrence_date) as "last_posted"
         FROM
                 main_hitgroupcontent h
@@ -196,7 +196,7 @@ def topreq_data(days):
                 h.first_crawl_id > %s
                 AND coalesce(p.is_public, true) = true
             group by h.requester_id, h.requester_name
-            order by sum(mv.hits_available*h.reward) desc
+            order by reward desc
             limit 1000;""" % (firstcrawl, firstcrawl)))
 
 
