@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ block.super }} readme{% endblock %}
+
+{% block css %}
+{{ block.super }}
+{# <link rel="stylesheet" href="{{ STATIC_URL }}css/sphinxdoc.css" type="text/css" media="screen"> #}
+{% endblock %}
+
+{% block content %}
+
+{{ content|safe }}
+
+{% endblock content %}
+

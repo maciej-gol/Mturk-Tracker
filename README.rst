@@ -26,6 +26,21 @@ The application consists of two main components:
 * the website (as seen at http://mturk-tracker.com/)
 * web crawler (tracking http://www.mturk.com/)
 
+Documentation
+=============
+
+This file is only an introduction to the project and is also avalable at:
+
+    http://mturk-tracker.com/docs/
+
+whereas the complete project sphinx documentation can be found under:
+
+    http://mturk-tracker.com/docs/mturk-tracker/
+
+Sphinx documentation can be found in the repository:
+
+    https://github.com/10clouds/Mturk-Tracker/tree/master/doc
+
 How does it work?
 =================
 
@@ -52,22 +67,22 @@ This option is the easiset mean of installing the application on a target
 machine, however it will install all the components as there is currently no
 mean of excluding certain modules.
 
-Currently deployment scripts should cover everything you need to setup the 
-project. Only basic system configuration is required. First, create an user 
-account which will have ownership to the project files and run ssh-server 
+Currently deployment scripts should cover everything you need to setup the
+project. Only basic system configuration is required. First, create an user
+account which will have ownership to the project files and run ssh-server
 deamon.
 
-Most things in the project are parametrized. The project configuration is based 
-on json files that contain these parameters. Code responsible for deployment 
-process exists in ``path/to/Mturk-Tracker/deployment/`` subdirectory. There is 
-a fabric script responsible for most of deployment logic and templates of 
-configuration files that are filled with deployment parameters. 
+Most things in the project are parametrized. The project configuration is based
+on json files that contain these parameters. Code responsible for deployment
+process exists in ``path/to/Mturk-Tracker/deployment/`` subdirectory. There is
+a fabric script responsible for most of deployment logic and templates of
+configuration files that are filled with deployment parameters.
 
-Two major files that contains deployment parameters: 
+Two major files that contains deployment parameters:
 
-#. ``default.json`` - contains settings common across all project instances, 
+#. ``default.json`` - contains settings common across all project instances,
    such as the repository URL.
-#. ``site-name.json`` - contains settings specific for certain project. It also 
+#. ``site-name.json`` - contains settings specific for certain project. It also
    contains sensitive data thus it does not exist in the repository.
 
 Data from this files is used for generation of resultant configuration files
@@ -76,8 +91,8 @@ and scripts on the destination machine.
 The structure of ``default.json`` file
 --------------------------------------
 
-This file exists in the repository. It contains parameters common for all 
-project instances. Only several parameters are usually overriden by 
+This file exists in the repository. It contains parameters common for all
+project instances. Only several parameters are usually overriden by
 ``site-name.json`` that is described in the next section.
 
 The structure of ``site-name.json`` file
@@ -87,7 +102,7 @@ This file should contain instance-specyfic deployment parameters:
 
 * ``projects_dir`` - path to the destination directory where the project files
   are to be stored;
-* ``settings_name`` - name of the resultant settings file, that will be created 
+* ``settings_name`` - name of the resultant settings file, that will be created
   from settings template.
 * ``locals_path`` - path to the additional custom Django settings file that you
   want to upload on the destination machine;
@@ -96,9 +111,9 @@ This file should contain instance-specyfic deployment parameters:
 * ``db_password`` - password for the crawler database user;
 * ``solr_db_user`` - name of the database user used by Solr during data import;
 * ``sorl_db_password`` - password for the Solr database user;
-* ``pip_requirements`` - list files that contanins set of Python packages to be 
+* ``pip_requirements`` - list files that contanins set of Python packages to be
   installed by pip;
-* ``system_requirements`` - files that constains lists of system packages to be 
+* ``system_requirements`` - files that constains lists of system packages to be
   installed by system package manager;
 * ``branch`` - name of the repository branch;
 * ``pip_cache`` - path to the directory where pip packages are cached on the
@@ -128,7 +143,7 @@ The structure of custom Django settings file
 For better customization there is possibility to upload the file called
 ``local.py`` that can override some project parameters (for example in this
 way you can disable page caching).
-This file is uploaded during each deployment to the settings directory. It is 
+This file is uploaded during each deployment to the settings directory. It is
 imported to the main Django settings file.
 
 Example local settings file may look like the following:
@@ -164,14 +179,14 @@ If all is already properly configured go to the deployment subdirectory:
 
 	$ cd path/to/Mturk-Tracker/deployment/
 
-and run the fabric script. The following command will install all requirements 
+and run the fabric script. The following command will install all requirements
 (including Python and system packages):
 
 ::
 
 	$ fab deploy:conf_file="path/to/site-name.json",setup_environment=True -H 127.0.0.1 -u user
 
-or you may want to update only project source (for example in order to apply 
+or you may want to update only project source (for example in order to apply
 changes from the repository):
 
 ::
@@ -207,7 +222,7 @@ Python environment
 ------------------
 
 There is a number of python dependencies required for the project to run, see
-files in 
+files in
 https://github.com/10clouds/Mturk-Tracker/blob/new/deployment/files/requirements/.
 
 The easiest way to install and manage python packages is by using pip for
@@ -307,7 +322,7 @@ To generate data that will be displayed on graphs you need to launch scripts::
 Searching in collected crawls
 -----------------------------
 
-Mturk-Tracker gives ability for searching in mturk projects. Internally it 
+Mturk-Tracker gives ability for searching in mturk projects. Internally it
 uses ``Django-haystack`` application which in turn uses ``Solr`` (in version
 3.6.0) indexing server as a backend.
 
@@ -333,7 +348,7 @@ with
     user="your_solr_db_user"
     password="your_solr_db_password"
 
-in file ``path/to/your/solr/solr/en/conf/import_db_hits.xml`` (this is done 
+in file ``path/to/your/solr/solr/en/conf/import_db_hits.xml`` (this is done
 automatically in the case of automatic project setup). Next restart
 Solr server and visit http://127.0.0.1:8983/solr/en/select?q= (an empty xml
 response should be returned).

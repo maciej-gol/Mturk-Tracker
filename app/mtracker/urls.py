@@ -14,7 +14,7 @@ urlpatterns = patterns('mtracker',
     #url(r'^$', 'main.views.index', name='index'),
 
     url(r'^admin/', include(admin.site.urls)),
-
+    url(r'^docs/$', 'docs.views.docs_readme', name='docs_main'),
     (r'^bad/$', bad),
 )
 
