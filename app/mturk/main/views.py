@@ -296,6 +296,11 @@ def hit_group_details(request, hit_group_id):
 
     hit_group = get_object_or_404(HitGroupContent, group_id=hit_group_id)
 
+    from classic import Classify
+    classify = Classify()
+    classify(hit_group)
+
+
     params = {
         'multichart': False,
         'columns': HIT_DETAILS_COLUMNS,
@@ -308,7 +313,7 @@ def hit_group_details(request, hit_group_id):
                 'date': cc['start_time'],
                 'row': (str(cc['hits_available']),),
             }
-            print cc['start_time'], '>>>', cc['hits_available']
+
     hit_group = get_object_or_404(HitGroupContent, group_id=hit_group_id)
     dicts = query_to_dicts(
                 """ select start_time, hits_available from hits_mv
