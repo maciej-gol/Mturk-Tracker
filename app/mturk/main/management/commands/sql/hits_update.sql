@@ -30,4 +30,16 @@ begin
     end if;
     i := i+1;
   END LOOP;
+
+  RAISE NOTICE 'Delecting hits_temp records from % to %.', istart, iend;
+
+  TRUNCATE hits_temp;
+
+  -- DELETE FROM hits_temp
+  --   WHERE crawl_id IN (
+  --     SELECT id FROM main_crawl
+  --     WHERE start_time BETWEEN istart AND iend
+  --   );
+
+  RAISE NOTICE 'Finishing.';
 END;

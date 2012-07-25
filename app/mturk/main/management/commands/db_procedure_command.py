@@ -29,6 +29,8 @@ class DBProcedureCommand(BaseCommand):
             help='Hours to look back for records.'),
         make_option('--pidfile', dest="pidfile", default=None,
             help='The pidfile to use.'),
+        make_option('--logger', dest="logger", default=None,
+            help='The logger instance to use.'),
         )
 
     def process_args(self, options):
@@ -60,6 +62,8 @@ class DBProcedureCommand(BaseCommand):
         self.start = start
         self.end = end
 
+        self.logger = logging.getLogger(options.get('logger') or __name__)
+
         if options.get('verbosity') == 0:
             self.logger.setLevel(logging.WARNING)
 
@@ -87,6 +91,8 @@ class DBProcedureCommand(BaseCommand):
                 self.proc_name, self.start, self.end, time.time() - start_time))
 
         except Exception as e:
-            log.exception(e)
+            self.logger.exception(e)
         finally:
             pid.remove_pid()
+            if options.get('verbosity') == 0:
+                self.logger.setLevel(logging.DEBUG)
