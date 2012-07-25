@@ -57,7 +57,11 @@
         <thead>
             <tr>
                 <th style="vertical-align: top;">Requester</th>
-                <td>{{ hit_group.requester_name }}</td>
+                <td>
+                    <a href="{% url requester_details hit_group.requester_id %}">
+                        {{ hit_group.requester_name }}
+                    </a>
+                </td>
             </tr>
             <tr>
                 <th style="vertical-align: top;">Reward</th>

@@ -70,13 +70,13 @@ class DB(object):
                 INSERT INTO main_hitgroupcontent(
                     reward, description, title, requester_name, qualifications,
                     time_alloted, html, keywords, requester_id, group_id,
-                    group_id_hashed, occurrence_date, first_crawl_id
+                    group_id_hashed, occurrence_date, first_crawl_id, is_public
                 )
                 VALUES (
                     %(reward)s, %(description)s, %(title)s, %(requester_name)s,
                     %(qualifications)s, %(time_alloted)s, %(html)s, %(keywords)s,
                     %(requester_id)s, %(group_id)s, %(group_id_hashed)s,
-                    %(occurrence_date)s, %(first_crawl_id)s
+                    %(occurrence_date)s, %(first_crawl_id)s, %(is_public)s
                 )''', data)
             self.curr.execute("SELECT currval('main_hitgroupcontent_id_seq')")
         except psycopg2.IntegrityError as e:

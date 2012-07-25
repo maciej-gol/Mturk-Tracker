@@ -295,6 +295,7 @@ def requester_details(request, requester_id):
 def hit_group_details(request, hit_group_id):
 
     hit_group = get_object_or_404(HitGroupContent, group_id=hit_group_id)
+
     params = {
         'multichart': False,
         'columns': HIT_DETAILS_COLUMNS,
