@@ -52,14 +52,24 @@
     </div>
 </div>
 
-<div class="span-10">
+<div class="span-12">
     <table>
         <thead>
+            <tr>
+                <th style="vertical-align: top;">Title</th>
+                <td>
+                    {{ hit_group.title|safe }}
+                </td>
+            </tr>
+            <tr>
+                <th style="vertical-align: top;">Description</th>
+                <td>{{ hit_group.description|safe }}</td>
+            </tr>
             <tr>
                 <th style="vertical-align: top;">Requester</th>
                 <td>
                     <a href="{% url requester_details hit_group.requester_id %}">
-                        {{ hit_group.requester_name }}
+                        {{ hit_group.requester_name|safe }}
                     </a>
                 </td>
             </tr>
@@ -76,20 +86,12 @@
                 <td>{{ hit_group.occurrence_date }}</td>
             </tr>
             <tr>
-                <th style="vertical-align: top;">Description</th>
-                <td>{{ hit_group.description }}</td>
-            </tr>
-            <tr>
                 <th style="vertical-align: top;">Keywords</th>
                 <td>{{ hit_group.keywords }}</td>
             </tr>
             <tr>
                 <th style="vertical-align: top;">Qualifications</th>
                 <td>{{ hit_group.qualifications }}</td>
-            </tr>
-            <tr>
-                <th style="vertical-align: top;">Class</th>
-                <td>{{ group }}
             </tr>
         </thead>
     </table>

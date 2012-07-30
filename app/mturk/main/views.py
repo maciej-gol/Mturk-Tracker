@@ -296,15 +296,14 @@ def hit_group_details(request, hit_group_id):
 
     hit_group = get_object_or_404(HitGroupContent, group_id=hit_group_id)
 
-    from classic import Classify
-    classify = Classify()
-    classify(hit_group)
-
+    from classification import Classificator
+    classificator = Classificator()
+    print '>>>>', classificator(hit_group)
 
     params = {
         'multichart': False,
         'columns': HIT_DETAILS_COLUMNS,
-        'title': '#Hits'
+        'title': '#Hits',
     }
 
     def hit_group_details_data_formater(input):
