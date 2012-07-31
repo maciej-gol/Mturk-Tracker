@@ -1,12 +1,13 @@
 @charset "utf-8";
 
-body {
+html, body {
     background:url(../img/mturktracker_right_line_bg.png) 20px top scroll repeat-y;
     font-family: Arial, Helvetica, sns-serif;
     font-size:12px;
     line-height:16px;
     margin:0;
     padding:0;
+    height: 100%;
 }
 
 h2 {
@@ -112,7 +113,8 @@ a {
     display:block;
     margin: 20px 0 0 0;
     color:#075b8d;
-    padding:10px 10px 10px 70px;
+    padding: 10px 10px 0 70px;
+    height: 50px; /* .push must be the same height as .footer */
 }
 .footer a {
     color:#1b7eb8;
@@ -121,6 +123,19 @@ a {
     margin-bottom:10px;
 }
 
+/* Sticky footer
+    keep wrapper margin and push height equal to the total footers size,
+    including margins/parddings/borders
+*/
+.wrapper {
+    min-height: 100%;
+    height: auto !important;
+    height: 100%;
+    margin: 0 auto -81px;
+}
+.push {
+    height: 81px;
+}
 
 table.result thead tr {
     background:url(../img/m_header_bg.png) bottom  repeat-x;
