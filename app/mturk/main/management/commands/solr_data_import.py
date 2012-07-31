@@ -27,7 +27,7 @@ class SolrDataImportCommand(SolrCommand):
 
     DEFAULT_CLEAN = False
     DEFAULT_VERBOSE = False
-    DEFAULT_CLEAR_QUEUE = True
+    DEFAULT_CLEAR_QUEUE = False
 
     INDEX_QUEUE_BATCH_SIZE = 1000
 
@@ -41,6 +41,7 @@ class SolrDataImportCommand(SolrCommand):
                     default=DEFAULT_CLEAN, help=u"specifies wheter to clean up "
                     "index before the indexing is started"),
         make_option("--clear-queue", dest="clear_queue", action="store_true",
+                    default=DEFAULT_CLEAR_QUEUE,
                     help=u"specifies wheter to clear index queue before the "
                     "indexing is started"),
         make_option("--older-than", dest="older_than", type="int", default=2,
