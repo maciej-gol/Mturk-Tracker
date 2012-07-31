@@ -70,12 +70,15 @@ DEFAULT_SEARCH_IN = SEARCH_IN_FIELDS # all fields
 DEFAULT_SORT_BY = SORT_BY_CHOICES[0][0] # title_sort_asc
 DEFAULT_HITS_PER_PAGE = HITS_PER_PAGES[0] # 5
 
+
 class HitGroupContentSearchForm(SearchForm):
     search_in = forms.MultipleChoiceField(choices=SEARCH_IN_CHOICES,
                                           required=False)
     sort_by = forms.ChoiceField(choices=SORT_BY_CHOICES, required=False)
-    hits_per_page = forms.ChoiceField(choices=HITS_PER_PAGE_CHOICES,
-                                      required=False)
+    hits_per_page = forms.CharField(required=False, widget=forms.HiddenInput,
+        initial=HITS_PER_PAGES[0][0])
+
+    hits_per_page_choices = HITS_PER_PAGE_CHOICES
 
     def cleaned_data_or_empty(self):
         try:

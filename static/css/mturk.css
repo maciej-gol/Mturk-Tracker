@@ -4,7 +4,6 @@ html, body {
     background:url(../img/mturktracker_right_line_bg.png) 20px top scroll repeat-y;
     font-family: Arial, Helvetica, sns-serif;
     font-size:12px;
-    line-height:16px;
     margin:0;
     padding:0;
     height: 100%;
@@ -72,6 +71,8 @@ a {
     border:1px solid #83adc6;
     font-size:14px;
     line-height:14px;
+    margin: 0.5em 0;
+    padding: 1px;
  }
 #form_submit{ background:#075b8d;
     border:1px solid #075b8d;
@@ -109,7 +110,7 @@ a {
 
 .footer {
     border-top: 1px solid #b2d2e4;
-    background:#dfeaf0 url(../img/m_footer_bg.png) no-repeat 17px 10px ;
+    background: #dfeaf0 url(../img/m_footer_bg.png) no-repeat 17px 10px ;
     display:block;
     margin: 20px 0 0 0;
     color:#075b8d;
@@ -163,4 +164,28 @@ p.error {
     width:300px;
     height:30px;
     border:none;
+}
+div.chzn-container {
+    vertical-align: middle;
+}
+div.search-form-row label, select, span{
+    padding: 5px;
+}
+div.search-results {
+    padding: 5px;
+}
+div.search-pagination {
+    background: #dfeaf0;
+    margin: 20px 0 0 0;
+    padding: 8px 0 8px 14px
+    width: 100%;
+}
+.search-results-col1 {
+    width: 50%;
+}
+.search-results-col2 {
+    width: 30%;
+}
+.search-results-col3 {
+    width: 20%;
 }
