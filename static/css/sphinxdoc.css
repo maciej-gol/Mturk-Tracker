@@ -29,9 +29,10 @@ h1 {
 }
 
 .padded {
-    padding: 4px;
+    padding: 4px 0px 4px 0px;
 }
 
 hr {
     margin: 0;
 }
+
