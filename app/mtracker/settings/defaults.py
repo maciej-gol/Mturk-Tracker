@@ -132,8 +132,8 @@ LOGGING = {
     'disable_existing_loggers': False,
     'formatters': {
         'verbose': {
-            'format': (' mturk-tracker: %(name)s %(levelname)s '
-                '%(funcName)s:%(lineno)d %(message)s')
+            'format': ('%(asctime)s %(name)s %(levelname)s '
+                       '%(funcName)s:%(lineno)d %(message)s')
         },
         'simple': {
             'format': '%(levelname)s %(message)s'
@@ -186,6 +186,14 @@ LOGGING = {
             'maxBytes': '16777216',  # 16megabytes
             'formatter': 'simple'
         },
+        'solr_log': {
+            'level': LOG_LEVEL,
+            'class': 'logging.handlers.RotatingFileHandler',
+            # Override this in local settings
+            'filename': os.path.join(ROOT_PATH, 'arrivals.log'),
+            'maxBytes': '16777216',  # 16megabytes
+            'formatter': 'verbose'
+        },
         # 'sentry': {
         #     'level': 'WARNING',
         #     'class': 'raven.contrib.django.handlers.SentryHandler',
@@ -210,7 +218,12 @@ LOGGING = {
             'handlers': ['arrivals_log', 'console'],
             'level': LOG_LEVEL,
             'propagate': True,
-        }
+        },
+        'mturk.solr': {
+            'handlers': ['solr_log', 'console'],
+            'level': LOG_LEVEL,
+            'propagate': True,
+        },
     },
 }
 

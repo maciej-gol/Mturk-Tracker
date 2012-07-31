@@ -1,18 +1,13 @@
 import logging
-import time
 import urllib2
 
 from xml.dom import minidom
-from optparse import make_option
 
 from django.conf import settings
 from django.core.management.base import BaseCommand
 
-from solr_command import SolrCommand
 
-
-logger = logging.getLogger(__name__)
-
+logger = logging.getLogger('mturk.solr')
 
 class SolrStatusParser(object):
 
@@ -68,10 +63,9 @@ class SolrStatusParser(object):
         return "\n".join(result_list)
 
 
-class SolrStatusCommand(SolrCommand):
+class SolrStatusCommand(BaseCommand):
 
     def handle(self, *args, **options):
-        self.setup_logger(logger)
         status_url = "{}/import_db_hits?command=status".format(settings.SOLR_PATH)
         response = urllib2.urlopen(status_url)
         solr_info = SolrStatusParser(response.read())
