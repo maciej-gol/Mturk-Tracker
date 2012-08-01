@@ -1,40 +1,192 @@
 @charset "utf-8";
 
-body { background:url(../img/m_bg.png) center top no-repeat; font-family:Arial, Helvetica, sans-serif; font-size:12px; line-height:16px; margin:0; padding:0;}
+html, body {
+    background:url(../img/mturktracker_right_line_bg.png) left top scroll repeat-y;
+    font-family: Arial, Helvetica, sns-serif;
+    font-size:12px;
+    margin:0;
+    padding:0;
+    height: 100%;
+}
 
-h2 { font-size:18px; line-height:24px; color:#075b8d;}
-h2 span.no { background:url(../img/m_h_bg.png) center top no-repeat; text-align:center; padding:1px 8px 1px 8px; line-height:24px; font-size:12px; color:#928d11; position:relative; bottom:2px;}
-a { color:#075b8d;}
+h2 {
+    font-size: 18px;
+    line-height: 24px;
+    color: #075b8d;
+}
+h2 span.no {
+    background: url(../img/m_h_bg.png) center top no-repeat;
+    text-align: center;
+    padding: 1px 8px 1px 8px;
+    line-height: 24px;
+    font-size: 12px;
+    color: #928d11;
+    position: relative;
+    bottom: 2px;
+ }
+a {
+    color: #075b8d;
+}
 
-.header { background:url(../img/m_header_bg.png) bottom  repeat-x; height:92px; overflow:hidden; margin:0 0 10px 0;}
-.menu {}
-.menu ul{ margin:20px 0 0 0; padding:0; list-style:none; font-size:18px;  float:left;}
-.menu ul li{ float:left; clear:none; margin:0;}
-.menu ul li a{ display:block; padding:20px 6px 40px 6px; margin:2px; color:#004f84; text-decoration:none; }
-.menu ul li.active a{ background:#fff; padding:19px 5px 40px 5px;  border:1px solid #bfbfbf; border-bottom:none; color:#004f84; }
+.logo img {
+    margin-top: 30px;
+}
+.header {
+    background: url(../img/m_header_bg.png) bottom  repeat-x;
+    height:92px;
+    overflow:hidden;
+    /*margin:0 0 10px 0;*/
+}
+.menu {
+    background:url(../img/mturktracker_right_bg.png) left top no-repeat;
+    width: 210px;
+    min-height: 520px;
+    margin: 0 0 0 10px;
+}
+.menu ul {
+    width: 210px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-size: 18px;
+    float: left;
+}
+.menu ul li a {
+    display: block;
+    padding: 15px 20px 15px 40px;
+    color: #004f84;
+    text-decoration: none;
+}
+.menu ul li.active a {
+    background: url(../img/mturktracker_menu_bg.png) left bottom repeat-x;
+    font-weight: bold;
+    color: #004f84;
+}
 
-#form_query, #form_date_from, #form_date_to { background:url(../img/m_input_bg.png) bottom  repeat-x; border:1px solid #83adc6; font-size:14px; line-height:14px;}
-#form_submit{ background:#075b8d; border:1px solid #075b8d; color:#fff; font-size:14px; line-height:14px; font-weight:normal;}
+.content {
+    margin-top: 40px;
+}
 
-.menu ul li.search { padding: 0 0 0 20px;}
-.menu ul li.search #form_query { margin-top:15px; padding:3px; line-height:18px; font-size:18px; color:#075b8d; width:140px; background:url(../img/m_search_bg.png) center left no-repeat; padding-left:38px; }
+#form_query, #form_date_from, #form_date_to {
+    background:url(../img/m_input_bg.png) bottom  repeat-x;
+    border:1px solid #83adc6;
+    font-size:14px;
+    line-height:14px;
+    margin: 0.5em 0;
+    padding: 1px;
+ }
+#form_submit{ background:#075b8d;
+    border:1px solid #075b8d;
+    color:#fff;
+    font-size:14px;
+    line-height:14px;
+    font-weight:normal;
+}
 
-.span-12.about  { margin:50px 0 0 0;}
-.span-12.about h2 { font-size:30px; line-height:30px;}
-.span-12.about p, .span-12.about ul li { font-size:18px; line-height:24px; color: #666;}
-.span-12.about ul { list-style:none; margin:0; padding:0;}
-.span-12.about a { color:#005387; }
+.menu ul li.search {
+    /*padding: 0 0 0 20px;*/
+}
+.menu ul li.search #form_query {
+    margin: 15px 0 0 40px;
+    padding:3px;
+    line-height:18px;
+    font-size:18px;
+    color:#075b8d;
+    width:100px;
+    background:url(../img/m_search_bg.png) center left no-repeat;
+    padding-left:38px;
+}
+
+.about  { margin:50px 0 0 0;}
+.about h2 {
+    font-size:30px;
+    line-height:30px;
+    margin-bottom: 22.5px;
+}
+.about p, .about ul li { font-size:18px; line-height:24px; color: #666;}
+.about ul { list-style:none; margin:0; padding:0;}
+.about a { color:#005387; }
 
 .datepick {}
 
-.span-24.footer { border-top: 1px solid #b2d2e4; background:#dfeaf0 url(../img/m_footer_bg.png) no-repeat 17px 10px ; display:block; margin:20px 0 0 0 ; color:#075b8d; width: 870px; padding:10px 10px 0px 70px; }
-.span-24.footer a{ color:#1b7eb8; }
-.span-24.footer p{ margin-bottom:10px; }
+.footer {
+    border-top: 1px solid #b2d2e4;
+    background: #dfeaf0 url(../img/m_footer_bg.png) no-repeat 17px 10px ;
+    display:block;
+    margin: 20px 0 0 0;
+    color:#075b8d;
+    padding: 10px 10px 0 70px;
+    height: 50px; /* .push must be the same height as .footer */
+}
+.footer a {
+    color:#1b7eb8;
+}
+.footer p {
+    margin-bottom:10px;
+}
 
+/* Sticky footer
+    keep wrapper margin and push height equal to the total footers size,
+    including margins/parddings/borders
+*/
+.wrapper {
+    min-height: 100%;
+    height: auto !important;
+    height: 100%;
+    margin: 0 auto -81px;
+}
+.push {
+    height: 81px;
+}
 
-table.result thead tr { background:url(../img/m_header_bg.png) bottom  repeat-x; }
-table.result thead tr td a{ padding:5px 0 5px 0; display:block; color:#075b8d; }
+table.result thead tr {
+    background:url(../img/m_header_bg.png) bottom  repeat-x;
+}
+table.result thead tr td a {
+    padding:5px 0 5px 0;
+    display:block;
+    color:#075b8d;
+}
 
-div#datepick { width:325px;}
-div#datepick img { position:relative; top:6px; margin:0 5px 0 0;}
-p.error { display:block; padding:15px 0 0 45px; background: url(../img/m_error.png) no-repeat; width:300px; height:30px; border:none; }
+div#datepick {
+    width:350px;
+    float: left;
+    vertical-align: middle;
+}
+div#datepick img {
+    position:relative;
+    top:6px;
+    margin:0 5px 0 0;
+}
+p.error {
+    display:block;
+    padding:15px 0 0 45px;
+    background: url(../img/m_error.png) no-repeat;
+    width:300px;
+    height:30px;
+    border:none;
+}
+div.chzn-container {
+    vertical-align: middle;
+}
+div.search-form-row label, select, span{
+    padding: 5px;
+}
+div.search-results {
+    padding: 5px;
+}
+div.search-pagination {
+    background: #dfeaf0;
+    margin: 20px 0 0 0;
+    padding: 8px 0 8px 14px
+    width: 100%;
+}
+.search-results-col1 {
+    width: 50%;
+}
+.search-results-col2 {
+    width: 30%;
+}
+.search-results-col3 {
+    width: 20%;
+}

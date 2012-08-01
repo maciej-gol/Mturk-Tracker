@@ -39,7 +39,8 @@ def text_row_formater(input):
 
         yield "["+','.join(row)+"]"
 
-@register.simple_tag
+
+@register.inclusion_tag('graphs/google_timeline.html', takes_context=True)
 def google_timeline(context, columns, data, multirow=False, adjust_zoom=False):
     '''
     http://code.google.com/apis/visualization/documentation/gallery/annotatedtimeline.html
@@ -52,10 +53,7 @@ def google_timeline(context, columns, data, multirow=False, adjust_zoom=False):
         }
     return ctx
 
-@register.simple_tag
+
+@register.inclusion_tag('graphs/google_table.html', takes_context=True)
 def google_table(context, columns, data):
-    return {'data':text_row_formater(data), 'columns':columns}
-
-
-register.inclusion_tag('graphs/google_timeline.html', takes_context=True)(google_timeline)
-register.inclusion_tag('graphs/google_table.html', takes_context=True)(google_table)
+    return {'data': text_row_formater(data), 'columns': columns}

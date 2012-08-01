@@ -7,7 +7,7 @@
             {DOMobj: document.getElementById('chart_div_hits'), dataType: 'hits', color: 'blue'},
             {DOMobj: document.getElementById('chart_div_rewards'), dataType: 'rewards', color: 'red'},
             {DOMobj: document.getElementById('chart_div_projects'), dataType: 'projects', color: 'green'},
-            {DOMobj: document.getElementById('chart_div_spam'), dataType: 'spam', color: 'blue'}            
+            {DOMobj: document.getElementById('chart_div_spam'), dataType: 'spam', color: 'blue'}
         ]
 
         google.setOnLoadCallback(function () {
@@ -54,33 +54,29 @@
     });
     </script>
 
-    <div id="charts">
-    
-        <div class="chartBox">
+    <div class="row-fluid" id="charts">
+
+        <div class="span6">
             <h2><span class="no">1</span> Hits</h2>
             <div id="chart_div_hits" style="height: 300px;"></div>
         </div>
-        
-        <div class="chartBox">
+
+        <div class="span6">
             <h2><span class="no">2</span> Rewards</h2>
             <div id="chart_div_rewards" style="height: 300px;"></div>
         </div>
-
-        <div style="clear: both;"></div>
-
-        
-        <div class="chartBox">
+    </div>
+    <div class="row-fluid" id="charts">
+        <div class="span6">
             <h2><span class="no">3</span> Projects</h2>
             <div id="chart_div_projects" style="height: 300px;"></div>
         </div>
 
-        <div class="chartBox">
+        <div class="span6">
             <h2><span class="no">4</span> Spam (Experimental - Beta)</h2>
             <div id="chart_div_spam" style="height: 300px;"></div>
         </div>
-        
-        <div style="clear: both;"></div>
-        
+
     </div>
 
 {% else %}
@@ -99,7 +95,7 @@
                 {% for row in data %}
                     data.addRow({{row}});
                 {% endfor %}
-                
+
                 {% if adjust_zoom %}
                 /* List data from the last week */
                 var currentdate = null;
@@ -123,6 +119,9 @@
             }
     </script>
 
-    <div id="chart_div" style="height: 600px;"></div>
-
+    <div class="row-fluid" id="charts">
+        <div class="span12">
+            <div id="chart_div" style="height: 600px;"></div>
+        </div>
+    </div>
 {% endif %}
