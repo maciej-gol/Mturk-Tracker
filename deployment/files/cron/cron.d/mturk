@@ -7,17 +7,12 @@ SCRIPT_NAME="manage_py_exec_silent"
 30      *       *       *       *       root    cd $PROJECT_ROOT; /$SCRIPT_ROOT/$SCRIPT_NAME db_remove_bad_crawl_related --fix-interrupted;
 5       *       *       *       *       root    cd $PROJECT_ROOT; /$SCRIPT_ROOT/$SCRIPT_NAME db_refresh_mviews;
 15      *       *       *       *       root    cd $PROJECT_ROOT; /$SCRIPT_ROOT/$SCRIPT_NAME db_update_agregates; /$SCRIPT_ROOT/$SCRIPT_NAME classify_spam --limit=40;
+30      *       *       *       *       root    cd $PROJECT_ROOT; /$SCRIPT_ROOT/$SCRIPT_NAME db_arrivals --hours=2;
+40      *       *       *       *       root    cd $PROJECT_ROOT; /$SCRIPT_ROOT/$SCRIPT_NAME db_update_daily_stats;
 
-#5      *       *       *       *       root    cd $PROJECT_ROOT; /$SCRIPT_ROOT/$SCRIPT_NAME db_hits_temp_population --hours=2;
-#15      *       *       *       *       root    cd $PROJECT_ROOT; /$SCRIPT_ROOT/$SCRIPT_NAME hits_update --hours=2;
-#30      *       *       *       *       root    cd $PROJECT_ROOT; /$SCRIPT_ROOT/$SCRIPT_NAME db_reward_population --hours=2;
-45      *       *       *       *       root    cd $PROJECT_ROOT; /$SCRIPT_ROOT/$SCRIPT_NAME db_update_daily_stats;
-
-#15		*		*		*		*		root 	cd $PROJECT_ROOT; /$SCRIPT_ROOT/$SCRIPT_NAME db_update_agregates; /$SCRIPT_ROOT/$SCRIPT_NAME db_update_diffs --limit=20; /$SCRIPT_ROOT/$SCRIPT_NAME classify_spam --limit=40;
-#25      1       *       *       *       root    cd $PROJECT_ROOT; /$SCRIPT_ROOT/$SCRIPT_NAME db_calculate_daily_stats
 #15      2       *       *       *       root    cd $PROJECT_ROOT; /$SCRIPT_ROOT/$SCRIPT_NAME solr_sync --clean-queue
 #45      *       *       *       *       root    cd $PROJECT_ROOT; /$SCRIPT_ROOT/$SCRIPT_NAME solr_sync
-#
+
 15      2       *       *       *       root    cd $PROJECT_ROOT; /$SCRIPT_ROOT/$SCRIPT_NAME solr_data_import --import-type="full-import" --clean-index --clean-queue
 45      *       *       *       *       root    cd $PROJECT_ROOT; /$SCRIPT_ROOT/$SCRIPT_NAME solr_data_import --import-type="delta-import" --clean-index --clean-queue
 
