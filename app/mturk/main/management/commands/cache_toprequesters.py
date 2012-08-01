@@ -28,12 +28,12 @@ class Command(BaseCommand):
         key = 'TOPREQUESTERS_CACHED'
 
         result = cache.get(key)
-	force = options['force']
+        force = options['force']
         if result is not None and not force:
             log.info("toprequesters still in cache...")
             return
-	
-	if not force:
+
+        if not force:
             log.info("toprequesters missing, refetching")
         else:
             log.info("refetching toprequesters")

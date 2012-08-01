@@ -4,7 +4,7 @@ import time
 from django.conf import settings
 from django.core.cache import cache
 from django.core.urlresolvers import reverse
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404
 from django.views.generic.simple import direct_to_template
 from django.views.decorators.cache import cache_page, never_cache
 from haystack.views import SearchView
@@ -17,30 +17,30 @@ from mturk.main.models import HitGroupContent
 from mturk.main.templatetags.graph import text_row_formater
 from utils.sql import query_to_dicts, query_to_tuples, execute_sql
 
-GENERAL_COLUMNS =  (
-               ('date','Date'),
-               ('number','#HITs'),
-               ('number','Rewards($)'),
-               ('number','#Projects'),
-               ('number','#Spam Projects'),
+GENERAL_COLUMNS = (
+    ('date', 'Date'),
+    ('number', '#HITs'),
+    ('number', 'Rewards($)'),
+    ('number', '#Projects'),
+    ('number', '#Spam Projects'),
 )
 
-DEFAULT_COLUMNS =  (
-               ('date','Date'),
-               ('number','#HITs'),
-               ('number','Rewards($)'),
-               ('number','#Projects'),
+DEFAULT_COLUMNS = (
+    ('date', 'Date'),
+    ('number', '#HITs'),
+    ('number', 'Rewards($)'),
+    ('number', '#Projects'),
 )
 
-ARRIVALS_COLUMNS =  (
-               ('date','Date'),
-               ('number','#HITs'),
-               ('number','Rewards($)'),
+ARRIVALS_COLUMNS = (
+    ('date', 'Date'),
+    ('number', '#HITs'),
+    ('number', 'Rewards($)'),
 )
 
 HIT_DETAILS_COLUMNS = (
-                ('date', 'Date'),
-                ('number', '#HITs'),
+    ('date', 'Date'),
+    ('number', '#HITs'),
 )
 
 
@@ -52,7 +52,8 @@ def data_formater(input):
     for cc in input:
         yield {
                 'date': cc['start_time'],
-                'row': (str(cc['hits']), str(cc['reward']), str(cc['count']), str(cc['spam_projects'])),
+                'row': (str(cc['hits']), str(cc['reward']),
+                    str(cc['count']), str(cc['spam_projects'])),
         }
 
 
@@ -109,7 +110,7 @@ def arrivals(request):
 
     params = {
         'multichart': False,
-        'columns':ARRIVALS_COLUMNS,
+        'columns': ARRIVALS_COLUMNS,
         'title': 'New Tasks/HITs/$$$ per day'
     }
 
@@ -133,11 +134,12 @@ def arrivals(request):
     data = arrivals_data_formater(query_to_dicts('''
         select date as "start_time", arrivals as "hits", arrivals_value as "reward"
         from main_daystats where date >= '%s' and date <= '%s'
-    ''' % (date_from,date_to)))
+    ''' % (date_from, date_to)))
 
     params['data'] = data
 
     return direct_to_template(request, 'main/graphs/timeline.html', params)
+
 
 @cache_page(ONE_DAY)
 def completed(request):
@@ -160,7 +162,7 @@ def completed(request):
     data = data_formater(query_to_dicts('''
         select date as "start_time", day_start_hits - day_end_hits as "hits", day_start_reward - day_end_reward as "reward", day_start_projects - day_end_projects as "count"
             from main_daystats where day_end_hits != 0 and date >= '%s' and date <= '%s'
-    ''' % (date_from,date_to)))
+    ''' % (date_from, date_to)))
 
     params['data'] = data
 
@@ -168,14 +170,14 @@ def completed(request):
 
 
 def topreq_data(days):
-    start_time = time.time()
     firstcrawl = execute_sql("""
         SELECT crawl_id
         FROM hits_mv
         WHERE
             start_time > %s
         ORDER BY start_time ASC
-        LIMIT 1;""", datetime.date.today() - datetime.timedelta(int(days))).fetchall()[0][0]
+        LIMIT 1;""", datetime.date.today() - datetime.timedelta(int(days))
+        ).fetchall()[0][0]
 
     return list(query_to_tuples("""
         SELECT
@@ -186,12 +188,12 @@ def topreq_data(days):
             coalesce(sum(mv.hits_available*h.reward), 0) as "reward",
             max(h.occurrence_date) as "last_posted"
         FROM
-                main_hitgroupcontent h
-                LEFT JOIN main_requesterprofile p ON h.requester_id = p.requester_id
-                LEFT JOIN (
-                    SELECT group_id, crawl_id, hits_available from
-                    hits_mv where crawl_id> %s
-                ) mv ON (h.group_id=mv.group_id and h.first_crawl_id=mv.crawl_id)
+            main_hitgroupcontent h
+            LEFT JOIN main_requesterprofile p ON h.requester_id = p.requester_id
+            LEFT JOIN (
+                SELECT group_id, crawl_id, hits_available from
+                hits_mv where crawl_id> %s
+            ) mv ON (h.group_id=mv.group_id and h.first_crawl_id=mv.crawl_id)
             WHERE
                 h.first_crawl_id > %s
                 AND coalesce(p.is_public, true) = true
@@ -200,12 +202,10 @@ def topreq_data(days):
             limit 1000;""" % (firstcrawl, firstcrawl)))
 
 
-
 @never_cache
 def top_requesters(request):
     if request.user.is_superuser:
         return admin.top_requesters(request)
-
 
     key = 'TOPREQUESTERS_CACHED'
     # check cache
@@ -215,19 +215,22 @@ def top_requesters(request):
         def row_formatter(input):
             for cc in input:
                 row = []
-                row.append('<a href="%s">%s</a>' % (reverse('requester_details',kwargs={'requester_id':cc[0]}) ,cc[1]))
-                row.append('<a href="https://www.mturk.com/mturk/searchbar?requesterId=%s" target="_mturk">%s</a> (<a href="http://feed.crowdsauced.com/r/req/%s">RSS</a>)'
-                           % (cc[0],cc[0],cc[0]) )
+                row.append('<a href="%s">%s</a>' % (
+                    reverse('requester_details',
+                        kwargs={'requester_id': cc[0]}), cc[1]))
+                row.append(('<a href="https://www.mturk.com/mturk/searchbar?'
+                    'requesterId=%s" target="_mturk">%s</a> '
+                    '(<a href="http://feed.crowdsauced.com/r/req/%s">RSS</a>)')
+                           % (cc[0], cc[0], cc[0]))
                 row.extend(cc[2:6])
                 yield row
 
-
         columns = (
-            ('string','Requester ID'),
-            ('string','Requester'),
-            ('number','#Task'),
-            ('number','#HITs'),
-            ('number','Rewards'),
+            ('string', 'Requester ID'),
+            ('string', 'Requester'),
+            ('number', '#Task'),
+            ('number', '#HITs'),
+            ('number', 'Rewards'),
             ('datetime', 'Last Posted On')
         )
         ctx = {
@@ -239,6 +242,7 @@ def top_requesters(request):
 
     return _top_requesters(request)
 
+
 def requester_details(request, requester_id):
     if request.user.is_superuser:
         return admin.requester_details(request, requester_id)
@@ -249,14 +253,19 @@ def requester_details(request, requester_id):
 
             for cc in input:
                 row = []
-                row.append('<a href="%s">%s</a>' % (reverse('hit_group_details',kwargs={'hit_group_id':cc[3]}),cc[0]))
+                row.append('<a href="%s">%s</a>' % (reverse('hit_group_details',
+                    kwargs={'hit_group_id': cc[3]}), cc[0]))
                 row.extend(cc[1:3])
                 yield row
 
-        requster_name = HitGroupContent.objects.filter(requester_id = requester_id).values_list('requester_name',flat=True).distinct()
+        requster_name = HitGroupContent.objects.filter(
+            requester_id=requester_id).values_list(
+            'requester_name', flat=True).distinct()
 
-        if requster_name: requster_name = requster_name[0]
-        else: requster_name = requester_id
+        if requster_name:
+            requster_name = requster_name[0]
+        else:
+            requster_name = requester_id
 
         date_from = (datetime.date.today() - datetime.timedelta(days=30)).isoformat()
 
@@ -283,12 +292,13 @@ def requester_details(request, requester_id):
         ctx = {
             'data': text_row_formater(row_formatter(data)),
             'columns': tuple(columns),
-            'title':'Tasks posted during last 30 days by %s' % (requster_name),
+            'title': 'Tasks posted during last 30 days by %s' % (requster_name),
             'user': request.user,
         }
-        return direct_to_template(request, 'main/requester_details.html',ctx)
+        return direct_to_template(request, 'main/requester_details.html', ctx)
 
     return _requester_details(request, requester_id)
+
 
 #cache_page(ONE_DAY)
 @never_cache
@@ -299,7 +309,6 @@ def hit_group_details(request, hit_group_id):
     from classic import Classify
     classify = Classify()
     classify(hit_group)
-
 
     params = {
         'multichart': False,
@@ -325,6 +334,7 @@ def hit_group_details(request, hit_group_id):
     params['data'] = data
     params['hit_group'] = hit_group
     return direct_to_template(request, 'main/hit_group_details.html', params)
+
 
 def search(request):
 
