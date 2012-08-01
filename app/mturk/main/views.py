@@ -296,10 +296,6 @@ def hit_group_details(request, hit_group_id):
 
     hit_group = get_object_or_404(HitGroupContent, group_id=hit_group_id)
 
-    from classification import Classificator
-    classificator = Classificator()
-    print '>>>>', classificator(hit_group)
-
     params = {
         'multichart': False,
         'columns': HIT_DETAILS_COLUMNS,
@@ -313,7 +309,6 @@ def hit_group_details(request, hit_group_id):
                 'row': (str(cc['hits_available']),),
             }
 
-    hit_group = get_object_or_404(HitGroupContent, group_id=hit_group_id)
     dicts = query_to_dicts(
                 """ select start_time, hits_available from hits_mv
                     where group_id = '{}' order by start_time asc """

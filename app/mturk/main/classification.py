@@ -1,161 +1,160 @@
 """ Simple HIT group classification algorithm based on keywords analysis. """
 
+import re
 import string
 
 from unidecode import unidecode
 
 
-ITERABLE = (list, tuple)
+class DocumentClassifier(object):
 
+    # TODO complete this list.
+    WORDS = set((
+                # Prepositions
+                "aboard", "about", "above", "across", "after", "against",
+				"along", "amid", "among", "anti", "around", "as", "at",
+				"before", "behind", "below", "beneath", "beside", "besides",
+				"between", "beyond", "but", "by", "concerning", "considering",
+				"despite", "down", "during", "except", "excepting",
+				"excluding", "following", "for", "from", "in", "inside",
+				"into", "like", "minus", "near", "of", "off", "on", "onto",
+				"opposite", "outside", "over", "past", "per", "plus",
+				"regarding", "round", "save", "since", "than", "through", "to",
+				"toward", "towards", "under", "underneath", "unlike", "until",
+				"up", "upon", "versus", "via", "with", "within", "without",
 
-GRAPHICS = "graphics"
-AUDIO = "audio"
-VIDEO = "video"
-TEXT = "text"
+                # Conjunctions
+                "although", "and", "far", "if", "long", "soon", "though",
+                "well", "because", "both", "either", "even", "how", "however",
+                "only", "case", "order", "that", "neither", "nor", "now",
+                "once", "or", "provided", "rather", "so", "till", "unless ",
+                "when", "whenever", "where", "whereas", "wherever", "whether",
+                "while", "yet",
 
+                # Articles
+                "the", "a", "an", "some",
 
-class TrainingObject(object):
+                # Other
+                "i", "you", "he", "she", "it", "we", "they",
+                "me", "your", "him", "her", "its", "us", "your", "them",
+                "my", "your", "their", "our",
+        ))
 
-    def __init__(self, title, description, keywords=''):
-        self.title = title
-        self.description = description
-        self.keywords = keywords
-
-_ = TrainingObject
-
-
-TRAINING = (
-    (
-        _("Take a video pretending to be a ferocious dog",
-          "Upload a video of yourself visibly attacking a camera as if you "
-          "were ferocious dog. Of course this requires you to  have a "
-          "recording device."),
-        VIDEO,
-    ),
-    (
-        _("Is the Mac Mini powerful enough to act like a TiVo/digital video "
-          "recorder?", "Answer this question: Is the Mac Mini powerful enough "
-          "to act like a TiVo/digital video recorder?"),
-        VIDEO,
-    ),
-    (
-        _("VOB2MP4 time. On an average computer, how long does it take to "
-          "convert 1 hour of video in VOB format to MP4 format?", "Answer "
-          "this question: VOB2MP4 time. On an average computer, how long does "
-          "it take to convert 1 hour of video in VOB format to MP4 format?"
-        ),
-        VIDEO,
-    ),
-    (
-        _("Mnemonic for International Phonetic Alphabet.", "Answer this "
-          "question: Mnemonic for International Phonetic Alphabet. Is there a "
-          "sentence or two that has all the words in the International "
-          "Phonetic Alphabet (IPA)? The best I've come up with is 'Romeo and "
-          "Juliet played Golf and danced the Foxtrot at the Sierra Hotel in "
-          "India.' which only includes a few of the letters"),
-        TEXT,
-    ),
-    (
-        _("Rewrite this sentence (topic: Surprise visit to my parents' house",
-          "Rewrite this sentence so that its meaning remains approximately "
-          "the same but the wording is substantially changed"),
-        TEXT,
-    ),
-    (
-        _("Sentence Completion Task", "find the noun that best fits the "
-          "context of the sentence"),
-        TEXT,
-    ),
-    (
-        _("Choose which sentence sounds better", "Choose which English "
-          "sentence sounds more natural in 303 pairs of sentences."),
-        TEXT,
-    ),
-    (
-        _("Transcribe Audio Recording A278445 (audio length: 1 hour 2 minutes "
-          "34 seconds", "Transcribe this audio recording to text"),
-        AUDIO,
-    ),
-    (
-        _("Tag Short Audio Clip", "Your task is to listen to this short audio "
-          "recording and tag it. Much like you would tag a picture, but for "
-          "the audio. "),
-        AUDIO,
-    ),
-    (
-        _("Create Audio Transcript from .aiff file", "create audio transcript "
-          "from 5 min 15 second aiff files"),
-        AUDIO,
-    ),
-    (
-        _("Create a 10s mp3 sound clip of a song",
-          "Create a 10s mp3 sound clip of a song, preferably an easily "
-          "recognizable part"),
-        AUDIO,
-    ),
-
-)
-
-
-class Classificator(object):
+    NUMBER = re.compile(r"^\d+$")
 
     @classmethod
-    def learn(cls, training):
-        """ Calculates prior probability of classes and conditional probability
-            of each word in particular classes. """
-        probs = {}, {}
-        for test in training:
-            document, clazz = test
-            # Increase number of the class occurrences.
-            counter = probs[0].get(clazz, 0)
-            probs[0][clazz] = counter + 1
-            # For each word in the training document count probability within
-            # class which is assigned to the document.
-            for keyword in cls.words(document):
-                dictionary = probs[1].get(keyword, {})
-                counter = dictionary.get(clazz, 0)
-                dictionary[clazz] = counter + 1
-                probs[1][keyword] = dictionary
-        for keyword in probs[1]:
-            num = sum(probs[1][keyword].values())
-            for clazz in probs[1][keyword]:
-                probs[1][keyword][clazz] /= float(num)
-        num = sum(probs[0].values())
-        for clazz in probs[0]:
-            probs[0][clazz] /= float(num)
-
-        for k in probs[1]:
-            print k
-            for kk in probs[1][k]:
-                print '    {}: {}'.format(kk, probs[1][k][kk])
-
-        return probs
+    def isvalid(cls, keyword):
+        return keyword not in cls.WORDS and not cls.NUMBER.search(keyword)
 
     @classmethod
-    def words(cls, doc):
+    def keywords(cls, document):
         result = []
-        for sentence in [doc.title, doc.description, doc.keywords]:
+        for keywords in [getattr(document, "title"),
+                         getattr(document, "description"),
+                         getattr(document, "keywords")]:
             # Strip unicode characters, punctuation, etc.
-            stripped = string.translate(unidecode(sentence),
-                                        string.maketrans("", ""),
-                                        string.punctuation)
-            # Split string into separate words and append to the words list.
-            result.extend(map(string.lower, stripped.split()))
+            stripped =  string.translate(unidecode(keywords),
+                                         string.maketrans("", ""),
+                                         string.punctuation)
+            # Split string into separate lowecase words.
+            splitted = map(string.lower, stripped.split())
+            # Filter out unwanted words.
+            filtered = filter(cls.isvalid, splitted)
+            result.extend(filtered)
         return result
 
-    def __init__(self, training=TRAINING):
-        self.probabilities = self.learn(training)
+    @classmethod
+    def increment(cls, dictionary, key, default_value=0):
+        value = dictionary[key] = dictionary.get(key, default_value) + 1
+        return value
 
-    def __call__(self, obj):
-        return self.classify(obj)
+    def __init__(self, *args, **kwargs):
+        super(DocumentClassifier, self).__init__()
+        training_set = kwargs.get('training_set', None)
+        prior = kwargs.get('prior', None)
+        posterior = kwargs.get('posterior', None)
+        probabilities = kwargs.get('probabilities', None)
+        if training_set:
+            self.probabilities = self.train(training_set)
+        elif prior and posterior:
+            self.probabilities = prior, posterior
+        elif probabilities:
+            self.probabilities = probabilities
+        else:
+            raise Exception("Improperly configured")
+
+    def __call__(self, doc_or_batch):
+        if isinstance(doc_or_batch, (tuple, list)):
+            return self.classify_batch(doc_or_batch)
+        return self.classify(doc_or_batch)
+
+    def classify(self, document):
+        raise NotImplementedError
+
+    def classify_batch(self, documents):
+        raise NotImplementedError
+
+    def train(self, training_set):
+        raise NotImplementedError
+
+
+class NaiveBayesClassifier(DocumentClassifier):
+    """ Classifies documents using Naive Bayes Cassification.
+    """
 
     def classify(self, document):
         """ ??? """
-        probabilities = self.probabilities
+        prior, posterior = self.probabilities
         result = {}
-        for keyword in self.words(document):
-            dictionary = probabilities[1].get(keyword, {})
-            for clazz in dictionary:
-                result[clazz] = result.get(clazz, 0) + dictionary[clazz]# * probabilities[0][clazz]
+        for keyword in self.keywords(document):
+            dictionary = posterior.get(keyword, {})
+            for label in dictionary:
+                result[label] = result.get(label, 1) * dictionary[label]# * probabilities[0][clazz]
+        for label in result:
+            result[label] *= prior[label]
         return result
 
+    def classify_batch(self, documents):
+        """ ??? """
+        result = []
+        for document in documents:
+            result.append(self.classify(document))
+        return result
+
+    def train(self, training_set):
+        """ Calculates a prior probability of each label occurrence and a
+            posterior probability of occurrence each word in a particular
+            label.
+        """
+        # A prior probablity is stored as a dictionary which keys are
+        # labels strings and values are calculated probabilities of
+        # label occurrence. A posterior probability is stored as a dictionary
+        # which keys are words strings with associated dictionaries that holds
+        # conditional probability of word occurrence in a particular label.
+        prior, posterior = {}, {}
+        # Each word occurrences in the training set.
+        occurrences = {}
+        for test in training_set:
+            # Each training entry is tuple storing a document and associated
+            # label.
+            document, label = test
+            # Increase a number of this label occurrences.
+            self.increment(prior, label)
+            # For each word in the training document, calculate probability
+            # of the word occurrence with the label.
+            for keyword in self.keywords(document):
+                probability = posterior.get(keyword, {})
+                self.increment(probability, label)
+                posterior[keyword] = probability
+                self.increment(occurrences, keyword)
+        # Divide each occurrences number to get probability value.
+        for keyword in posterior:
+            for label in posterior[keyword]:
+#                from ipdb import set_trace; set_trace()
+                posterior[keyword][label] /= float(occurrences[keyword])
+        num_labels = sum(prior.values())
+        for label in prior:
+            prior[label] /= float(num_labels)
+#        for w in occurrences:
+#            print w, occurrences[w]
+        return prior, posterior
