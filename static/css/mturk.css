@@ -1,7 +1,7 @@
 @charset "utf-8";
 
 html, body {
-    background:url(../img/mturktracker_right_line_bg.png) 20px top scroll repeat-y;
+    background:url(../img/mturktracker_right_line_bg.png) left top scroll repeat-y;
     font-family: Arial, Helvetica, sns-serif;
     font-size:12px;
     margin:0;
@@ -28,23 +28,24 @@ a {
     color: #075b8d;
 }
 
+.logo img {
+    margin-top: 30px;
+}
 .header {
     background: url(../img/m_header_bg.png) bottom  repeat-x;
     height:92px;
     overflow:hidden;
-    margin:0 0 10px 0;
+    /*margin:0 0 10px 0;*/
 }
-
-.logo {}
 .menu {
     background:url(../img/mturktracker_right_bg.png) left top no-repeat;
     width: 210px;
     min-height: 520px;
-    overflow: visible;
+    margin: 0 0 0 10px;
 }
 .menu ul {
-    width: 212px;
-    margin: 20px 0 0 0;
+    width: 210px;
+    margin: 0;
     padding: 0;
     list-style: none;
     font-size: 18px;
@@ -52,13 +53,13 @@ a {
 }
 .menu ul li a {
     display: block;
-    padding: 20px 6px 20px 6px;
-    margin: 2px;
+    padding: 15px 20px 15px 40px;
     color: #004f84;
     text-decoration: none;
 }
 .menu ul li.active a {
-    background: url(../img/mturktracker_menu_bg.png) bottom  repeat-x;
+    background: url(../img/mturktracker_menu_bg.png) left bottom repeat-x;
+    font-weight: bold;
     color: #004f84;
 }
 
@@ -86,12 +87,12 @@ a {
     /*padding: 0 0 0 20px;*/
 }
 .menu ul li.search #form_query {
-    margin-top:15px;
+    margin: 15px 0 0 40px;
     padding:3px;
     line-height:18px;
     font-size:18px;
     color:#075b8d;
-    width:140px;
+    width:100px;
     background:url(../img/m_search_bg.png) center left no-repeat;
     padding-left:38px;
 }
