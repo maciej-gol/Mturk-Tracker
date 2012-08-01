@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from decimal import Decimal
 from django import template
 from django.utils import simplejson
 
@@ -28,6 +29,8 @@ def text_row_formater(input):
             elif isinstance(el, datetime.date):
                 row.append("new Date(%s,%s,%s)" % (el.year, el.month-1, el.day))
             elif isinstance(el, float):
+                row.append("%.2f" % el)
+            elif isinstance(el, Decimal):
                 row.append("%.2f" % el)
             elif isinstance(el, datetime.timedelta):
                 row.append("%.2f" % ( el.days + (float(el.seconds)/(60*60*24) ) ))

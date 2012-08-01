@@ -21,8 +21,8 @@ def query_to_dicts(query_string, *query_args):
 
 def query_to_tuples(query_string, *query_args):
     """Run a simple query and produce a generator
-    that returns the results as a bunch of dictionaries
-    with keys for the column values selected.
+    that returns the results as a bunch of tuples
+    column values selected as subsequent values.
     """
     cursor = connection.cursor()
     cursor.execute(query_string, query_args)

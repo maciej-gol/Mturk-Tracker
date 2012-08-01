@@ -2,7 +2,6 @@ import datetime
 import time
 
 from django.conf import settings
-from django.core.cache import cache
 from django.core.urlresolvers import reverse
 from django.shortcuts import get_object_or_404
 from django.views.generic.simple import direct_to_template
@@ -15,7 +14,10 @@ import plot
 from mturk.main.forms import HitGroupContentSearchForm
 from mturk.main.models import HitGroupContent
 from mturk.main.templatetags.graph import text_row_formater
-from utils.sql import query_to_dicts, query_to_tuples, execute_sql
+# TODO: when refactoring toprequesters move them to mturk.toprequesters
+from mturk.main.management.commands.toprequesters.reports import (
+    ToprequestersReport)
+from utils.sql import query_to_dicts, query_to_tuples
 
 GENERAL_COLUMNS = (
     ('date', 'Date'),
@@ -169,47 +171,14 @@ def completed(request):
     return direct_to_template(request, 'main/graphs/timeline.html', params)
 
 
-def topreq_data(days):
-    firstcrawl = execute_sql("""
-        SELECT crawl_id
-        FROM hits_mv
-        WHERE
-            start_time > %s
-        ORDER BY start_time ASC
-        LIMIT 1;""", datetime.date.today() - datetime.timedelta(int(days))
-        ).fetchall()[0][0]
-
-    return list(query_to_tuples("""
-        SELECT
-            h.requester_id,
-            h.requester_name,
-            coalesce(count(*), 0) as "projects",
-            coalesce(sum(mv.hits_available), 0) as "hits",
-            coalesce(sum(mv.hits_available*h.reward), 0) as "reward",
-            max(h.occurrence_date) as "last_posted"
-        FROM
-            main_hitgroupcontent h
-            LEFT JOIN main_requesterprofile p ON h.requester_id = p.requester_id
-            LEFT JOIN (
-                SELECT group_id, crawl_id, hits_available from
-                hits_mv where crawl_id> %s
-            ) mv ON (h.group_id=mv.group_id and h.first_crawl_id=mv.crawl_id)
-            WHERE
-                h.first_crawl_id > %s
-                AND coalesce(p.is_public, true) = true
-            group by h.requester_id, h.requester_name
-            order by reward desc
-            limit 1000;""" % (firstcrawl, firstcrawl)))
-
-
 @never_cache
 def top_requesters(request):
     if request.user.is_superuser:
         return admin.top_requesters(request)
 
-    key = 'TOPREQUESTERS_CACHED'
-    # check cache
-    data = cache.get(key) or []
+    # TODO: link ui choice here
+    data = ToprequestersReport.get_report_data(
+        ToprequestersReport.AVAILABLE) or []
 
     def _top_requesters(request):
         def row_formatter(input):
@@ -238,6 +207,7 @@ def top_requesters(request):
             'columns': columns,
             'title': 'Top-1000 Recent Requesters',
         }
+
         return direct_to_template(request, 'main/graphs/table.html', ctx)
 
     return _top_requesters(request)
@@ -300,7 +270,6 @@ def requester_details(request, requester_id):
     return _requester_details(request, requester_id)
 
 
-#cache_page(ONE_DAY)
 @never_cache
 def hit_group_details(request, hit_group_id):
 
