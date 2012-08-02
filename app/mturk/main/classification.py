@@ -3,9 +3,10 @@
 import re
 import string
 
+from math import log
 from unidecode import unidecode
 
-
+NOLABEL = 0
 AUDIO = 1
 VIDEO = 2
 GRAPHICS = 4
@@ -15,6 +16,7 @@ COMPUTER = 32
 SURVEY = 64
 
 LABELS = {
+    NOLABEL: "no label",
     AUDIO: "audio",
     VIDEO: "video",
     GRAPHICS: "graphics",
@@ -23,6 +25,9 @@ LABELS = {
     COMPUTER: "computer",
     SURVEY: "survey",
 }
+
+class EmptyBatchException(Exception):
+    pass
 
 class DocumentClassifier(object):
 
@@ -129,10 +134,9 @@ class NaiveBayesClassifier(DocumentClassifier):
     EPSILON = 1E-5
 
     def classify(self, document):
-        """ ??? """
+        """ Classifies a single document """
         prior, posterior = self.probabilities
         result = {}
-        from math import log
         for keyword in self.keywords(document):
             probability = posterior.get(keyword, {})
             if not probability:
@@ -148,14 +152,19 @@ class NaiveBayesClassifier(DocumentClassifier):
                 result[label] = result.get(label, 0) + log(probability[label])
         for label in result:
             result[label] += log(prior[label])
-#            result[label] = e ** result[label]
+        if not result:
+            result = {NOLABEL: 0.0}
         return {"document": document, "probabilities": result}
 
     def classify_batch(self, documents):
-        """ ??? """
+        """ Classifies a batch od documents. """
+        # TODO it is a nasty workaround...
+        i = 0
         for document in documents:
-#            result.append(self.classify(document))
+            i += 1
             yield self.classify(document)
+        if i == 0:
+            raise EmptyBatchException
 
     def train(self, training_set):
         """ Calculates a prior probability of each label occurrence and a
