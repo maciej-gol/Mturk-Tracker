@@ -194,6 +194,14 @@ LOGGING = {
             'maxBytes': '16777216',  # 16megabytes
             'formatter': 'verbose'
         },
+        'classification_log': {
+            'level': LOG_LEVEL,
+            'class': 'logging.handlers.RotatingFileHandler',
+            # Override this in local settings
+            'filename': os.path.join(ROOT_PATH, 'classification.log'),
+            'maxBytes': '16777216',  # 16megabytes
+            'formatter': 'simple'
+        },
         # 'sentry': {
         #     'level': 'WARNING',
         #     'class': 'raven.contrib.django.handlers.SentryHandler',
@@ -221,6 +229,11 @@ LOGGING = {
         },
         'mturk.solr': {
             'handlers': ['solr_log', 'console'],
+            'level': LOG_LEVEL,
+            'propagate': True,
+        },
+        'mturk.classification': {
+            'handlers': ['classification_log', 'console'],
             'level': LOG_LEVEL,
             'propagate': True,
         },

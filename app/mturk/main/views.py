@@ -275,14 +275,10 @@ def hit_group_details(request, hit_group_id):
 
     hit_group = get_object_or_404(HitGroupContent, group_id=hit_group_id)
 
-    # from classification import Classify
-    # classify = Classify()
-    # classify(hit_group)
-
     params = {
         'multichart': False,
         'columns': HIT_DETAILS_COLUMNS,
-        'title': '#Hits'
+        'title': '#Hits',
     }
 
     def hit_group_details_data_formater(input):
@@ -292,7 +288,6 @@ def hit_group_details(request, hit_group_id):
                 'row': (str(cc['hits_available']),),
             }
 
-    hit_group = get_object_or_404(HitGroupContent, group_id=hit_group_id)
     dicts = query_to_dicts(
                 """ select start_time, hits_available from hits_mv
                     where group_id = '{}' order by start_time asc """
@@ -304,6 +299,20 @@ def hit_group_details(request, hit_group_id):
     params['hit_group'] = hit_group
     return direct_to_template(request, 'main/hit_group_details.html', params)
 
+@never_cache
+def classification(request):
+    data = query_to_dicts(
+        """ SELECT classes, COUNT(classes) number
+            FROM main_hitgroupclass
+            GROUP BY classes;
+        """)
+    data = list(data)
+    import classification
+    for d in data:
+        d["name"] = classification.LABELS[d["classes"]]
+    params = {"data":data}
+    return direct_to_template(request, 'main/hit_group_classification.html',
+                              params)
 
 def search(request):
 

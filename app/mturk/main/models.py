@@ -222,3 +222,8 @@ class IndexQueue(models.Model):
     created = models.DateTimeField(auto_now_add=True)
 
     objects = IndexQueueManager()
+
+class HitGroupClass(models.Model):
+    group_id = models.CharField(max_length=50, db_index=True, unique=True)
+    classes = models.IntegerField(db_index=True)
+    probabilities = models.CharField(max_length=1000)
