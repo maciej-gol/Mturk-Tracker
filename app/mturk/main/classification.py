@@ -48,7 +48,7 @@ class DocumentClassifier(object):
 
     @classmethod
     def keywords(cls, document):
-        result = []
+        result = set()
         for keywords in [getattr(document, "title"),
                          getattr(document, "description"),
                          getattr(document, "keywords")]:
@@ -60,7 +60,7 @@ class DocumentClassifier(object):
             splitted = map(string.lower, stripped.split())
             # Filter out unwanted words.
             filtered = filter(cls.isvalid, splitted)
-            result.extend(filtered)
+            result.update(filtered)
         return result
 
     @classmethod
@@ -102,16 +102,29 @@ class NaiveBayesClassifier(DocumentClassifier):
     """ Classifies documents using Naive Bayes Cassification.
     """
 
+    EPSILON = 1E-5
+
     def classify(self, document):
         """ ??? """
         prior, posterior = self.probabilities
         result = {}
+        from math import log
         for keyword in self.keywords(document):
-            dictionary = posterior.get(keyword, {})
-            for label in dictionary:
-                result[label] = result.get(label, 1) * dictionary[label]# * probabilities[0][clazz]
+            probability = posterior.get(keyword, {})
+            if not probability:
+                continue
+            minimal = min(probability.values())
+            if self.EPSILON < minimal:
+                minimal = self.EPSILON
+            else:
+                minimal /= 10.0
+            for label in prior:
+                probability[label] = probability.get(label, self.EPSILON)
+            for label in probability:
+                result[label] = result.get(label, 0) + log(probability[label])
         for label in result:
-            result[label] *= prior[label]
+            result[label] += log(prior[label])
+#            result[label] = e ** result[label]
         return result
 
     def classify_batch(self, documents):
