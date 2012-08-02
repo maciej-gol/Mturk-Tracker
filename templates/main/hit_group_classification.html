@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% load graph %}
+
+{% block title %}{{block.super}}: {{title}}{% endblock %}
+{% block header_text %}{{block.super}} <br/>{{hit_group.title}}{% endblock %}
+
+{% block content %}
+<h2>Hit group classification:</h2>
+<dl>
+{% for d in data %}
+    <dt>{{ d.name }}</dt><dd>{{ d.number }}</dd>
+{% endfor %}
+</dl>
+{% endblock %}

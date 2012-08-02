@@ -320,6 +320,21 @@ def hit_group_details(request, hit_group_id):
     params['hit_group'] = hit_group
     return direct_to_template(request, 'main/hit_group_details.html', params)
 
+@never_cache
+def classification(request):
+    data = query_to_dicts(
+        """ SELECT classes, COUNT(classes) number
+            FROM main_hitgroupclass
+            GROUP BY classes;
+        """)
+    data = list(data)
+    import classification
+    for d in data:
+        d["name"] = classification.LABELS[d["classes"]]
+    params = {"data":data}
+    return direct_to_template(request, 'main/hit_group_classification.html',
+                              params)
+
 def search(request):
 
     params = {}

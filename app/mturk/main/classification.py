@@ -6,6 +6,24 @@ import string
 from unidecode import unidecode
 
 
+AUDIO = 1
+VIDEO = 2
+GRAPHICS = 4
+TEXT = 8
+INTERNET = 16
+COMPUTER = 32
+SURVEY = 64
+
+LABELS = {
+    AUDIO: "audio",
+    VIDEO: "video",
+    GRAPHICS: "graphics",
+    TEXT: "text",
+    INTERNET: "internet",
+    COMPUTER: "computer",
+    SURVEY: "survey",
+}
+
 class DocumentClassifier(object):
 
     # TODO complete this list.
@@ -49,9 +67,15 @@ class DocumentClassifier(object):
     @classmethod
     def keywords(cls, document):
         result = set()
-        for keywords in [getattr(document, "title"),
-                         getattr(document, "description"),
-                         getattr(document, "keywords")]:
+
+        # TODO replace this with one consistent way to get document attributes.
+        try:
+            merged = [document.title, document.description, document.keywords]
+        except AttributeError:
+            merged = [document["title"], document["description"],
+                      document["keywords"]]
+
+        for keywords in merged:
             # Strip unicode characters, punctuation, etc.
             stripped =  string.translate(unidecode(keywords),
                                          string.maketrans("", ""),
@@ -125,14 +149,13 @@ class NaiveBayesClassifier(DocumentClassifier):
         for label in result:
             result[label] += log(prior[label])
 #            result[label] = e ** result[label]
-        return result
+        return {"document": document, "probabilities": result}
 
     def classify_batch(self, documents):
         """ ??? """
-        result = []
         for document in documents:
-            result.append(self.classify(document))
-        return result
+#            result.append(self.classify(document))
+            yield self.classify(document)
 
     def train(self, training_set):
         """ Calculates a prior probability of each label occurrence and a
@@ -163,11 +186,8 @@ class NaiveBayesClassifier(DocumentClassifier):
         # Divide each occurrences number to get probability value.
         for keyword in posterior:
             for label in posterior[keyword]:
-#                from ipdb import set_trace; set_trace()
                 posterior[keyword][label] /= float(occurrences[keyword])
         num_labels = sum(prior.values())
         for label in prior:
             prior[label] /= float(num_labels)
-#        for w in occurrences:
-#            print w, occurrences[w]
         return prior, posterior
