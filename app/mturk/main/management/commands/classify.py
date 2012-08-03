@@ -36,12 +36,14 @@ class ClassifyCommand(BaseCommand):
             for result in results:
                 doc = result["document"]
                 prob = result["probabilities"]
-                if not prob:
-                    raise Exception(str(doc["group_id"]))
-                _compare = lambda k1, k2: k1 if prob[k1] > prob[k2] else k2
                 yield HitGroupClass(group_id=doc["group_id"],
-                                    classes=reduce(_compare, prob),
+                                    classes=NaiveBayesClassifier.most_likely(result),
                                     probabilities=json.dumps(prob))
+        if options["remove"]:
+            logger.info("Removing existing classification")
+            HitGroupClass.objects.all().delete()
+            logger.info("Classification removed")
+            return
         with open(options["input_path"], "r") as file:
             probabilities = json.load(file)
             classifier = NaiveBayesClassifier(probabilities=probabilities)
@@ -49,11 +51,6 @@ class ClassifyCommand(BaseCommand):
             if options["single"] and options["group_id"]:
                 model = HitGroupContent.objects.get(group_id=options['group_id'])
                 print classifier.classify(model)
-                return
-            if options["remove"]:
-                logger.info("Removing existing classification")
-                HitGroupClass.objects.all().delete()
-                logger.info("Classification removed")
                 return
             logger.info("Classification of hit groups started. Processing in "\
                         "batches size of {}".format(self.BATCH_SIZE))

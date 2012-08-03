@@ -1,7 +1,9 @@
 import datetime
+import json
 import time
 
 from django.conf import settings
+from django.core.exceptions import ObjectDoesNotExist
 from django.core.urlresolvers import reverse
 from django.shortcuts import get_object_or_404
 from django.views.generic.simple import direct_to_template
@@ -11,13 +13,15 @@ from haystack.views import SearchView
 import admin
 import plot
 
+from mturk.main.classification import NaiveBayesClassifier
 from mturk.main.forms import HitGroupContentSearchForm
-from mturk.main.models import HitGroupContent
+from mturk.main.models import HitGroupContent, HitGroupClass
 from mturk.main.templatetags.graph import text_row_formater
 # TODO: when refactoring toprequesters move them to mturk.toprequesters
 from mturk.main.management.commands.toprequesters.reports import (
     ToprequestersReport)
 from utils.sql import query_to_dicts, query_to_tuples
+
 
 GENERAL_COLUMNS = (
     ('date', 'Date'),
@@ -45,10 +49,8 @@ HIT_DETAILS_COLUMNS = (
     ('number', '#HITs'),
 )
 
-
 ONE_DAY = 60 * 60 * 24
 ONE_HOUR = 60 * 60
-
 
 def data_formater(input):
     for cc in input:
@@ -57,7 +59,6 @@ def data_formater(input):
                 'row': (str(cc['hits']), str(cc['reward']),
                     str(cc['count']), str(cc['spam_projects'])),
         }
-
 
 #@cache_page(ONE_HOUR)
 def general(request):
@@ -212,7 +213,6 @@ def top_requesters(request):
 
     return _top_requesters(request)
 
-
 def requester_details(request, requester_id):
     if request.user.is_superuser:
         return admin.requester_details(request, requester_id)
@@ -269,16 +269,42 @@ def requester_details(request, requester_id):
 
     return _requester_details(request, requester_id)
 
-
 @never_cache
 def hit_group_details(request, hit_group_id):
 
     hit_group = get_object_or_404(HitGroupContent, group_id=hit_group_id)
 
+    try:
+        hit_group_class = HitGroupClass.objects.get(group_id=hit_group_id)
+    except ObjectDoesNotExist:
+        # TODO classification should be done on all models.
+        hit_group_class = None
+        try:
+            with open(settings.CLASSIFIER_PATH, "r") as file:
+                classifier = NaiveBayesClassifier(probabilities=json.load(file))
+                classified = classifier.classify(hit_group)
+                most_likely = classifier.most_likely(classified)
+                document = classified["document"]
+                hit_group_class = HitGroupClass(
+                        group_id=document.group_id,
+                        classes=most_likely,
+                        probabilities=classified["probabilities"])
+                hit_group_class.save()
+        except IOError:
+            # We do not want make hit group details page unavailable when
+            # classifier file does not exist.
+            pass
+
+    if hit_group_class is not None:
+        hit_group_class_label = NaiveBayesClassifier.label(hit_group_class.classes)
+    else:
+        hit_group_class_label = NaiveBayesClassifier.label()
+
     params = {
         'multichart': False,
         'columns': HIT_DETAILS_COLUMNS,
         'title': '#Hits',
+        'class': hit_group_class_label,
     }
 
     def hit_group_details_data_formater(input):
@@ -307,11 +333,15 @@ def classification(request):
             GROUP BY classes;
         """)
     data = list(data)
-    import classification
+    sum = 0
     for d in data:
-        d["name"] = classification.LABELS[d["classes"]]
+        sum += d["number"]
+
+    for d in data:
+        d["name"] = NaiveBayesClassifier.label(d["classes"])
+        d["part"] = 100 * float(d["number"]) / sum
     params = {"data":data}
-    return direct_to_template(request, 'main/hit_group_classification.html',
+    return direct_to_template(request, 'main/classification.html',
                               params)
 
 def search(request):

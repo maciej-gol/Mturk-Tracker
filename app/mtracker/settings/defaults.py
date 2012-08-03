@@ -344,3 +344,8 @@ HAYSTACK_SOLR_URL = SOLR_PATH
 # 'limit exceeded for page xx' messages, caused by crawler timeouts.
 CRAWLER_RETRY_SLEEP = 0.1
 CRAWLER_RETRY_COUNT = 200
+
+# Temporarily this file is stored in the $HOME directory. In the final
+# implementation a classification algorithm will be changed, hence this file
+# probably will not be used.
+CLASSIFIER_PATH = os.path.join("/home", "mtracker", "classifier.json")

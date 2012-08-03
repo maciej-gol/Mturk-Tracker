@@ -97,6 +97,11 @@ class DocumentClassifier(object):
         value = dictionary[key] = dictionary.get(key, default_value) + 1
         return value
 
+    @classmethod
+    def label(cls, l=0):
+        # Sometimes l is not an integer (may be string?).
+        return LABELS.get(int(l), LABELS[NOLABEL])
+
     def __init__(self, *args, **kwargs):
         super(DocumentClassifier, self).__init__()
         training_set = kwargs.get('training_set', None)
@@ -132,6 +137,14 @@ class NaiveBayesClassifier(DocumentClassifier):
     """
 
     EPSILON = 1E-5
+
+    @classmethod
+    def most_likely(cls, result, num=1):
+        prob = result["probabilities"]
+        if not prob:
+            return 0
+        _compare = lambda k1, k2: k1 if prob[k1] > prob[k2] else k2
+        return reduce(_compare, prob)
 
     def classify(self, document):
         """ Classifies a single document """

@@ -9,7 +9,7 @@
 <h2>Hit group classification:</h2>
 <dl>
 {% for d in data %}
-    <dt>{{ d.name }}</dt><dd>{{ d.number }}</dd>
+    <dt>{{ d.name }}</dt><dd>{{ d.number }}&nbsp;({{ d.part|floatformat }}%)</dd>
 {% endfor %}
 </dl>
 {% endblock %}
