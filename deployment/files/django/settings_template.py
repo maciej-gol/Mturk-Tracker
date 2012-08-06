@@ -16,7 +16,9 @@ LOGGING['loggers']['mturk.main.management.commands']['level'] = LOG_LEVEL
 LOGGING['loggers']['mturk.arrivals']['level'] = LOG_LEVEL
 LOGGING['handlers']['crawl_log']['filename'] = pjoin(LOG_DIRECTORY, 'crawl.log')
 LOGGING['handlers']['log_file']['filename'] = pjoin(LOG_DIRECTORY, 'main.log')
+LOGGING['handlers']['solr_log']['filename'] = pjoin(LOG_DIRECTORY, 'solr.log')
 LOGGING['handlers']['arrivals_log']['filename'] = pjoin(LOG_DIRECTORY, 'arrivals.log')
+LOGGING['handlers']['classification_log']['filename'] = pjoin(LOG_DIRECTORY, 'classification.log')
 LOGGING['handlers']['toprequesters_log']['filename'] = pjoin(LOG_DIRECTORY, 'toprequesters.log')
 
 log = logging.getLogger(__name__)

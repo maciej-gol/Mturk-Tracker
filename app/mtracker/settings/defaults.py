@@ -171,6 +171,8 @@ LOGGING = {
             'maxBytes': '16777216',  # 16megabytes
             'formatter': 'verbose'
         },
+        # TODO: decide which logs can go to log_file and remove some of the
+        # below
         'crawl_log': {
             'level': LOG_LEVEL,
             'class': 'logging.handlers.RotatingFileHandler',
@@ -191,7 +193,7 @@ LOGGING = {
             'level': LOG_LEVEL,
             'class': 'logging.handlers.RotatingFileHandler',
             # Override this in local settings
-            'filename': os.path.join(ROOT_PATH, 'arrivals.log'),
+            'filename': os.path.join(ROOT_PATH, 'solr.log'),
             'maxBytes': '16777216',  # 16megabytes
             'formatter': 'verbose'
         },
