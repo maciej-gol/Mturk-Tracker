@@ -10,6 +10,7 @@
             $(".chzn-select").chosen();
             $(".per-page-selector").change(function(e){
                 $('#id_hits_per_page').val($(e.target.selectedOptions).val());
+                $('#search-form').submit();
                 e.preventDefault();
             });
         });
@@ -33,7 +34,7 @@
 {% block content %}
     <h2>Search</h2>
     <hr />
-    <form class="form-inline" method="get" action=".">
+    <form id="search-form" class="form-inline" method="get" action=".">
         <fieldset>
             <div class="row-fluid">
                 <div class="span12 search-form-row">
