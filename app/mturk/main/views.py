@@ -5,7 +5,8 @@ import time
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.urlresolvers import reverse
-from django.shortcuts import get_object_or_404
+from django.contrib import messages
+from django.shortcuts import get_object_or_404, redirect
 from django.views.generic.simple import direct_to_template
 from django.views.decorators.cache import cache_page, never_cache
 from haystack.views import SearchView
@@ -15,7 +16,7 @@ import plot
 
 from mturk.main.classification import NaiveBayesClassifier
 from mturk.main.forms import HitGroupContentSearchForm
-from mturk.main.models import HitGroupContent, HitGroupClass
+from mturk.main.models import HitGroupContent, HitGroupClass, RequesterProfile
 from mturk.main.templatetags.graph import text_row_formater
 # TODO: when refactoring toprequesters move them to mturk.toprequesters
 from mturk.main.management.commands.toprequesters.reports import (
@@ -269,10 +270,19 @@ def requester_details(request, requester_id):
 
     return _requester_details(request, requester_id)
 
+
 @never_cache
 def hit_group_details(request, hit_group_id):
 
-    hit_group = get_object_or_404(HitGroupContent, group_id=hit_group_id)
+    try:
+        hit_group = HitGroupContent.objects.get(group_id=hit_group_id)
+        if RequesterProfile.objects.filter(requester_id=hit_group.requester_id,
+            is_public=False):
+            raise HitGroupContent.DoesNotExist()
+    except HitGroupContent.DoesNotExist:
+        messages.info(request, 'Hitgroup with id "{0}" was not found!'.format(
+            hit_group_id))
+        return redirect('haystack_search')
 
     try:
         hit_group_class = HitGroupClass.objects.get(group_id=hit_group_id)
