@@ -18,9 +18,8 @@ from mturk.main.classification import NaiveBayesClassifier
 from mturk.main.forms import HitGroupContentSearchForm
 from mturk.main.models import HitGroupContent, HitGroupClass
 from mturk.main.templatetags.graph import text_row_formater
-# TODO: when refactoring toprequesters move them to mturk.toprequesters
-from mturk.main.management.commands.toprequesters.reports import (
-    ToprequestersReport)
+from mturk.toprequesters.reports import ToprequestersReport
+
 from utils.sql import query_to_dicts, query_to_tuples
 
 

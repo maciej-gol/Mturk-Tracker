@@ -5,7 +5,7 @@ from utils.pid import Pid
 
 from django.core.management.base import BaseCommand, NoArgsCommand
 from optparse import make_option
-from toprequesters.reports import ToprequestersReport
+from mturk.toprequesters.reports import ToprequestersReport
 
 HOURS4 = 60 * 60 * 4
 

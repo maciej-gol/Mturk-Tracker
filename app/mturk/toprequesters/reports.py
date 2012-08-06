@@ -3,7 +3,6 @@ from django.core.cache import cache
 
 from utils.sql import query_to_tuples, execute_sql
 
-# TODO: MOVE THIS MODULE TO MTURK.TOPREQUESTERS
 # TODO2: ADD EnumMetaClass to the project
 
 

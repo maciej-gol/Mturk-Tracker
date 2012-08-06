@@ -119,6 +119,7 @@ MTRACKER_APPS = (
     'mturk.main',
     'mturk.importer',
     'mturk.spam',
+    'mturk.toprequesters',
 )
 
 INSTALLED_APPS = tuple(list(FOREIGN_APPS) + list(MTRACKER_APPS))
@@ -202,6 +203,14 @@ LOGGING = {
             'maxBytes': '16777216',  # 16megabytes
             'formatter': 'simple'
         },
+        'toprequesters_log': {
+            'level': LOG_LEVEL,
+            'class': 'logging.handlers.RotatingFileHandler',
+            # Override this in local settings
+            'filename': os.path.join(ROOT_PATH, 'toprequesters.log'),
+            'maxBytes': '16777216',  # 16megabytes
+            'formatter': 'simple'
+        },
         # 'sentry': {
         #     'level': 'WARNING',
         #     'class': 'raven.contrib.django.handlers.SentryHandler',
@@ -234,6 +243,11 @@ LOGGING = {
         },
         'mturk.classification': {
             'handlers': ['classification_log', 'console'],
+            'level': LOG_LEVEL,
+            'propagate': True,
+        },
+        'mturk.toprequesters': {
+            'handlers': ['toprequesters_log', 'console'],
             'level': LOG_LEVEL,
             'propagate': True,
         },
