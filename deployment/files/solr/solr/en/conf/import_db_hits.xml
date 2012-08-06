@@ -10,14 +10,21 @@
                 transactionIsolation="TRANSACTION_READ_COMMITTED"
                 holdability="CLOSE_CURSORS_AT_COMMIT"/>
     <document>
-        <entity name="hitgroupcontent" dataSource="mturk_crawl" threads="2" transformer="HTMLStripTransformer"
+        <entity name="hitgroupcontent" dataSource="mturk_crawl" threads="2"
+            transformer="HTMLStripTransformer"
 
-				query="SELECT id as django_id, group_id, requester_id, requester_name, reward, html, description, title, keywords,
-						qualifications, occurrence_date, time_alloted
+                query="SELECT hgc.id as django_id, hgc.group_id,
+                      hgc.requester_id, hgc.requester_name, hgc.reward,
+                      hgc.html, hgc.description, hgc.title, hgc.keywords,
+					  hgc.qualifications, hgc.occurrence_date, hgc.time_alloted
                     FROM
-                        main_hitgroupcontent
+                        main_hitgroupcontent hgc
+                    LEFT JOIN
+                        main_requesterprofile rp
+                        ON hgc.requester_id = rp.requester_id
                     WHERE
-                        is_public = true AND
+                        coalesce(rp.is_public, true) = true AND
+                        hgc.is_public = true AND
                         LENGTH(html) &lt; 9000001"
 
 				deltaQuery="SELECT DISTINCT
@@ -28,11 +35,17 @@
                     created > '${dataimporter.last_index_time}'
                 "
 
-                deltaImportQuery="SELECT id as django_id group_id, requester_id, requester_name, reward, html, description, title, keywords,
-					qualifications, occurrence_date, time_alloted
+                deltaImportQuery="SELECT hgc.id as django_id, hgc.group_id,
+                      hgc.requester_id, hgc.requester_name, hgc.reward,
+                      hgc.html, hgc.description, hgc.title, hgc.keywords,
+				      hgc.qualifications, hgc.occurrence_date, hgc.time_alloted
                 FROM
                     main_hitgroupcontent hgc
+                LEFT JOIN
+                    main_requesterprofile rp
+                    ON hgc.requester_id = rp.requester_id
                 WHERE
+                    coalesce(rp.is_public, true) = true AND
                     hgc.is_public = true
                     AND hgc.id = ${dataimporter.delta.id}">
 
