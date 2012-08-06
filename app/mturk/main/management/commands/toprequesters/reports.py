@@ -151,7 +151,8 @@ class ToprequestersReport:
     display_names = {
         AVAILABLE: 'Hits available',
         POSTED: 'Hits posted',
-        POSTED_CRAWL_ID_QUERY_VARIANT: 'Hits posted crawl id query variant',
+        # TODO remove once we are sure it's slower:
+        POSTED_CRAWL_ID_QUERY_VARIANT: 'Hits posted (crawl id query variant)',
     }
 
     REPORT_FUNCTION = {

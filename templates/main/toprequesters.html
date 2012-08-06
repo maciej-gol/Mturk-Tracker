@@ -1,0 +1,16 @@
+{% extends 'main/graphs/table.html' %}
+{% load url from future %}
+
+{% block top_tabs %}
+    <div class="row-fluid">
+        <div class="span12">
+            <ul class="nav nav-tabs">
+                {% for tab_id, tab_text in tab_enum.iteritems %}
+                    <li{% ifequal active_tab tab_id %} class="active"{% endifequal %}>
+                        <a href="{% url 'graphs_top_requesters' tab_id %}">{{ tab_text }}</a>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+{% endblock %}

@@ -5,7 +5,8 @@ import time
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.urlresolvers import reverse
-from django.shortcuts import get_object_or_404
+from django.contrib import messages
+from django.shortcuts import get_object_or_404, redirect
 from django.views.generic.simple import direct_to_template
 from django.views.decorators.cache import cache_page, never_cache
 from haystack.views import SearchView
@@ -52,6 +53,7 @@ HIT_DETAILS_COLUMNS = (
 ONE_DAY = 60 * 60 * 24
 ONE_HOUR = 60 * 60
 
+
 def data_formater(input):
     for cc in input:
         yield {
@@ -59,6 +61,7 @@ def data_formater(input):
                 'row': (str(cc['hits']), str(cc['reward']),
                     str(cc['count']), str(cc['spam_projects'])),
         }
+
 
 #@cache_page(ONE_HOUR)
 def general(request):
@@ -173,13 +176,21 @@ def completed(request):
 
 
 @never_cache
-def top_requesters(request):
+def top_requesters(request, tab=None):
+
     if request.user.is_superuser:
         return admin.top_requesters(request)
 
-    # TODO: link ui choice here
-    data = ToprequestersReport.get_report_data(
-        ToprequestersReport.AVAILABLE) or []
+    try:
+        tab = int(tab)
+    except Exception:
+        pass
+    if tab not in ToprequestersReport.values:
+        messages.warning(request, 'Unknown report type: {0}'.format(tab))
+        return redirect('graphs_top_requesters',
+                        tab=ToprequestersReport.values[0])
+
+    data = ToprequestersReport.get_report_data(tab) or []
 
     def _top_requesters(request):
         def row_formatter(input):
@@ -207,11 +218,14 @@ def top_requesters(request):
             'data': row_formatter(data),
             'columns': columns,
             'title': 'Top-1000 Recent Requesters',
+            'tab_enum': ToprequestersReport.display_names,
+            'active_tab': tab
         }
 
-        return direct_to_template(request, 'main/graphs/table.html', ctx)
+        return direct_to_template(request, 'main/toprequesters.html', ctx)
 
     return _top_requesters(request)
+
 
 def requester_details(request, requester_id):
     if request.user.is_superuser:
@@ -269,6 +283,7 @@ def requester_details(request, requester_id):
 
     return _requester_details(request, requester_id)
 
+
 @never_cache
 def hit_group_details(request, hit_group_id):
 
@@ -325,6 +340,7 @@ def hit_group_details(request, hit_group_id):
     params['hit_group'] = hit_group
     return direct_to_template(request, 'main/hit_group_details.html', params)
 
+
 @never_cache
 def classification(request):
     data = query_to_dicts(
@@ -343,6 +359,7 @@ def classification(request):
     params = {"data":data}
     return direct_to_template(request, 'main/classification.html',
                               params)
+
 
 def search(request):
 
