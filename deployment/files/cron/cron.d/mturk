@@ -16,4 +16,5 @@ SCRIPT_NAME="manage_py_exec_silent"
 15      2       *       *       *       root    cd $PROJECT_ROOT; /$SCRIPT_ROOT/$SCRIPT_NAME solr_data_import --import-type="full-import" --clean-index --clean-queue
 45      *       *       *       *       root    cd $PROJECT_ROOT; /$SCRIPT_ROOT/$SCRIPT_NAME solr_data_import --import-type="delta-import" --clean-index --clean-queue
 
-*/10    *       * 	    *	    *	%(user)s cd $PROJECT_ROOT; /$SCRIPT_ROOT/$SCRIPT_NAME cache_toprequesters --days=20 --all
+*/3    *       * 	    *	    *	%(user)s cd $PROJECT_ROOT; /$SCRIPT_ROOT/$SCRIPT_NAME cache_toprequesters --force --report-type=0 --pidfile='cache_topreq_0' --days=5
+*/15    *       *       *       *   %(user)s cd $PROJECT_ROOT; /$SCRIPT_ROOT/$SCRIPT_NAME cache_toprequesters --force --report-type=1 --pidfile='cache_topreq_1' --days=30

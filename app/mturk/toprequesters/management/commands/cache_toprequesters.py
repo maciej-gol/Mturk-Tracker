@@ -17,6 +17,40 @@ class Command(BaseCommand):
     Allows the user to see available reports and their status, cache all or
     selected reports.
 
+    Use mturk.toprequesters.reports.ToprequestersReport to access the results,
+    manage available report types and report display on Top Requesters tab in
+    the menu..
+
+    Examples.
+
+    To see available report types and their ids (required to specify report-type)
+    use:
+
+        cache_toprequesters --list
+
+    Once you know the report id, you can cache the report you can cache it by
+    running:
+
+        cache_toprequesters --report-type=0 --pidfile='cache_topreq_0' --days=5
+
+    Specifying pidfile is not mandatory, but is important if you want to
+    calculate a number of reports asynchronously. By default only one process
+    can be ran and it will use default pid file: "mturk_cache_topreq.pid".
+    The name will have a '.pid' extension appended.
+
+    Use:
+
+        cache_toprequesters ...  --force
+
+    to force re-calcuation, as by default it won't be performed if not
+    necessary. If the option is specified, the data will replaced once the new
+    result is available.
+
+    To remove selected reports use:
+
+        cache_toprequesters --purge --all
+        cache_toprequesters --purge --report-type=1
+
     """
 
     option_list = NoArgsCommand.option_list + (
@@ -32,6 +66,9 @@ class Command(BaseCommand):
             help='Removes all or the selected report from cache.'),
         make_option('--report-type', dest='report-type', type="int",
             default=None, help='The report to rebuild.'),
+        make_option('--pidfile', dest='pidfile', type="string",
+            default='mturk_cache_topreq',
+            help='The name of the pidfile to use.'),
     )
     help = 'Make sure top requesters are in cache.'
 
@@ -43,7 +80,7 @@ class Command(BaseCommand):
         if self.options['list']:
             pass  # do nothing, go straight to print_status
         else:
-            pid = Pid('mturk_cache_topreq', True)
+            pid = Pid(self.options.get('pidfile'), True)
             self.prepare_options()  # sets self.reports and prints errors is any
             self.reports and (self.handle_purge() or self.handle_cache())
             pid.remove_pid()
@@ -52,7 +89,7 @@ class Command(BaseCommand):
 
     def prepare_options(self):
         """Sets self.reports with an array of data to process or None.
-        Prints any errors occuring.
+        Prints any errors occurring.
 
         """
         self.reports = None
@@ -110,8 +147,10 @@ class Command(BaseCommand):
         return True
 
     def handle_purge(self):
-        """Handles purge option. Removes all data if --all was used or spefified
-        --report-type."""
+        """Handles purge option. Removes all data if --all was used or specified
+        --report-type=<id>.
+
+        """
         if self.options['purge']:
             log.info("Removing data for {0}.".format(self.reports))
             for r in self.reports:
