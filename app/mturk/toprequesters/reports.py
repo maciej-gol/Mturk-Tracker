@@ -21,7 +21,7 @@ def topreq_data_hits_available(days):
         SELECT
             h.requester_id,
             h.requester_name,
-            coalesce(count(*), 0) as "projects",
+            count(DISTINCT hitgroup.group_id) as "projects",
             coalesce(round(CAST (sum(hitgroup.grp_hits) as NUMERIC), 0), 0) as hits,
             coalesce(sum(hitgroup.grp_hits * h.reward), 0) as reward,
             max(hitgroup.grp_last_posted) as "last_posted"
@@ -43,11 +43,11 @@ def topreq_data_hits_available(days):
             GROUP BY mv.group_id
             ) hitgroup
                 ON h.group_id = hitgroup.group_id
-            WHERE
-                coalesce(p.is_public, true) = true
-            GROUP BY h.requester_id, h.requester_name
-            ORDER BY reward desc
-            LIMIT 1000;""".format(start_time.isoformat())))
+        WHERE
+            coalesce(p.is_public, true) = true
+        GROUP BY h.requester_id, h.requester_name
+        ORDER BY reward DESC
+        LIMIT 1000;""".format(start_time.isoformat())))
 
 
 def topreq_data_hits_posted(days):
@@ -82,11 +82,11 @@ def topreq_data_hits_posted(days):
                     hits_posted > 0
             ) mv
                 ON h.group_id = mv.group_id
-            WHERE
-                coalesce(p.is_public, true) = true
-            GROUP BY h.requester_id, h.requester_name
-            ORDER BY reward desc
-            LIMIT 1000;""".format(start_time.isoformat())))
+        WHERE
+            coalesce(p.is_public, true) = true
+        GROUP BY h.requester_id, h.requester_name
+        ORDER BY reward DESC
+        LIMIT 1000;""".format(start_time.isoformat())))
 
 
 class ToprequestersReport:
@@ -155,7 +155,7 @@ class ToprequestersReport:
             meta = cls.get_report_meta(rid)
             if meta:
                 meta = (' ({0} days), updated: {1:%Y-%m-%d %H:%M:%S}, elapsed:'
-                ' {2}s').format(meta.get('days'), meta.get('to'),
+                ' {2}s').format(meta.get('days'), meta.get('start_time'),
                                 int(meta.get('elapsed')))
             else:
                 meta = ''
