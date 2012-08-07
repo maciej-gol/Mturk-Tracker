@@ -215,6 +215,7 @@ def top_requesters(request, tab=None):
         )
         ctx = {
             'data': row_formatter(data),
+            'report_meta': ToprequestersReport.get_report_meta(tab),
             'columns': columns,
             'title': 'Top-1000 Recent Requesters',
             'tab_enum': ToprequestersReport.display_names,

@@ -14,3 +14,25 @@
         </div>
     </div>
 {% endblock %}
+
+{% block content_before %}
+    <div class="row-fluid">
+        <div class="span12">
+            <h3>
+                Report for {{ report_meta.from }} to {{ report_meta.to }}
+                ({{ report_meta.days }} days).
+            </h3>
+            <hr />
+        </div>
+    </div>
+{% endblock %}
+
+{% block content_after %}
+    <div class="row-fluid">
+        <div class="span12">
+            <div class="pull-right">
+                Generated on {{ report_meta.start_time|default:'unknown' }} in {{ report_meta.elapsed|floatformat:2|default:"unknown" }} seconds.
+            </div>
+        </div>
+    </div>
+{% endblock %}

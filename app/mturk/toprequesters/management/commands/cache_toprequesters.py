@@ -132,7 +132,7 @@ class Command(BaseCommand):
             log.info(('"{0}" toprequesters report missing, recalculating.'
                 ).format(display_name))
 
-        to = now()
+        start_date = now()
         start_time = time.time()
 
         days = int(self.options['days'])
@@ -147,8 +147,9 @@ class Command(BaseCommand):
         else:
             meta = {
                 'days': days,
-                'to': to,
-                'from': to - datetime.timedelta(days=days),
+                'to': start_date.date(),
+                'from': (start_date - datetime.timedelta(days=days)).date(),
+                'start_time': start_date,
                 'elapsed': elapsed,
             }
             ToprequestersReport.store(report_type, data, meta)

@@ -9,10 +9,14 @@
 
     {% block top_tabs %}{% endblock %}
 
+    {% block content_before %}{% endblock %}
+
     <div class="row-fluid">
         <div class="span12">
             {% google_table columns data %}
         </div>
     </div>
+
+    {% block content_after %}{% endblock %}
 
 {% endblock %}
