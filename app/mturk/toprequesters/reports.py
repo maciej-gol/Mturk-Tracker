@@ -48,7 +48,8 @@ def topreq_data_hits_available(days):
             WHERE
                 coalesce(p.is_public, true) = true
             GROUP BY h.requester_id, h.requester_name
-            ORDER BY reward desc;""".format(start_time.isoformat())))
+            ORDER BY reward desc
+            LIMIT 1000;""".format(start_time.isoformat())))
 
 
 def topreq_data_hits_posted(days):
@@ -86,7 +87,8 @@ def topreq_data_hits_posted(days):
             WHERE
                 coalesce(p.is_public, true) = true
             GROUP BY h.requester_id, h.requester_name
-            ORDER BY reward desc;""".format(start_time.isoformat())))
+            ORDER BY reward desc
+            LIMIT 1000;""".format(start_time.isoformat())))
 
 
 def topreq_data_hits_posted_crawl_id(days):
