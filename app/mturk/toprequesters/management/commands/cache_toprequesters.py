@@ -1,7 +1,9 @@
+import datetime
 import time
 import logging
 from utils.pid import Pid
 
+from django.utils.timezone import now
 from django.core.management.base import BaseCommand, NoArgsCommand
 from optparse import make_option
 from mturk.toprequesters.reports import ToprequestersReport
@@ -130,18 +132,26 @@ class Command(BaseCommand):
             log.info(('"{0}" toprequesters report missing, recalculating.'
                 ).format(display_name))
 
+        to = now()
         start_time = time.time()
 
-        days = self.options['days']
+        days = int(self.options['days'])
         data = ToprequestersReport.REPORT_FUNCTION[report_type](days)
+        elapsed = time.time() - start_time
         log.info('Toprequesters report "{0}" generated in: {1}s.'.format(
-            display_name, time.time() - start_time))
+            display_name, elapsed))
 
         # too often we get no information on the success of caching
         if not data:
             log.warning('Data returned by report function is {0}!'.format(data))
         else:
-            ToprequestersReport.store(report_type, data)
+            meta = {
+                'days': days,
+                'to': to,
+                'from': to - datetime.timedelta(days=days),
+                'elapsed': elapsed,
+            }
+            ToprequestersReport.store(report_type, data, meta)
             if not ToprequestersReport.is_cached(report_type):
                 log.warning('Cache error - data could not be fetched!')
         return True

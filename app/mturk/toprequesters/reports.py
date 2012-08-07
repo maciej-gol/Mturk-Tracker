@@ -117,6 +117,11 @@ class ToprequestersReport:
         return cls.cache_key_base + str(report_type)
 
     @classmethod
+    def __get_cache_key_for_meta(cls, report_type):
+        """Returns string key, under which the report should be cached."""
+        return cls.cache_key_base + str(report_type) + '_meta'
+
+    @classmethod
     def is_cached(cls, report_type):
         """True is there is something under report key in the cache."""
         return cls.get_report_data(report_type) is not None
@@ -125,6 +130,11 @@ class ToprequestersReport:
     def get_report_data(cls, report_type):
         """Returns report data if available or None."""
         return cache.get(cls.get_cache_key(report_type))
+
+    @classmethod
+    def get_report_meta(cls, report_type):
+        """Returns meta data related to the report."""
+        return cache.get(cls.__get_cache_key_for_meta(report_type))
 
     @classmethod
     def get_available_as_str(cls):
@@ -142,14 +152,40 @@ class ToprequestersReport:
         for rid, name in cls.display_names.iteritems():
             in_cache = cls.is_cached(rid)
             in_cache = '[x]' if in_cache else '[ ]'
-            lines.append("\n{0} {1} - {2}".format(in_cache, rid, name))
+            meta = cls.get_report_meta(rid)
+            if meta:
+                meta = (' ({0} days), updated: {1:%Y-%m-%d %H:%M:%S}, elapsed:'
+                ' {2}s').format(meta.get('days'), meta.get('to'),
+                                int(meta.get('elapsed')))
+            else:
+                meta = ''
+            lines.append("\n{0} {1} - {2}{3}".format(in_cache, rid, name, meta))
         lines.append('\n')
         return ''.join(lines)
 
     @classmethod
-    def store(cls, report_type, data, cache_expiry=60 * 60 * 4):
-        """Stores the data under correct cache key."""
+    def store(cls, report_type, data, meta=None, cache_expiry=60 * 60 * 4):
+        """Stores the data under correct cache key.
+
+        Keyword arguments:
+
+        report_type -- type of the report to relate the data to
+        data -- report data
+        meta -- report meta data
+        cache_expiry -- how long the data should remain in cache
+
+        """
+        cls.__store_meta(report_type, meta, cache_expiry)
         return cache.set(cls.get_cache_key(report_type), data, cache_expiry)
+
+    @classmethod
+    def __store_meta(cls, report_type, meta, cache_expiry):
+        """Stores meta data. Adding this method to allow manual update of
+        reports meta data.
+
+        """
+        return cache.set(
+            cls.__get_cache_key_for_meta(report_type), meta, cache_expiry)
 
     @classmethod
     def purge(cls, report_type):
