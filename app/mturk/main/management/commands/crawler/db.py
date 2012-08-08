@@ -79,15 +79,15 @@ class DB(object):
                     %(occurrence_date)s, %(first_crawl_id)s, %(is_public)s
                 )''', data)
             self.curr.execute("SELECT currval('main_hitgroupcontent_id_seq')")
-        except psycopg2.IntegrityError as e:
+        except psycopg2.IntegrityError:
             # this exception was caused because  hitgroupcontent with given
             # group_id already exists. Because of that, we do not have to
             # insert given data - just return id of already existing data row
-            log.error("""HitGroupConent insert IntegrityError, returning id:'
+            log.exception("""HitGroupConent insert IntegrityError, returning id:'
                 %(reward)s, %(title)s, %(requester_name)s, %(qualifications)s,
                 %(time_alloted)s, %(keywords)s, %(requester_id)s, %(group_id)s,
                  %(group_id_hashed)s, %(occurrence_date)s, %(first_crawl_id)s
-                 exception: %(exc)s""", data, exc=str(e))
+                 """, data)
             self.conn.rollback()
             self.curr.execute('''
                 SELECT id FROM main_hitgroupcontent WHERE group_id = %s LIMIT 1

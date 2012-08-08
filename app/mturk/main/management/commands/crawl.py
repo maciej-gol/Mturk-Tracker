@@ -140,12 +140,17 @@ class Command(BaseCommand):
         for hg_pack in hitgroups_iter:
             jobs = []
             for hg in hg_pack:
+                if hg['group_id'] in processed_groups:
+                    log.debug('Group already in processed_groups, skipping.')
+                    continue
+                processed_groups.add(hg['group_id'])
+
                 j = gevent.spawn(tasks.process_group,
                         hg, crawl.id, reqesters, processed_groups, dbpool)
                 jobs.append(j)
                 total_reward += hg['reward'] * hg['hits_available']
             log.debug('processing pack of hitgroups objects')
-            gevent.joinall(jobs, timeout=20)
+            gevent.joinall(jobs, timeout=60)
             # check if all jobs ended successfully
             for job in jobs:
                 if not job.ready():
@@ -171,25 +176,26 @@ class Command(BaseCommand):
         work_time = time.time() - _start_time
         log.info('created crawl id: %s', crawl.id)
         log.info('total reward value: %s', total_reward)
-        log.info('processed hits groups downloaded: %s', len(processed_groups))
-        log.info('processed hits groups available: %s', groups_available)
+        log.info('hits groups downloaded: %s', len(processed_groups))
+        log.info('hits groups available: %s', groups_available)
         log.info('work time: %.2fsec', work_time)
 
+        crawl_downloaded_pc = 0.9
         crawl_time_warning = 300
         if work_time > crawl_time_warning:
             log.warning("Crawl took {0} s which seems a bit too long (more than"
                 "{0} s), you might consider checking if correct mturk account"
                 " is used.".format(crawl_time_warning))
-        if crawl.groups_downloaded < groups_available * 0.9:
+        if crawl.groups_downloaded < groups_available * crawl_downloaded_pc:
             log.warning('More than 10% of hit groups were not downloaded, '
                 'please check mturk account configuration and/or if there are '
                 'any network-related problems.')
-        crawl_downloaded_pc = 0.6
-        if crawl.groups_downloaded < groups_available * crawl_downloaded_pc:
             log.warning("This crawl contains far too few groups downloaded to "
                 "available: ({0} < {1} * {2}) and will be considered as "
                 "erroneous".format(crawl.groups_downloaded, groups_available,
                 crawl_downloaded_pc))
+
+        pid.remove_pid()
 
     def hits_iter(self):
         """Hits group lists generator.

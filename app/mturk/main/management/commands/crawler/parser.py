@@ -232,7 +232,6 @@ def hits_group_details(html):
     """Get more details info about single group of hits"""
     rx = _RX_HITS_DETAILS.search(html)
     if not rx:
-        log.info('hits group details not found')
         return {}
     res = rx.groupdict()
     res['html'] = res.get('html', None)

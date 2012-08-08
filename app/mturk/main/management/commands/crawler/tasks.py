@@ -62,10 +62,21 @@ def hits_groups_info(page_nr,
     sleep -- how long to wait between each retry
 
     """
+    def __fix_missing_hash(hg):
+        hg['group_id_hashed'] = not bool(hg.get('group_id', None))
+        if hg['group_id_hashed']:
+            composition = ';'.join(map(str, (
+                hg['title'], hg['requester_id'], hg['time_alloted'],
+                hg['reward'], hg['description'], hg['keywords'],
+                hg['qualifications']))) + ';'
+            hg['group_id'] = hashlib.md5(composition).hexdigest()
+            log.debug('group_id not found, creating hash: %s  %s',
+                    hg['group_id'], hg['title'])
     url = hitsearch_url(page_nr)
     html = _get_html(url)
     rows = []
     for n, info in enumerate(parser.hits_group_listinfo(html)):
+        __fix_missing_hash(info)
         info['page_number'] = page_nr
         info['inpage_position'] = n + 1
         rows.append(info)
@@ -94,6 +105,8 @@ def hits_group_info(group_id):
     url = group_url(group_id)
     html = _get_html(url)
     data = parser.hits_group_details(html)
+    if not data:
+        log.warning('Could not fetch hit group info: {0}'.format(group_id))
     # additional fetch of example task
     iframe_src = data.get('iframe_src', None)
     if iframe_src:
@@ -120,21 +133,8 @@ def process_group(hg, crawl_id, requesters, processed_groups, dbpool):
     hg['keywords'] = ', '.join(hg['keywords'])
     # for those hit goups that does not contain hash group, create one and
     # setup apropiate flag
-    hg['group_id_hashed'] = not bool(hg.get('group_id', None))
-    hg['qualifications'] = ', '.join(hg['qualifications'])
-    if hg['group_id_hashed']:
-        composition = ';'.join(map(str, (
-            hg['title'], hg['requester_id'], hg['time_alloted'],
-            hg['reward'], hg['description'], hg['keywords'],
-            hg['qualifications']))) + ';'
-        hg['group_id'] = hashlib.md5(composition).hexdigest()
-        log.debug('group_id not found, creating hash: %s  %s',
-                hg['group_id'], composition)
 
-    if hg['group_id'] in processed_groups:
-        # this higroup was already processed
-        log.debug('Duplicated group: %s;;%s', crawl_id, hg['group_id'])
-        return False
+    hg['qualifications'] = ', '.join(hg['qualifications'])
 
     conn = dbpool.getconn(thread.get_ident())
     db = DB(conn)
@@ -168,11 +168,14 @@ def process_group(hg, crawl_id, requesters, processed_groups, dbpool):
         db.insert_hit_group_status(hg)
         conn.commit()
     except Exception:
+        processed_groups.remove(hg['group_id'])
         log.exception('process_group fail - rollback')
         conn.rollback()
     finally:
         db.curr.close()
         dbpool.putconn(conn, thread.get_ident())
+        msg = ('This really should not happen, Hitgroupstatus was processed but'
+            ' is not on the list, race condition?')
+        assert hg['group_id'] in processed_groups, msg
 
-    processed_groups.add(hg['group_id'])
     return True
