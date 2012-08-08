@@ -8,6 +8,7 @@ begin
 
   -- cur_id - the one we are updating
   -- lag_id - previous correct crawl
+  -- note: cur_id > lag_id
   FOR cur_id, lag_id IN (
     SELECT (lag(id, 1, NULL) OVER (ORDER BY start_time DESC)), id
      FROM main_crawl
@@ -27,7 +28,7 @@ begin
        * HOWEVER repeating the join is a faster query than selecting from newly
        * created hits_temp.
       */
-      DELETE FROM hits_temp WHERE crawl_id=cur_id;
+
       INSERT INTO hits_temp(
         SELECT (coalesce(a.hits_available, 0) - coalesce(b.hits_available, 0)),
           a.group_id, b.group_id, cur_id, lag_id FROM (
