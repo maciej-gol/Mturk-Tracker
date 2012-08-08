@@ -19,8 +19,12 @@
     <div class="row-fluid">
         <div class="span12">
             <h3>
+                {% if report_meta %}
                 Report for {{ report_meta.from }} to {{ report_meta.to }}
-                ({{ report_meta.days }} days).
+                ({{ report_meta.days }} days)
+                {% else %}
+                Report unavailable
+                {% endif%}
             </h3>
             <hr />
         </div>
@@ -28,11 +32,22 @@
 {% endblock %}
 
 {% block content_after %}
+    {% if report_meta.start_time %}
     <div class="row-fluid">
         <div class="span12">
             <div class="pull-right">
-                Generated on {{ report_meta.start_time|default:'unknown' }} in {{ report_meta.elapsed|floatformat:2|default:"unknown" }} seconds.
+                Generated on {{ report_meta.start_time|default:'unknown' }}
+                {% if report_meta.elapsed %}
+                    in {{ report_meta.elapsed|floatformat:2|default:"unknown" }} seconds
+                {% endif %}
             </div>
         </div>
     </div>
+    {% endif %}
 {% endblock %}
+
+
+{% block content_table %}
+{% if not report_meta %}{% else %}{{ block.super }}{% endif %}
+{% endblock %}
+
