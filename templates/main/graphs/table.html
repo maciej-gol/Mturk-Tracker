@@ -7,6 +7,18 @@
 
 {% block content %}
 
-	{% google_table columns data %}
+    {% block top_tabs %}{% endblock %}
+
+    {% block content_before %}{% endblock %}
+
+    {% block content_table %}
+    <div class="row-fluid">
+        <div class="span12">
+            {% google_table columns data %}
+        </div>
+    </div>
+    {% endblock %}
+
+    {% block content_after %}{% endblock %}
 
 {% endblock %}

@@ -18,9 +18,8 @@ from mturk.main.classification import NaiveBayesClassifier
 from mturk.main.forms import HitGroupContentSearchForm
 from mturk.main.models import HitGroupContent, HitGroupClass, RequesterProfile
 from mturk.main.templatetags.graph import text_row_formater
-# TODO: when refactoring toprequesters move them to mturk.toprequesters
-from mturk.main.management.commands.toprequesters.reports import (
-    ToprequestersReport)
+from mturk.toprequesters.reports import ToprequestersReport
+
 from utils.sql import query_to_dicts, query_to_tuples
 
 
@@ -53,6 +52,7 @@ HIT_DETAILS_COLUMNS = (
 ONE_DAY = 60 * 60 * 24
 ONE_HOUR = 60 * 60
 
+
 def data_formater(input):
     for cc in input:
         yield {
@@ -60,6 +60,7 @@ def data_formater(input):
                 'row': (str(cc['hits']), str(cc['reward']),
                     str(cc['count']), str(cc['spam_projects'])),
         }
+
 
 #@cache_page(ONE_HOUR)
 def general(request):
@@ -174,13 +175,21 @@ def completed(request):
 
 
 @never_cache
-def top_requesters(request):
+def top_requesters(request, tab=None):
+
     if request.user.is_superuser:
         return admin.top_requesters(request)
 
-    # TODO: link ui choice here
-    data = ToprequestersReport.get_report_data(
-        ToprequestersReport.AVAILABLE) or []
+    try:
+        tab = int(tab)
+    except Exception:
+        pass
+    if tab not in ToprequestersReport.values:
+        messages.warning(request, 'Unknown report type: {0}'.format(tab))
+        return redirect('graphs_top_requesters',
+                        tab=ToprequestersReport.values[0])
+
+    data = ToprequestersReport.get_report_data(tab) or []
 
     def _top_requesters(request):
         def row_formatter(input):
@@ -206,13 +215,17 @@ def top_requesters(request):
         )
         ctx = {
             'data': row_formatter(data),
+            'report_meta': ToprequestersReport.get_report_meta(tab),
             'columns': columns,
             'title': 'Top-1000 Recent Requesters',
+            'tab_enum': ToprequestersReport.display_names,
+            'active_tab': tab
         }
 
-        return direct_to_template(request, 'main/graphs/table.html', ctx)
+        return direct_to_template(request, 'main/toprequesters.html', ctx)
 
     return _top_requesters(request)
+
 
 def requester_details(request, requester_id):
     if request.user.is_superuser:
@@ -335,6 +348,7 @@ def hit_group_details(request, hit_group_id):
     params['hit_group'] = hit_group
     return direct_to_template(request, 'main/hit_group_details.html', params)
 
+
 @never_cache
 def classification(request):
     data = query_to_dicts(
@@ -353,6 +367,7 @@ def classification(request):
     params = {"data":data}
     return direct_to_template(request, 'main/classification.html',
                               params)
+
 
 def search(request):
 

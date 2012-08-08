@@ -119,6 +119,7 @@ MTRACKER_APPS = (
     'mturk.main',
     'mturk.importer',
     'mturk.spam',
+    'mturk.toprequesters',
 )
 
 INSTALLED_APPS = tuple(list(FOREIGN_APPS) + list(MTRACKER_APPS))
@@ -170,6 +171,8 @@ LOGGING = {
             'maxBytes': '16777216',  # 16megabytes
             'formatter': 'verbose'
         },
+        # TODO: decide which logs can go to log_file and remove some of the
+        # below
         'crawl_log': {
             'level': LOG_LEVEL,
             'class': 'logging.handlers.RotatingFileHandler',
@@ -190,7 +193,7 @@ LOGGING = {
             'level': LOG_LEVEL,
             'class': 'logging.handlers.RotatingFileHandler',
             # Override this in local settings
-            'filename': os.path.join(ROOT_PATH, 'arrivals.log'),
+            'filename': os.path.join(ROOT_PATH, 'solr.log'),
             'maxBytes': '16777216',  # 16megabytes
             'formatter': 'verbose'
         },
@@ -199,6 +202,14 @@ LOGGING = {
             'class': 'logging.handlers.RotatingFileHandler',
             # Override this in local settings
             'filename': os.path.join(ROOT_PATH, 'classification.log'),
+            'maxBytes': '16777216',  # 16megabytes
+            'formatter': 'simple'
+        },
+        'toprequesters_log': {
+            'level': LOG_LEVEL,
+            'class': 'logging.handlers.RotatingFileHandler',
+            # Override this in local settings
+            'filename': os.path.join(ROOT_PATH, 'toprequesters.log'),
             'maxBytes': '16777216',  # 16megabytes
             'formatter': 'simple'
         },
@@ -234,6 +245,11 @@ LOGGING = {
         },
         'mturk.classification': {
             'handlers': ['classification_log', 'console'],
+            'level': LOG_LEVEL,
+            'propagate': True,
+        },
+        'mturk.toprequesters': {
+            'handlers': ['toprequesters_log', 'console'],
             'level': LOG_LEVEL,
             'propagate': True,
         },
