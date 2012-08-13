@@ -18,7 +18,7 @@ begin
       ORDER BY start_time DESC)
   LOOP
     IF(lag_id IS NOT NULL AND cur_id IS NOT NULL AND lag_id <> cur_id) THEN
-      RAISE NOTICE 'lag_id % cur_id % ', lag_id, cur_id;
+      RAISE NOTICE 'lag_id % cur_id % diff %', lag_id, cur_id, cur_id - lag_id;
 
       /* Inserts (hits_diff, group_id, group_id, crawl_id, prev_crawl_id) into
        * hits_temp.
