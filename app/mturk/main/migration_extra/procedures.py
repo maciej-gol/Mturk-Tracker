@@ -122,8 +122,6 @@ See __create_procedures for more details.
 
 """
 PROCEDURES_TO_CREATE = {
-    # 'hits_column_population.sql',  # disabled
-    'hits_column_population_daily.sql': create_no_args,
     'hits_temp_population.sql': create_with_date_args,
     'hits_update.sql': create_with_date_args,
     'reward_population.sql': create_with_date_args,
@@ -144,14 +142,6 @@ EXTRA_COLUMNS = {
     #     (u"hitgroups_consumed", "integer"),
     #     (u"rewards_posted", "double precision")
     #     (u"rewards_consumed", "double precision")
-    # ]
-
-    # Those columns are not added, as they they'd be currently unused
-    # u'main_hitgroupstatus': [
-    #     ('projects_arrived', 'integer'),
-    #     ('projects_completed', 'integer'),
-    #     ('projects_arrived', 'integer'),
-    #     ('projects_consumed', 'integer'),
     # ]
 }
 
