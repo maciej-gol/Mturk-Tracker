@@ -34,11 +34,13 @@ def query_to_tuples(query_string, *query_args):
     return
 
 
-def execute_sql(query_string, *query_args):
+def execute_sql(query_string, commit=False, *query_args):
     cursor = connection.cursor()
     # empty tuple results in 'tuple index out of range'
     query_args = query_args if len(query_args) > 0 else None
     cursor.execute(query_string, query_args)
+    if commit:
+        transaction.commit_unless_managed()
     return cursor
 
 

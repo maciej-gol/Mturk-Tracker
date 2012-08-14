@@ -11,6 +11,7 @@ from django.utils.timezone import now
 from django.core.management.base import BaseCommand
 from django.core.management import call_command
 
+from utils.sql import execute_sql
 from mturk.main.models import Crawl
 
 log = logging.getLogger('mturk.arrivals.db_arrivals')
@@ -32,7 +33,11 @@ class Command(BaseCommand):
             help='Hours to look back for records.'),
         make_option('--chunk-size', dest="chunk-size", default=10, type='int',
             help='How many crawls should be processed in a batch.'),
-        )
+        make_option("--clear-existing", dest="clear-existing", default=False,
+            action="store_true",
+            help='If true, related hits_posted and hits_consumed will be set '
+            'to 0 before proceeding.'),
+    )
 
     def process_args(self, options):
 
@@ -118,6 +123,12 @@ class Command(BaseCommand):
                 self.chunk_size,
                 crawls[0].id, crawls[total_count - 1].id))
 
+            if options['clear-existing']:
+                log.info('Clearing all existing results.')
+                clear_time = time.time()
+                self.clear_past_results([c.id for c in crawls])
+                log.info('{0}s elapsed.'.format(time.time() - clear_time))
+
             # iterate over overlapping chunks of crawls list
             for chunk in self.chunks(crawls, self.chunk_size + 1, overlap=1):
                 start, end = (chunk[-1].start_time, chunk[0].start_time)
@@ -129,6 +140,7 @@ class Command(BaseCommand):
                 # run commands responsible for populating data
                 # it's important that they query the crawls in a similar way
                 # so that the data is processed correctly
+
                 chunk_time = time.time()
                 for c in self.COMMANDS:
                     log.info('Calling {0}, {1}.'.format(c, self.short_date()))
@@ -141,9 +153,16 @@ class Command(BaseCommand):
                 log.info(('Chunk processed in {0}s, total {1}s, {2}/{3}'
                     ' done.').format(time.time() - chunk_time,
                     self.get_elapsed(), done, total_count - 1))
-
         except Exception as e:
             log.exception(e)
         else:
             log.info('{0} crawls processed in {1}s, exiting.'.format(
                 total_count, self.get_elapsed()))
+
+    def clear_past_results(self, crawl_ids):
+        """Clears hits_mv hits_posted and hits_consumed in the interval."""
+        cur = execute_sql(
+        """UPDATE hits_mv SET hits_posted = 0, hits_consumed = 0
+           WHERE crawl_id IN ({0});
+        """.format(', '.join([str(cid) for cid in crawl_ids])), commit=True)
+        cur.close()
