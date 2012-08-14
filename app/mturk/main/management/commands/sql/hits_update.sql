@@ -35,11 +35,15 @@ begin
     if(REC.hits >= 0) then
       update hits_mv
         set hits_posted = REC.hits
-        where group_id = REC.group_id1 and crawl_id = REC.crawl_id;
+        where group_id = REC.group_id1 and crawl_id = REC.crawl_id
+        and hits_available != REC.hits;
     else
       update hits_mv
         set hits_consumed = (-1) * REC.hits
-        where group_id = REC.group_id2 and crawl_id = REC.prev_crawl_id;
+        -- Settings prev_crawl_id here is important, makes finding cases where
+        -- hits_avaialble equals hits_consumed possible.
+        where group_id = REC.group_id2 and crawl_id = REC.prev_crawl_id
+        and hits_available != (-1) * REC.hits;
     end if;
 
     if(i % 1000 = 0) then
