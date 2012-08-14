@@ -2,6 +2,7 @@ import datetime
 from django.core.cache import cache
 
 from utils.sql import query_to_tuples
+from utils.enum import EnumMetaclass
 
 
 def topreq_data_hits_available(days):
@@ -92,15 +93,13 @@ def topreq_data_hits_posted(days):
 class ToprequestersReport:
     """Enum representing available toprequesters reports."""
 
+    __metaclass__ = EnumMetaclass
+
     cache_key_base = "TOPREQUESTERS_CACHED_"
 
     AVAILABLE = 0
     POSTED = 1
 
-    values = [
-        AVAILABLE,
-        POSTED,
-    ]
     display_names = {
         AVAILABLE: 'Hits available',
         POSTED: 'Hits posted',
