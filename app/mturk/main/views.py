@@ -2,6 +2,7 @@ import datetime
 import json
 import time
 
+from collections import OrderedDict
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.urlresolvers import reverse
@@ -21,7 +22,7 @@ from mturk.main.templatetags.graph import text_row_formater
 from mturk.toprequesters.reports import ToprequestersReport
 
 from utils.sql import query_to_dicts, query_to_tuples
-
+from utils.enum import EnumMetaclass
 
 GENERAL_COLUMNS = (
     ('date', 'Date'),
@@ -62,13 +63,69 @@ def data_formater(input):
         }
 
 
-#@cache_page(ONE_HOUR)
-def general(request):
+def get_tab_data(col, data):
+    """Returns date and one other selected column."""
+    for d in data:
+        yield {'date': d['date'], 'row': (d['row'][col], )}
 
-    params = {
-        'multichart': True,
-        'columns': GENERAL_COLUMNS,
-        'title': 'General Data'
+
+class GeneralTabEnum:
+    """Describes available tabs on the general view."""
+
+    __metaclass__ = EnumMetaclass
+
+    ALL = 0
+    HITS = 1
+    REWARDS = 2
+    PROJECTS = 3
+    SPAM = 4
+
+    tab_titles = {
+        ALL: 'General data'
+    }
+
+    display_names = {
+        HITS: 'HITs'
+    }
+
+    data_set_processor = {
+        ALL: lambda x: x,
+        HITS: lambda x: get_tab_data(0, x),
+        REWARDS: lambda x: get_tab_data(1, x),
+        PROJECTS: lambda x: get_tab_data(2, x),
+        SPAM: lambda x: get_tab_data(3, x),
+    }
+
+    graph_columns = OrderedDict([
+        ('date', ('date', 'Date')),
+        (HITS, ('number', '#HITs')),
+        (REWARDS, ('number', 'Rewards($)')),
+        (PROJECTS, ('number', '#Projects')),
+        (SPAM, ('number', '#Spam Projects')),
+    ])
+
+    @classmethod
+    def get_graph_columns(cls, tab):
+        if tab == cls.ALL:
+            return tuple(cls.graph_columns.values())
+        return (cls.graph_columns['date'], cls.graph_columns[tab])
+
+    @classmethod
+    def get_tab_title(cls, tab):
+        return cls.tab_titles.get(tab, cls.display_names[tab])
+
+
+#@cache_page(ONE_HOUR)
+def general(request, tab_slug=None):
+
+    tab = GeneralTabEnum.value_for_slug.get(tab_slug, GeneralTabEnum.ALL)
+
+    ctx = {
+        'multichart': tab == GeneralTabEnum.ALL,
+        'columns': GeneralTabEnum.get_graph_columns(tab),
+        'title': GeneralTabEnum.get_tab_title(tab),
+        'current_tab': GeneralTabEnum.enum_dict[tab],
+        'top_tabs': GeneralTabEnum.enum_dict.values(),
     }
 
     if 'date_from' in request.GET:
@@ -83,8 +140,8 @@ def general(request):
     else:
         date_to = datetime.datetime.now()
 
-    params['date_from'] = date_from.strftime('%m/%d/%Y')
-    params['date_to'] = date_to.strftime('%m/%d/%Y')
+    ctx['date_from'] = date_from.strftime('%m/%d/%Y')
+    ctx['date_to'] = date_to.strftime('%m/%d/%Y')
 
     data = data_formater(query_to_dicts('''
         select reward, hits, projects as "count", spam_projects, start_time
@@ -103,11 +160,13 @@ def general(request):
         return a
 
     if settings.DATASMOOTHING:
-        params['data'] = plot.repair(list(data), _is_anomaly, _fixer, 2)
+        ctx['data'] = plot.repair(list(data), _is_anomaly, _fixer, 2)
     else:
-        params['data'] = list(data)
+        ctx['data'] = list(data)
 
-    return direct_to_template(request, 'main/graphs/timeline.html', params)
+    ctx['data'] = GeneralTabEnum.data_set_processor[tab](ctx['data'])
+    # import ipdb; ipdb.set_trace()
+    return direct_to_template(request, 'main/graphs/timeline.html', ctx)
 
 
 #@cache_page(ONE_DAY)

@@ -52,19 +52,19 @@
             </form>
         </div>
 	</div>
-    {% ifequal top_tab 'general' %}
+    {% if top_tabs %}
     <div class="row-fluid">
         <div class="span12">
             <ul class="nav nav-tabs">
-                <li class="active"><a href="#">All</a></li>
-                <li><a href="#">HITs</a></li>
-                <li><a href="#">Rewards</a></li>
-                <li><a href="#">Projects</a></li>
-                <li><a href="#">Spam</a></li>
+                {% for tab in top_tabs %}
+                <li {% ifequal tab.value current_tab.value %}class="active"{% endifequal %}>
+                    <a href="{% url graphs_general tab.slug %}">{{ tab.display_name }}</a>
+                </li>
+                {% endfor %}
             </ul>
         </div>
     </div>
-    {% endifequal %}
+    {% endif %}
 
     {% google_timeline columns data %}
 
