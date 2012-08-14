@@ -159,10 +159,28 @@ class Command(BaseCommand):
             log.info('{0} crawls processed in {1}s, exiting.'.format(
                 total_count, self.get_elapsed()))
 
-    def clear_past_results(self, crawl_ids):
-        """Clears hits_mv hits_posted and hits_consumed in the interval."""
+    def clear_past_results_using_crawl_id(self, crawl_ids):
+        """Clears hits_mv hits_posted and hits_consumed in the interval.
+
+        I'm leaving this as a remark or for further testing. This method is
+        adds 50% more time than the latter (1829.80674314s run time on sample
+        date).
+        """
         cur = execute_sql(
         """UPDATE hits_mv SET hits_posted = 0, hits_consumed = 0
            WHERE crawl_id IN ({0});
         """.format(', '.join([str(cid) for cid in crawl_ids])), commit=True)
+        cur.close()
+
+    def clear_past_results(self, crawl_ids):
+        """Clears hits_mv hits_posted and hits_consumed in the interval.
+        (1348.86685991s run time - for comaprison with the above).
+        """
+        cur = execute_sql(
+        """UPDATE hits_mv SET hits_posted = 0, hits_consumed = 0
+           WHERE crawl_id IN (
+               SELECT id FROM main_crawl
+               WHERE start_time BETWEEN '{0}' AND '{1}'
+            );
+        """.format(self.start.isoformat(), self.end.isoformat(), commit=True))
         cur.close()
