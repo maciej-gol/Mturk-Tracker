@@ -58,7 +58,7 @@
             <ul class="nav nav-tabs">
                 {% for tab in top_tabs %}
                 <li {% ifequal tab.value current_tab.value %}class="active"{% endifequal %}>
-                    <a href="{% url graphs_general tab.slug %}">{{ tab.display_name }}</a>
+                    <a href="{{ tab.url }}">{{ tab.display_name }}</a>
                 </li>
                 {% endfor %}
             </ul>
