@@ -12,7 +12,8 @@ urlpatterns = patterns('',
         name='about'),
 
     url(r'^arrivals/$', 'mturk.main.views.arrivals', name='graphs_arrivals'),
-    url(r'^completed/$', 'mturk.main.views.completed', name='graphs_completed'),
+    url(r'^arrivals/(?P<tab_slug>[\w-]+)/$', 'mturk.main.views.arrivals',
+        name='graphs_arrivals'),
 
     url(r'^top_requesters/(?P<tab>\d+)/$', 'mturk.main.views.top_requesters',
         name='graphs_top_requesters'),

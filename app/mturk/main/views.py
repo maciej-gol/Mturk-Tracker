@@ -2,12 +2,13 @@ import datetime
 import json
 import time
 
+from itertools import chain
 from collections import OrderedDict
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.urlresolvers import reverse
 from django.contrib import messages
-from django.shortcuts import get_object_or_404, redirect
+from django.shortcuts import redirect
 from django.views.generic.simple import direct_to_template
 from django.views.decorators.cache import cache_page, never_cache
 from haystack.views import SearchView
@@ -17,33 +18,14 @@ import plot
 
 from mturk.main.classification import NaiveBayesClassifier
 from mturk.main.forms import HitGroupContentSearchForm
-from mturk.main.models import HitGroupContent, HitGroupClass, RequesterProfile
+from mturk.main.models import (HitGroupContent, HitGroupClass, RequesterProfile,
+    DayStats)
 from mturk.main.templatetags.graph import text_row_formater
 from mturk.toprequesters.reports import ToprequestersReport
 
 from utils.sql import query_to_dicts, query_to_tuples
 from utils.enum import EnumMetaclass
 
-GENERAL_COLUMNS = (
-    ('date', 'Date'),
-    ('number', '#HITs'),
-    ('number', 'Rewards($)'),
-    ('number', '#Projects'),
-    ('number', '#Spam Projects'),
-)
-
-DEFAULT_COLUMNS = (
-    ('date', 'Date'),
-    ('number', '#HITs'),
-    ('number', 'Rewards($)'),
-    ('number', '#Projects'),
-)
-
-ARRIVALS_COLUMNS = (
-    ('date', 'Date'),
-    ('number', '#HITs'),
-    ('number', 'Rewards($)'),
-)
 
 HIT_DETAILS_COLUMNS = (
     ('date', 'Date'),
@@ -63,56 +45,10 @@ def data_formater(input):
         }
 
 
-def get_tab_data(col, data):
+def general_tab_data_formatter(col, data):
     """Returns date and one other selected column."""
     for d in data:
         yield {'date': d['date'], 'row': (d['row'][col], )}
-
-
-class GeneralTabEnum:
-    """Describes available tabs on the general view."""
-
-    __metaclass__ = EnumMetaclass
-
-    ALL = 0
-    HITS = 1
-    REWARDS = 2
-    PROJECTS = 3
-    SPAM = 4
-
-    tab_titles = {
-        ALL: 'General data'
-    }
-
-    display_names = {
-        HITS: 'HITs'
-    }
-
-    data_set_processor = {
-        ALL: lambda x: x,
-        HITS: lambda x: get_tab_data(0, x),
-        REWARDS: lambda x: get_tab_data(1, x),
-        PROJECTS: lambda x: get_tab_data(2, x),
-        SPAM: lambda x: get_tab_data(3, x),
-    }
-
-    graph_columns = OrderedDict([
-        ('date', ('date', 'Date')),
-        (HITS, ('number', '#HITs')),
-        (REWARDS, ('number', 'Rewards($)')),
-        (PROJECTS, ('number', '#Projects')),
-        (SPAM, ('number', '#Spam Projects')),
-    ])
-
-    @classmethod
-    def get_graph_columns(cls, tab):
-        if tab == cls.ALL:
-            return tuple(cls.graph_columns.values())
-        return (cls.graph_columns['date'], cls.graph_columns[tab])
-
-    @classmethod
-    def get_tab_title(cls, tab):
-        return cls.tab_titles.get(tab, cls.display_names[tab])
 
 
 #@cache_page(ONE_HOUR)
@@ -169,68 +105,44 @@ def general(request, tab_slug=None):
     return direct_to_template(request, 'main/graphs/timeline.html', ctx)
 
 
-#@cache_page(ONE_DAY)
-def arrivals(request):
+def model_fields_formatter(fields, data):
+    return tuple([str(getattr(data, f)) for f in fields])
 
-    params = {
+
+#@cache_page(ONE_DAY)
+def arrivals(request, tab_slug=None):
+
+    tab = ArrivalsTabEnum.value_for_slug.get(tab_slug, ArrivalsTabEnum.ALL)
+
+    ctx = {
         'multichart': False,
-        'columns': ARRIVALS_COLUMNS,
-        'title': 'New Tasks/HITs/$$$ per day'
+        'columns': ArrivalsTabEnum.get_graph_columns(tab),
+        'title': ArrivalsTabEnum.get_tab_title(tab),
+        'top_tabs': ArrivalsTabEnum.enum_dict.values(),
+        'current_tab': ArrivalsTabEnum.enum_dict[tab],
     }
 
-    def arrivals_data_formater(input):
+    def arrivals_data_formater(input, tab):
         for cc in input:
             yield {
-                    'date': cc['start_time'],
-                    'row': (str(cc['hits']), str(cc['reward'])),
+                'date': cc.date,
+                'row': ArrivalsTabEnum.data_set_processor[tab](cc),
             }
 
     date_from = (datetime.date.today() - datetime.timedelta(days=30)).isoformat()
     date_to = (datetime.date.today() + datetime.timedelta(days=1)).isoformat()
 
-    if request.method == 'GET' and 'date_from' in request.GET and 'date_to' in request.GET:
+    if 'date_from' in request.GET and 'date_to' in request.GET:
+        date_from = datetime.datetime(
+            *time.strptime(request.GET['date_from'], '%m/%d/%Y')[:6])
+        date_to = datetime.datetime(
+            *time.strptime(request.GET['date_to'], '%m/%d/%Y')[:6])
+        ctx['date_from'] = request.GET['date_from']
+        ctx['date_to'] = request.GET['date_to']
 
-        date_from = datetime.datetime(*time.strptime(request.GET['date_from'], '%m/%d/%Y')[:6])
-        date_to = datetime.datetime(*time.strptime(request.GET['date_to'], '%m/%d/%Y')[:6])
-        params['date_from'] = request.GET['date_from']
-        params['date_to'] = request.GET['date_to']
-
-    data = arrivals_data_formater(query_to_dicts('''
-        select date as "start_time", arrivals as "hits", arrivals_value as "reward"
-        from main_daystats where date >= '%s' and date <= '%s'
-    ''' % (date_from, date_to)))
-
-    params['data'] = data
-
-    return direct_to_template(request, 'main/graphs/timeline.html', params)
-
-
-@cache_page(ONE_DAY)
-def completed(request):
-
-    params = {
-        'columns': DEFAULT_COLUMNS,
-        'title': 'Tasks/HITs/$$$ completed per day'
-    }
-
-    date_from = (datetime.date.today() - datetime.timedelta(days=30)).isoformat()
-    date_to = (datetime.date.today() + datetime.timedelta(days=1)).isoformat()
-
-    if request.method == 'GET' and 'date_from' in request.GET and 'date_to' in request.GET:
-
-        date_from = datetime.datetime(*time.strptime(request.GET['date_from'], '%m/%d/%Y')[:6])
-        date_to = datetime.datetime(*time.strptime(request.GET['date_to'], '%m/%d/%Y')[:6])
-        params['date_from'] = request.GET['date_from']
-        params['date_to'] = request.GET['date_to']
-
-    data = data_formater(query_to_dicts('''
-        select date as "start_time", day_start_hits - day_end_hits as "hits", day_start_reward - day_end_reward as "reward", day_start_projects - day_end_projects as "count"
-            from main_daystats where day_end_hits != 0 and date >= '%s' and date <= '%s'
-    ''' % (date_from, date_to)))
-
-    params['data'] = data
-
-    return direct_to_template(request, 'main/graphs/timeline.html', params)
+    data = DayStats.objects.filter(date__gte=date_from, date__lte=date_to)
+    ctx['data'] = arrivals_data_formater(data, tab)
+    return direct_to_template(request, 'main/graphs/timeline.html', ctx)
 
 
 @never_cache
@@ -465,3 +377,101 @@ def haystack_search(request):
     search_view = HitGroupContentSearchView(form_class=HitGroupContentSearchForm,
                                             template="main/search.html")
     return search_view(request)
+
+
+class GeneralTabEnum:
+    """Describes available tabs on the general view."""
+
+    __metaclass__ = EnumMetaclass
+
+    ALL = 0
+    HITS = 1
+    REWARDS = 2
+    PROJECTS = 3
+    SPAM = 4
+
+    ENUM_FIELDS = EnumMetaclass.ENUM_FIELDS + ['urls']
+    EXTRA_FIELDS = {
+        'urls': lambda d: dict([
+            (v, reverse('graphs_general', kwargs={'tab_slug': slug}))
+            for v, slug in d['slugs'].items()])
+    }
+
+    display_names = {
+        ALL: 'General data',
+        HITS: 'HITs'
+    }
+
+    data_set_processor = {
+        ALL: lambda x: x,
+        HITS: lambda x: general_tab_data_formatter(0, x),
+        REWARDS: lambda x: general_tab_data_formatter(1, x),
+        PROJECTS: lambda x: general_tab_data_formatter(2, x),
+        SPAM: lambda x: general_tab_data_formatter(3, x),
+    }
+
+    graph_columns = OrderedDict([
+        ('date', ('date', 'Date')),
+        (HITS, ('number', '#HITs')),
+        (REWARDS, ('number', 'Rewards($)')),
+        (PROJECTS, ('number', '#Projects')),
+        (SPAM, ('number', '#Spam Projects')),
+    ])
+
+    @classmethod
+    def get_graph_columns(cls, tab):
+        if tab == cls.ALL:
+            return tuple(cls.graph_columns.values())
+        return (cls.graph_columns['date'], cls.graph_columns[tab])
+
+    @classmethod
+    def get_tab_title(cls, tab):
+        return cls.display_names[tab]
+
+
+class ArrivalsTabEnum:
+    """Describes available tabs on the general view."""
+
+    __metaclass__ = EnumMetaclass
+
+    ALL = 0
+    ARRIVALS = 1
+    COMPLETED = 2
+
+    ENUM_FIELDS = EnumMetaclass.ENUM_FIELDS + ['urls']
+    EXTRA_FIELDS = {
+        'urls': lambda d: dict([
+            (v, reverse('graphs_arrivals', kwargs={'tab_slug': slug}))
+            for v, slug in d['slugs'].items()])
+    }
+
+    display_names = {
+        ALL: 'Arrivals + Completitions'
+    }
+
+    data_set_processor = {
+        ALL: lambda x: model_fields_formatter(
+            ['arrivals', 'arrivals_value', 'processed', 'processed_value'], x),
+        ARRIVALS: lambda x: model_fields_formatter(
+            ['arrivals', 'arrivals_value'], x),
+        COMPLETED: lambda x: model_fields_formatter(
+            ['processed', 'processed_value'], x),
+    }
+
+    graph_columns = OrderedDict([
+        ('date', [('date', 'Date')]),
+        (ARRIVALS, [('number', '#HIT arrived'),
+                    ('number', 'Reward arrived($)')]),
+        (COMPLETED, [('number', '#HIT completed'),
+                     ('number', 'Reward completed($)')]),
+    ])
+
+    @classmethod
+    def get_tab_title(cls, tab):
+        return cls.display_names[tab]
+
+    @classmethod
+    def get_graph_columns(cls, tab):
+        if tab == cls.ALL:
+            return tuple(chain(*cls.graph_columns.values()))
+        return tuple(chain(cls.graph_columns['date'] + cls.graph_columns[tab]))

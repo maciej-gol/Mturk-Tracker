@@ -20,6 +20,11 @@ class EnumMetaclass(type):
     cls.enum_dict -- dictionary containing all details for the value, this is:
     slug, name, display_name, trans_name and value,
 
+
+    Overriding. To add additional fields use the following:
+    EXTRA_FIELDS -- (plural_name, function(d)) pairs to add to the class
+    ENUM_FIELDS -- fields to copy into enum_dict
+
     Example:
     class X(object):
         __metaclass__ = EnumMetaclass
@@ -50,6 +55,10 @@ class EnumMetaclass(type):
     {'a': 1, 'b': 2, 'c': 3, 'long-name': 4}
 
     """
+
+    ENUM_FIELDS = ['slugs', 'names', 'display_names', 'trans_names', 'urls']
+    EXTRA_FIELDS = {}
+
     def __new__(cls, name, bases, d):
         names = dict()
         pairs = []
@@ -77,9 +86,14 @@ class EnumMetaclass(type):
             for n in d['display_names'].items()])
         d['value_for_slug'] = dict([(n[1], n[0]) for n in d['slugs'].items()])
 
+        # adding new fields
+        for name, fun in d.get('EXTRA_FIELDS', cls.EXTRA_FIELDS).iteritems():
+            d[name] = fun(d)
+
         d['enum_dict'] = dict([(v, {'value': v}) for v in values])
         for v in d['enum_dict']:
-            for l in ['slugs', 'names', 'display_names', 'trans_names']:
-                d['enum_dict'][v][l[:-1]] = d[l][v]
+            for l in d.get('ENUM_FIELDS', cls.ENUM_FIELDS):
+                if l in d and v in d[l]:
+                    d['enum_dict'][v][l[:-1]] = d[l][v]
 
         return type.__new__(cls, name, bases, d)
