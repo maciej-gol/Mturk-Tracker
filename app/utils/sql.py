@@ -34,13 +34,24 @@ def query_to_tuples(query_string, *query_args):
     return
 
 
-def execute_sql(query_string, commit=False, *query_args):
+def execute_sql(query_string, *query_args, **kwargs):
+    """Executes given query providing positional args as query arguments.
+
+    Keyword arguments:
+    query_string -- query to execute
+    query_args -- positional arguments are passed on as query arguments
+    commit -- specify commit=True keyword argument if you want the commit to be
+    called after query
+
+    """
     cursor = connection.cursor()
     # empty tuple results in 'tuple index out of range'
     query_args = query_args if len(query_args) > 0 else None
     cursor.execute(query_string, query_args)
-    if commit:
+
+    if kwargs.get('commit'):
         transaction.commit_unless_managed()
+
     return cursor
 
 
