@@ -1,5 +1,5 @@
 declare
-  i integer; crawl integer;
+  i integer;
   total_reward_consumed float; total_reward_posted float;
 
 BEGIN
@@ -8,21 +8,22 @@ BEGIN
   FOR i IN (SELECT id FROM main_crawl
             WHERE start_time BETWEEN istart AND iend)
   LOOP
-    /* Calculate the total reward consumed from hits_mv. */
-    select crawl_id, sum(coalesce(hits_consumed, 0) * reward)
-      into crawl, total_reward_consumed from hits_mv
-      where crawl_id = i group by crawl_id;
 
-    /* Calculate the total reward posted from hits_mv. */
-    select crawl_id, sum(coalesce(hits_posted, 0) * reward)
-      into crawl, total_reward_posted from hits_mv
-      where crawl_id = i group by crawl_id;
+    /* Calculate the total reward consumed/posted from hits_mv. */
+    SELECT
+      sum(coalesce(hits_consumed, 0) * reward),
+      sum(coalesce(hits_posted, 0) * reward)
+    INTO
+      total_reward_consumed, total_reward_posted
+    FROM hits_mv
+    WHERE crawl_id = i;
 
     /* The data to the main_crawlaggredates. */
-    update main_crawlagregates
-      set rewards_consumed = total_reward_consumed,
-          rewards_posted = total_reward_posted
-      where crawl_id = i;
+    UPDATE main_crawlagregates
+    SET
+      rewards_consumed = total_reward_consumed,
+      rewards_posted = total_reward_posted
+    WHERE crawl_id = i;
 
     if (i % 1000 = 0) then
       RAISE NOTICE 'Processing crawl % ', i;
@@ -30,4 +31,3 @@ BEGIN
 
   END LOOP;
 END;
-
