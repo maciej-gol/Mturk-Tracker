@@ -1,5 +1,6 @@
 declare
   i integer;
+  total_hits_posted integer; total_hits_consumed integer;
   total_reward_consumed float; total_reward_posted float;
 
 BEGIN
@@ -11,9 +12,12 @@ BEGIN
 
     /* Calculate the total reward consumed/posted from hits_mv. */
     SELECT
+      sum(coalesce(hits_consumed, 0)),
+      sum(coalesce(hits_posted, 0)),
       sum(coalesce(hits_consumed, 0) * reward),
       sum(coalesce(hits_posted, 0) * reward)
     INTO
+      total_hits_consumed, total_hits_posted,
       total_reward_consumed, total_reward_posted
     FROM hits_mv
     WHERE crawl_id = i;
@@ -21,6 +25,8 @@ BEGIN
     /* The data to the main_crawlaggredates. */
     UPDATE main_crawlagregates
     SET
+      hits_posted = total_hits_posted,
+      hits_consumed = total_hits_consumed,
       rewards_consumed = total_reward_consumed,
       rewards_posted = total_reward_posted
     WHERE crawl_id = i;

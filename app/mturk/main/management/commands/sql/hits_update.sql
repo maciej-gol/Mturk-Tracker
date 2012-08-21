@@ -53,7 +53,7 @@ begin
     i := i+1;
   END LOOP;
 
-  RAISE NOTICE 'Delecting all hits_temp records (from % to %).', istart, iend;
+  RAISE NOTICE 'Deleting all hits_temp records (from % to %).', istart, iend;
 
   -- ONLY one instance can run at a time, but truncate will be faster than
   -- delete in this case, as we can except 15k+ records

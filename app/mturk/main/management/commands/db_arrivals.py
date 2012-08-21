@@ -124,10 +124,7 @@ class Command(BaseCommand):
                 crawls[0].id, crawls[total_count - 1].id))
 
             if options['clear-existing']:
-                log.info('Clearing all existing results.')
-                clear_time = time.time()
-                self.clear_past_results([c.id for c in crawls])
-                log.info('{0}s elapsed.'.format(time.time() - clear_time))
+                self.clear_past_results()
 
             # iterate over overlapping chunks of crawls list
             for chunk in self.chunks(crawls, self.chunk_size + 1, overlap=1):
@@ -159,28 +156,43 @@ class Command(BaseCommand):
             log.info('{0} crawls processed in {1}s, exiting.'.format(
                 total_count, self.get_elapsed()))
 
-    def clear_past_results_using_crawl_id(self, crawl_ids):
-        """Clears hits_mv hits_posted and hits_consumed in the interval.
+    def clear_past_results(self):
+        """Clears results in hits_mv and main_crawlagregates tables.
 
-        I'm leaving this as a remark or for further testing. This method is
-        adds 50% more time than the latter (1829.80674314s run time on sample
-        date).
+        Tables cleared:
+        hits_mv -- hits_posted and hits_consumed
+        main_crawlagregates -- hits_consumed, hits_posted, hitgroups_posted,
+        hitgroups_consumed
+
         """
+        log.info('Clearing existiting hits_mv columns.')
+        clear_time = time.time()
         cur = execute_sql(
         """UPDATE hits_mv SET hits_posted = 0, hits_consumed = 0
-           WHERE crawl_id IN ({0});
-        """.format(', '.join([str(cid) for cid in crawl_ids])), commit=True)
+        WHERE
+            crawl_id IN (
+                SELECT id FROM main_crawl
+                WHERE start_time BETWEEN '{0}' AND '{1}'
+            ) AND
+            hits_posted > 0 OR hits_consumed > 0;
+        """.format(self.start.isoformat(), self.end.isoformat(), commit=True))
+        log.info('{0}s elapsed.'.format(time.time() - clear_time))
         cur.close()
 
-    def clear_past_results(self, crawl_ids):
-        """Clears hits_mv hits_posted and hits_consumed in the interval.
-        (1348.86685991s run time - for comaprison with the above).
-        """
+        log.info('Clearing existiting main_crawlagregates columns.')
+        clear_time = time.time()
         cur = execute_sql(
-        """UPDATE hits_mv SET hits_posted = 0, hits_consumed = 0
-           WHERE crawl_id IN (
-               SELECT id FROM main_crawl
-               WHERE start_time BETWEEN '{0}' AND '{1}'
-            );
+        """UPDATE main_crawlagregates
+        SET
+            hits_posted = 0, hits_consumed = 0,
+            hitgroups_posted = 0, hitgroups_consumed = 0,
+        WHERE
+            crawl_id IN (
+                SELECT id FROM main_crawl
+                WHERE start_time BETWEEN '{0}' AND '{1}'
+            ) AND
+            hits_posted > 0 OR hits_consumed > 0 OR
+            hitgroups_consumed > 0 OR hitgroups_posted > 0;
         """.format(self.start.isoformat(), self.end.isoformat(), commit=True))
+        log.info('{0}s elapsed.'.format(time.time() - clear_time))
         cur.close()

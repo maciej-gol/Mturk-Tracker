@@ -25,8 +25,6 @@ begin
        *
        * Note that we are saving both a.group_id and b.group_id. This can be
        * used to find moments where a project has disappeared.
-       * HOWEVER repeating the join is a faster query than selecting from newly
-       * created hits_temp.
       */
 
       INSERT INTO hits_temp(
@@ -39,24 +37,6 @@ begin
               WHERE crawl_id = lag_id) b
             ON a.group_id = b.group_id));
 
-      /* Finds the count of hitgroups started between the crawls. */
-      SELECT count(1) INTO prj_started FROM (
-        (SELECT group_id FROM main_hitgroupstatus WHERE crawl_id=cur_id) a
-        FULL OUTER JOIN
-        (SELECT group_id FROM main_hitgroupstatus WHERE crawl_id=lag_id) b
-        ON a.group_id=b.group_id) WHERE b.group_id IS NULL;
-
-      /* Finds the count of hitgroups completed between the crawls. */
-      SELECT count(1) INTO prj_completed FROM (
-        (SELECT group_id FROM main_hitgroupstatus WHERE crawl_id=cur_id) a
-        FULL OUTER JOIN
-        (SELECT group_id FROM main_hitgroupstatus WHERE crawl_id=lag_id) b
-        ON a.group_id=b.group_id) WHERE a.group_id IS NULL;
-
-      /* Updates crawlagregates. */
-      UPDATE main_crawlagregates
-        SET hitgroups_posted = prj_started, hitgroups_consumed = prj_completed
-        WHERE crawl_id=cur_id;
     END IF;
 
     if(cur_id % 100 = 0) then
