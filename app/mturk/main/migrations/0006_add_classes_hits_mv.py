@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from south.v2 import SchemaMigration
-from utils import add_table_columns
+from utils.sql import add_table_columns
 
 
 class Migration(SchemaMigration):
