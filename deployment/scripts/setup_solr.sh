@@ -15,6 +15,8 @@ if ([ ! -f "$DL_TO/$FILE" ] || $UPDATE );
 then
     echo "Downloading solr"
     wget "ftp://mirror.nyi.net/apache/lucene/solr/$SOLR_VERSION/apache-solr-$SOLR_VERSION.tgz" -O "$DL_TO/$FILE"
+    echo "Downloading PostgreSQL JDBC driver"
+    wget "http://jdbc.postgresql.org/download/postgresql-9.1-902.jdbc4.jar" -O "$DL_TO/postgresql.jdbc4.jar"
     echo "Unpacking solr"
     tar -C "$DL_TO" --overwrite -xvzf "$DL_TO/$FILE"
 else
@@ -28,6 +30,7 @@ then
     cp "$DL_TO/apache-solr-$SOLR_VERSION/example/start.jar" "$MTURK_HOME/solr"
     cp -rf "$DL_TO/apache-solr-$SOLR_VERSION/example/webapps" "$MTURK_HOME/solr"
     cp -rf "$DL_TO/apache-solr-$SOLR_VERSION/dist" "$MTURK_HOME/solr"
+    cp "$DL_TO/postgresql.jdbc4.jar" "$MTURK_HOME/solr/dist/"
     touch $SUCCESS_FILE
 else
     echo "Solr already installed - skipping install."
