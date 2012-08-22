@@ -112,9 +112,17 @@
 <div class="row-fluid">
     <div class="span12">
         {% if hit_group.html %}
-            <div id="hit_group" style="margin-top:15px;padding:10px;border:1px solid black">
-                {{ hit_group.html|safe }}
+
+            <div id="hit_group" class="hit-group-content">
+                <iframe src="{% url hit_group_content hit_group.group_id %}"></iframe>
             </div>
+
+            {% comment %}
+            <div id="hit_group" class="hit-group-content">
+                <iframe src="https://www.mturk.com/mturk/preview?groupId={{ hit_group.group_id }}"></iframe>
+            </div>
+            {% endcomment %}
+
         {% endif %}
     </div>
 </div>

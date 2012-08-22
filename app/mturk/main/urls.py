@@ -25,6 +25,8 @@ urlpatterns = patterns('',
     url(r'^search/$', 'mturk.main.views.haystack_search', name='haystack_search'),
     url(r'^requester_details/(?P<requester_id>[A-Z0-9]+)/$',
         'mturk.main.views.requester_details', name='requester_details'),
+    url(r'^hit/content/(?P<hit_group_id>[a-fA-Z0-9]+)/$',
+        'mturk.main.views.hit_group_content', name='hit_group_content'),
     url(r'^hit/(?P<hit_group_id>[a-fA-Z0-9]+)/$',
         'mturk.main.views.hit_group_details', name='hit_group_details'),
 
