@@ -142,6 +142,8 @@ class CrawlAgregates(models.Model):
     spam_projects = models.IntegerField("Spam projects")
     crawl = models.ForeignKey(Crawl, verbose_name="Crawl")
 
+    hits_posted = models.IntegerField("Hits posted", null=True, default=0)
+    hits_consumed = models.IntegerField("Hits consumed", null=True, default=0)
     hitgroups_posted = models.IntegerField("Hitgroups posted", null=True)
     hitgroups_consumed = models.IntegerField("Hitgroups consumed", null=True)
     rewards_posted = models.FloatField("Rewards posted", null=True)

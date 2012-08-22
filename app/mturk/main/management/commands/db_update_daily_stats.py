@@ -41,6 +41,7 @@ class Command(BaseCommand):
         days = (end - start).days
         log.info("Processing {0} to {1} ({2} days).".format(start, end, days))
         i = 0
+
         for i in range(0, days):
 
             day = crawl.start_day() + datetime.timedelta(days=i)
@@ -49,8 +50,10 @@ class Command(BaseCommand):
             # excluding objects having zero
             aggregates = CrawlAgregates.objects.filter(
                 start_time__gte=day, start_time__lt=day_end
-                ).filter(Q(hitgroups_posted__gt=0) |
-                         Q(hitgroups_consumed__gt=0))
+                ).filter(Q(hits_posted__gt=0) |
+                         Q(hits_consumed__gt=0) |
+                         Q(rewards_posted__gt=0) |
+                         Q(rewards_consumed__gt=0))
 
             if len(aggregates) == 0:
                 log.info("No crawl aggregates for %s." % day)
@@ -58,8 +61,8 @@ class Command(BaseCommand):
 
             res = [0, 0, 0, 0]
             for a in aggregates:
-                for i, at in enumerate(['hitgroups_posted', 'rewards_posted',
-                    'hitgroups_consumed', 'rewards_consumed']):
+                for i, at in enumerate(['hits_posted', 'rewards_posted',
+                    'hits_consumed', 'rewards_consumed']):
                     res[i] += getattr(a, at) or 0
             values = {}
             for i, k in enumerate(['arrivals', 'arrivals_value', 'processed',
