@@ -6,7 +6,7 @@ from utils.sql import add_table_columns
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        add_table_columns("hits_mv", (("classes", "int null")))
+        add_table_columns("hits_mv", (("classes", "int null"),))
 
     def backwards(self, orm):
         # We do not allow to undo migration.
