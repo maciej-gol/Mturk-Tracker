@@ -113,13 +113,20 @@
     <div class="span12">
         {% if hit_group.html %}
 
+            {# TAB 2-4 CONTENT BELOW #}
+
             <div id="hit_group" class="hit-group-content">
                 <iframe src="{% url hit_group_content hit_group.group_id %}"></iframe>
             </div>
 
             {% comment %}
+
             <div id="hit_group" class="hit-group-content">
                 <iframe src="https://www.mturk.com/mturk/preview?groupId={{ hit_group.group_id }}"></iframe>
+            </div>
+
+            <div id="hit_group" class="hit-group-content">
+                <pre> {{ hit_group.html }}</pre>
             </div>
             {% endcomment %}
 
