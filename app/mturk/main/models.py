@@ -85,7 +85,8 @@ class HitGroupContent(models.Model):
         # import StringIO
         import re
 
-        num_of_qualifications = len(self.qualifications.split(',')) if self.qualifications else 0
+        num_of_qualifications = len(self.qualifications.split(',')) \
+                if self.qualifications else 0
         sanitized_html = re.sub(r'\n', ' ', self.html)
         sanitized_html = re.sub(r'\r', '', sanitized_html)
 
@@ -99,7 +100,8 @@ class HitGroupContent(models.Model):
 
         return [self.reward, self.description, self.title, self.requester_name,
             self.qualifications, num_of_qualifications, self.time_alloted,
-            sanitized_html, self.keywords, "true" if self.is_public else "false"]
+            sanitized_html, self.keywords,
+            "true" if self.is_public else "false"]
 
         # return csvrow
 
@@ -224,6 +226,7 @@ class IndexQueue(models.Model):
     created = models.DateTimeField(auto_now_add=True)
 
     objects = IndexQueueManager()
+
 
 class HitGroupClass(models.Model):
     group_id = models.CharField(max_length=50, db_index=True, unique=True)
