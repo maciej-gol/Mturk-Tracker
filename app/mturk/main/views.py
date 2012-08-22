@@ -213,14 +213,14 @@ def requester_details(request, requester_id):
                 row.extend(cc[1:3])
                 yield row
 
-        requster_name = HitGroupContent.objects.filter(
+        requester_name = HitGroupContent.objects.filter(
             requester_id=requester_id).values_list(
             'requester_name', flat=True).distinct()
 
-        if requster_name:
-            requster_name = requster_name[0]
+        if requester_name:
+            requester_name = requester_name[0]
         else:
-            requster_name = requester_id
+            requester_name = requester_id
 
         date_from = (datetime.date.today() - datetime.timedelta(days=30)).isoformat()
 
@@ -247,12 +247,32 @@ def requester_details(request, requester_id):
         ctx = {
             'data': text_row_formater(row_formatter(data)),
             'columns': tuple(columns),
-            'title': 'Tasks posted during last 30 days by %s' % (requster_name),
+            'title': 'Tasks posted during last 30 days by %s' % (requester_name),
+            'requester_name': requester_name,
+            'requester_id': requester_id,
             'user': request.user,
         }
         return direct_to_template(request, 'main/requester_details.html', ctx)
 
     return _requester_details(request, requester_id)
+
+
+@never_cache
+def hit_group_content(request, hit_group_id):
+    """View used as an iframe source for hit_group_details."""
+
+    try:
+        hit_group = HitGroupContent.objects.get(group_id=hit_group_id)
+        if RequesterProfile.objects.filter(requester_id=hit_group.requester_id,
+            is_public=False):
+            raise HitGroupContent.DoesNotExist()
+    except HitGroupContent.DoesNotExist:
+        messages.info(request, 'Hitgroup with id "{0}" was not found!'.format(
+            hit_group_id))
+        return redirect('haystack_search')
+
+    params = {'hit_group': hit_group}
+    return direct_to_template(request, 'main/hit_group_content.html', params)
 
 
 @never_cache

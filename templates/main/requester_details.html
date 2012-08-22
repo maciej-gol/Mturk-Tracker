@@ -8,6 +8,16 @@
 
 {% block content %}
 
+<div class="row-fluid">
+    <div class="span12">
+        <h2>
+            Tasks posted during last 30 days by
+            <a href="{% url requester_details requester_id %}">{{ requester_name }}</a>
+        </h2>
+    </div>
+</div>
+<hr />
+
 <script type='text/javascript'>
 	google.load('visualization', '1', {'packages':['table']});
 	google.setOnLoadCallback(drawTable);

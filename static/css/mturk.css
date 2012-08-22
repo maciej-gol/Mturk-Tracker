@@ -190,3 +190,12 @@ div.search-pagination {
 .search-results-col3 {
     width: 20%;
 }
+.hit-group-content {
+    margin-top: 15px;
+    padding: 10px;
+    border: 1px solid black;
+}
+.hit-group-content iframe {
+    width: 100%;
+    height: 100%;
+}
