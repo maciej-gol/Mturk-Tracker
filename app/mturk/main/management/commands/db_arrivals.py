@@ -185,14 +185,14 @@ class Command(BaseCommand):
         """UPDATE main_crawlagregates
         SET
             hits_posted = 0, hits_consumed = 0,
-            hitgroups_posted = 0, hitgroups_consumed = 0,
+            hitgroups_posted = 0, hitgroups_consumed = 0
         WHERE
             crawl_id IN (
                 SELECT id FROM main_crawl
                 WHERE start_time BETWEEN '{0}' AND '{1}'
-            ) AND
+            ) AND (
             hits_posted > 0 OR hits_consumed > 0 OR
-            hitgroups_consumed > 0 OR hitgroups_posted > 0;
+            hitgroups_consumed > 0 OR hitgroups_posted > 0);
         """.format(self.start.isoformat(), self.end.isoformat(), commit=True))
         log.info('{0}s elapsed.'.format(time.time() - clear_time))
         cur.close()
