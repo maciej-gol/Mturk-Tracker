@@ -120,6 +120,7 @@ MTRACKER_APPS = (
     'mturk.importer',
     'mturk.spam',
     'mturk.toprequesters',
+    'mturk.arrivals',
 )
 
 INSTALLED_APPS = tuple(list(FOREIGN_APPS) + list(MTRACKER_APPS))

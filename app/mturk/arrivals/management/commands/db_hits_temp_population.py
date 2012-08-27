@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from db_procedure_command import DBProcedureCommand
+from utils.management.commands.base.db_procedure_command import DBProcedureCommand
 import logging
 
 
