@@ -1,73 +1,35 @@
 # -*- coding: utf-8 -*-
 
 import time
-import datetime
 import logging
-import dateutil.parser
 
 from optparse import make_option
 from django.db.models import F
 from django.utils.timezone import now
-from django.core.management.base import BaseCommand
 from django.core.management import call_command
 
+from utils.management.commands.base.crawl_updater import DataUpdaterCommand
 from utils.sql import execute_sql
-from mturk.main.models import Crawl
-
-log = logging.getLogger('mturk.arrivals.db_arrivals')
 
 
-class Command(BaseCommand):
+class Command(DataUpdaterCommand):
 
     help = ("Wraps all 3 commands that need to be ran in order to "
         "calculate data for day stats.")
 
-    option_list = BaseCommand.option_list + (
-        make_option('--start', dest="start", default=None,
-            help='Processed interval start, defaults to 2 hours.'),
-        make_option('--end', dest="end", default=None,
-            help='Processed interval end, defaults to now.'),
-        make_option('--minutes', dest="minutes", default=None, type='int',
-            help='Minutes to look back for records.'),
-        make_option('--hours', dest="hours", default=None, type='int',
-            help='Hours to look back for records.'),
-        make_option('--chunk-size', dest="chunk-size", default=10, type='int',
-            help='How many crawls should be processed in a batch.'),
+    log = logging.getLogger('mturk.arrivals')
+
+    option_list = DataUpdaterCommand.option_list + (
         make_option("--clear-existing", dest="clear-existing", default=False,
             action="store_true",
             help='If true, related hits_posted and hits_consumed will be set '
             'to 0 before proceeding.'),
     )
 
-    def process_args(self, options):
-
-        if isinstance(options.get('start'), basestring):
-            options['start'] = dateutil.parser.parse(options.get('start'))
-        if isinstance(options.get('end'), basestring):
-            options['end'] = dateutil.parser.parse(options.get('end'))
-
-        self.chunk_size = options.get('chunk-size')
-
-        if (options.get('minutes') is not None or
-            options.get('hours') is not None):
-
-            timedelta = datetime.timedelta(
-                minutes=options.get('minutes') or 0,
-                hours=options.get('hours') or 0)
-        else:
-            timedelta = datetime.timedelta(hours=2)
-
-        if options['end'] and options['start'] is None:
-            start = options['end'] - timedelta
-            end = options['end']
-        else:
-            start = options['start'] or (now() - timedelta)
-            end = options['end'] or now()
-
-        self.start = start
-        self.end = end
-
-        return start, end
+    min_crawls = 2
+    overlap = 1
+    chunk_size = 10
+    display_name = 'arrivals'
 
     # django management commands to run per each chunk in the given order
     COMMANDS = (
@@ -90,71 +52,21 @@ class Command(BaseCommand):
     def short_date(self):
         return now().time().strftime('%H:%M:%S')
 
-    def handle(self, **options):
+    def prepare_data(self):
+        if self.options['clear-existing']:
+            self.clear_past_results()
 
-        self.start_time = time.time()
-        self.process_args(options)
+    def filter_crawls(self, crawls):
+        return crawls.filter(groups_downloaded__gt=F('groups_available') * 0.9)
 
-        try:
-
-            # query crawls in the period we want to process
-            crawls = Crawl.objects.filter(
-                start_time__gt=self.start,
-                start_time__lt=self.end,
-                groups_downloaded__gt=F('groups_available') * 0.9
-                ).order_by('-start_time')
-            total_count = len(crawls)
-
-            if total_count < 2:
-                log.info("Not enough crawls to process.")
-                return
-
-            done = 0
-            log.info("""
-            Starting arrivals calculation.
-
-            {0} crawls will be processed in chunks of {3}.
-            -- {1} to
-            -- {2},
-            -- id from {4} to {5}.
-            """.format(total_count,
-                self.start.strftime('%y-%m-%d %H:%M:%S'),
-                self.end.strftime('%y-%m-%d %H:%M:%S'),
-                self.chunk_size,
-                crawls[0].id, crawls[total_count - 1].id))
-
-            if options['clear-existing']:
-                self.clear_past_results()
-
-            # iterate over overlapping chunks of crawls list
-            for chunk in self.chunks(crawls, self.chunk_size + 1, overlap=1):
-                start, end = (chunk[-1].start_time, chunk[0].start_time)
-                log.info(('Chunk of {0} crawls: {1}\nstart_time {2} to '
-                    '{3}.').format(len(chunk), [c.id for c in chunk],
-                    start.strftime('%y-%m-%d %H:%M:%S'),
-                    end.strftime('%y-%m-%d %H:%M:%S')))
-
-                # run commands responsible for populating data
-                # it's important that they query the crawls in a similar way
-                # so that the data is processed correctly
-
-                chunk_time = time.time()
-                for c in self.COMMANDS:
-                    log.info('Calling {0}, {1}.'.format(c, self.short_date()))
-                    ctime = time.time()
-                    call_command(c, start=start, end=end, pidfile='arrivals',
-                        verbosity=0, logger='mturk.arrivals')
-                    log.info('{0}s elapsed.'.format(time.time() - ctime))
-
-                done += len(chunk) - 1
-                log.info(('Chunk processed in {0}s, total {1}s, {2}/{3}'
-                    ' done.').format(time.time() - chunk_time,
-                    self.get_elapsed(), done, total_count - 1))
-        except Exception as e:
-            log.exception(e)
-        else:
-            log.info('{0} crawls processed in {1}s, exiting.'.format(
-                total_count, self.get_elapsed()))
+    def process_chunk(self, start, end, chunk):
+        for c in self.COMMANDS:
+            self.log.info('Calling {0}, {1}.'.format(c, self.short_date()))
+            ctime = time.time()
+            call_command(c, start=start, end=end, pidfile='arrivals',
+                verbosity=0, logger='mturk.arrivals')
+            self.log.info('{0}s elapsed.'.format(time.time() - ctime))
+        return True
 
     def clear_past_results(self):
         """Clears results in hits_mv and main_crawlagregates tables.
@@ -165,7 +77,7 @@ class Command(BaseCommand):
         hitgroups_consumed
 
         """
-        log.info('Clearing existiting hits_mv columns.')
+        self.log.info('Clearing existiting hits_mv columns.')
         clear_time = time.time()
         cur = execute_sql(
         """UPDATE hits_mv SET hits_posted = 0, hits_consumed = 0
@@ -176,10 +88,10 @@ class Command(BaseCommand):
             ) AND
             hits_posted > 0 OR hits_consumed > 0;
         """.format(self.start.isoformat(), self.end.isoformat(), commit=True))
-        log.info('{0}s elapsed.'.format(time.time() - clear_time))
+        self.log.info('{0}s elapsed.'.format(time.time() - clear_time))
         cur.close()
 
-        log.info('Clearing existiting main_crawlagregates columns.')
+        self.log.info('Clearing existiting main_crawlagregates columns.')
         clear_time = time.time()
         cur = execute_sql(
         """UPDATE main_crawlagregates
@@ -194,5 +106,5 @@ class Command(BaseCommand):
             hits_posted > 0 OR hits_consumed > 0 OR
             hitgroups_consumed > 0 OR hitgroups_posted > 0);
         """.format(self.start.isoformat(), self.end.isoformat(), commit=True))
-        log.info('{0}s elapsed.'.format(time.time() - clear_time))
+        self.log.info('{0}s elapsed.'.format(time.time() - clear_time))
         cur.close()
