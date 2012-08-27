@@ -20,7 +20,7 @@ urlpatterns = patterns('',
     url(r'^top_requesters/$', 'mturk.main.views.top_requesters',
         name='graphs_top_requesters'),
 
-    url(r'^classification/$', 'mturk.main.views.classification',
+    url(r'^classification/(?P<classes>\d+)/$', 'mturk.main.views.classification',
         name='classification'),
     url(r'^search/$', 'mturk.main.views.haystack_search', name='haystack_search'),
     url(r'^requester_details/(?P<requester_id>[A-Z0-9]+)/$',
