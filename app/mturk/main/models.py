@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
+import datetime
 from django.db import models, connection, transaction
 
 from mturk.fields import JSONField
-import datetime
 
 
 class Crawl(models.Model):
@@ -229,6 +229,17 @@ class IndexQueue(models.Model):
 
 
 class HitGroupClass(models.Model):
+    """ Contains information about classification.
+    """
     group_id = models.CharField(max_length=50, db_index=True, unique=True)
     classes = models.IntegerField(db_index=True)
     probabilities = models.CharField(max_length=1000)
+
+
+class HitGroupClassAggregate(models.Model):
+    """ Contains classification aggregates.
+    """
+    crawl_id = models.IntegerField()
+    start_time = models.DateTimeField()
+    classes = models.IntegerField()
+    hits_available = models.IntegerField()

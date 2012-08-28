@@ -16,10 +16,10 @@ from haystack.views import SearchView
 import admin
 import plot
 
-from mturk.main.classification import NaiveBayesClassifier
+from mturk.main.classification import NaiveBayesClassifier, LABELS
 from mturk.main.forms import HitGroupContentSearchForm
-from mturk.main.models import (HitGroupContent, HitGroupClass, RequesterProfile,
-    DayStats)
+from mturk.main.models import (HitGroupContent, HitGroupClass,
+                               RequesterProfile, DayStats)
 from mturk.main.templatetags.graph import text_row_formater
 from mturk.toprequesters.reports import ToprequestersReport
 
@@ -51,6 +51,35 @@ def general_tab_data_formatter(col, data):
         yield {'date': d['date'], 'row': (d['row'][col], )}
 
 
+def date_from_str(s):
+    return datetime.datetime(
+        *time.strptime(s, '%m/%d/%Y')[:6])
+
+
+def get_time_interval(get, ctx, encode=True, days_ago=30):
+    """ Shortcut function that returns a time interval from the ``get``
+        dictionary, and stores it in the ``ctx`` dictionary. 
+        The ``days_ago`` is a number of days from now, in case
+        when the ``get`` does not contain any information. """
+    if 'date_from' in get:
+        date_from = date_from_str(get['date_from'])
+    else:
+        date_from = (datetime.date.today() - datetime.timedelta(days=days_ago))
+    if 'date_to' in get:
+        date_to = date_from_str(get['date_to'])
+    else:
+        date_to = (datetime.date.today() + datetime.timedelta(days=1))
+    if encode:
+        date_from_enc = date_from.strftime('%m/%d/%Y')
+        date_to_enc = date_to.strftime('%m/%d/%Y')
+    else:
+        date_from_enc = date_from
+        date_to_enc = date_to
+    ctx['date_from'] = date_from_enc
+    ctx['date_to'] = date_to_enc
+    return date_from, date_to
+
+
 #@cache_page(ONE_HOUR)
 def general(request, tab_slug=None):
 
@@ -64,26 +93,13 @@ def general(request, tab_slug=None):
         'top_tabs': GeneralTabEnum.enum_dict.values(),
     }
 
-    if 'date_from' in request.GET:
-        date_from = datetime.datetime(
-                *time.strptime(request.GET['date_from'], '%m/%d/%Y')[:6])
-    else:
-        date_from = datetime.datetime.now() - datetime.timedelta(days=7)
-
-    if 'date_to' in request.GET:
-        date_to = datetime.datetime(
-                *time.strptime(request.GET['date_to'], '%m/%d/%Y')[:6])
-    else:
-        date_to = datetime.datetime.now()
-
-    ctx['date_from'] = date_from.strftime('%m/%d/%Y')
-    ctx['date_to'] = date_to.strftime('%m/%d/%Y')
+    date_from, date_to = get_time_interval(request.GET, ctx, days_ago=7)
 
     data = data_formater(query_to_dicts('''
-        select reward, hits, projects as "count", spam_projects, start_time
-            from main_crawlagregates
-            where start_time >= %s and start_time <= %s
-            order by start_time asc
+            SELECT reward, hits, projects as "count", spam_projects, start_time
+            FROM main_crawlagregates
+            WHERE start_time >= %s AND start_time <= %s
+            ORDER BY start_time ASC
         ''', date_from, date_to))
 
     def _is_anomaly(a, others):
@@ -101,7 +117,6 @@ def general(request, tab_slug=None):
         ctx['data'] = list(data)
 
     ctx['data'] = GeneralTabEnum.data_set_processor[tab](ctx['data'])
-    # import ipdb; ipdb.set_trace()
     return direct_to_template(request, 'main/graphs/timeline.html', ctx)
 
 
@@ -129,17 +144,7 @@ def arrivals(request, tab_slug=None):
                 'row': ArrivalsTabEnum.data_set_processor[tab](cc),
             }
 
-    date_from = (datetime.date.today() - datetime.timedelta(days=30)).isoformat()
-    date_to = (datetime.date.today() + datetime.timedelta(days=1)).isoformat()
-
-    if 'date_from' in request.GET and 'date_to' in request.GET:
-        date_from = datetime.datetime(
-            *time.strptime(request.GET['date_from'], '%m/%d/%Y')[:6])
-        date_to = datetime.datetime(
-            *time.strptime(request.GET['date_to'], '%m/%d/%Y')[:6])
-        ctx['date_from'] = request.GET['date_from']
-        ctx['date_to'] = request.GET['date_to']
-
+    date_from, date_to = get_time_interval(request.GET, ctx)
     data = DayStats.objects.filter(date__gte=date_from, date__lte=date_to)
     ctx['data'] = arrivals_data_formater(data, tab)
     return direct_to_template(request, 'main/graphs/timeline.html', ctx)
@@ -208,8 +213,9 @@ def requester_details(request, requester_id):
 
             for cc in input:
                 row = []
-                row.append('<a href="%s">%s</a>' % (reverse('hit_group_details',
-                    kwargs={'hit_group_id': cc[3]}), cc[0]))
+                row.append('<a href="{}">{}</a>'.format(
+                           reverse('hit_group_details',
+                           kwargs={'hit_group_id': cc[3]}), cc[0]))
                 row.extend(cc[1:3])
                 yield row
 
@@ -222,7 +228,8 @@ def requester_details(request, requester_id):
         else:
             requester_name = requester_id
 
-        date_from = (datetime.date.today() - datetime.timedelta(days=30)).isoformat()
+        date_from = (datetime.date.today() - datetime.timedelta(days=30)) \
+                    .isoformat()
 
         data = query_to_tuples("""
     select
@@ -247,7 +254,8 @@ def requester_details(request, requester_id):
         ctx = {
             'data': text_row_formater(row_formatter(data)),
             'columns': tuple(columns),
-            'title': 'Tasks posted during last 30 days by %s' % (requester_name),
+            'title': 'Tasks posted during last 30 days by %s' %
+                     (requester_name, ),
             'requester_name': requester_name,
             'requester_id': requester_id,
             'user': request.user,
@@ -295,7 +303,9 @@ def hit_group_details(request, hit_group_id):
         hit_group_class = None
         try:
             with open(settings.CLASSIFIER_PATH, "r") as file:
-                classifier = NaiveBayesClassifier(probabilities=json.load(file))
+                classifier = NaiveBayesClassifier(
+                        probabilities=json.load(file)
+                    )
                 classified = classifier.classify(hit_group)
                 most_likely = classifier.most_likely(classified)
                 document = classified["document"]
@@ -310,7 +320,9 @@ def hit_group_details(request, hit_group_id):
             pass
 
     if hit_group_class is not None:
-        hit_group_class_label = NaiveBayesClassifier.label(hit_group_class.classes)
+        hit_group_class_label = NaiveBayesClassifier.label(
+                hit_group_class.classes
+            )
     else:
         hit_group_class_label = NaiveBayesClassifier.label()
 
@@ -341,23 +353,60 @@ def hit_group_details(request, hit_group_id):
 
 
 @never_cache
-def classification(request):
-    data = query_to_dicts(
-        """ SELECT classes, COUNT(classes) number
-            FROM main_hitgroupclass
-            GROUP BY classes;
-        """)
-    data = list(data)
-    sum = 0
-    for d in data:
-        sum += d["number"]
+def classification(request, classes=sum(LABELS.keys())):
+    """ Displays charts with variability of classes in time. """
+    all_classes = sorted(LABELS.keys())
+    classes = int(classes)
+    chosen_classes = []
+    for cls in all_classes:
+        if classes & cls:
+            chosen_classes.append(cls)
+    num_classes = len(chosen_classes)
+    ctx = {
+        "top_tabs": False,
+        "multichart": False,
+        "columns": (("date", "Date"),) +
+                   # Create a column description for a quantity of each class.
+                   tuple(map(lambda c: ("number", str(c)), chosen_classes)),
+        "title": "Classification",
+    }
 
-    for d in data:
-        d["name"] = NaiveBayesClassifier.label(d["classes"])
-        d["part"] = 100 * float(d["number"]) / sum
-    params = {"data":data}
-    return direct_to_template(request, 'main/classification.html',
-                              params)
+    def data_formater(input):
+        for cc in input:
+            yield {
+                "date": cc[0],
+                "row": (str(cc[l + 1]) for l in range(num_classes)),
+            }
+
+    date_from, date_to = get_time_interval(request.GET, ctx, days_ago=7)
+    # Create a list of columns corresponding to the available classes.
+    # This is a pivot query. For example it translates record from:
+    # crawl_id | classess | hits_available
+    # 735      | 0        | 12
+    # 735      | 1        | 18
+    # 735      | 2        | 98
+    # 736      | 0        | 7
+    # 736      | 1        | 17
+    # 736      | 2        | 99
+    # to the form that is easy to use in templates:
+    # crawl_id | 0  | 1  | 2
+    # 735      | 12 | 18 | 98
+    # 736      | 7  |17  | 99
+    # Given from http://sykosomatic.org/2011/09/pivot-tables-in-postgresql/
+    columns = map(lambda l: "COALESCE(MAX(CASE classes "
+                                "WHEN {0} THEN hits_available END"
+                            "), 0) AS \"{0}\"".format(l), chosen_classes)
+    query = \
+    """
+        SELECT start_time, {}
+        FROM main_hitgroupclassaggregate
+        WHERE start_time >= \'{}\' AND start_time <= \'{}\'
+        GROUP BY crawl_id, start_time;
+    """.format(", ".join(columns), date_from, date_to)
+
+    data = query_to_tuples(query)
+    ctx['data'] = data_formater(data)
+    return direct_to_template(request, 'main/graphs/timeline.html', ctx)
 
 
 def search(request):
@@ -394,8 +443,9 @@ class HitGroupContentSearchView(SearchView):
 
 @never_cache
 def haystack_search(request):
-    search_view = HitGroupContentSearchView(form_class=HitGroupContentSearchForm,
-                                            template="main/search.html")
+    search_view = HitGroupContentSearchView(
+            form_class=HitGroupContentSearchForm,
+            template="main/search.html")
     return search_view(request)
 
 
@@ -495,3 +545,8 @@ class ArrivalsTabEnum:
         if tab == cls.ALL:
             return tuple(chain(*cls.graph_columns.values()))
         return tuple(chain(cls.graph_columns['date'] + cls.graph_columns[tab]))
+
+
+class ClassificationTabEnum:
+    """ Describes avalable tabs on the classification view. """
+    pass
