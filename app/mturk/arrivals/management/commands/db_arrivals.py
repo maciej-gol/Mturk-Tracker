@@ -5,21 +5,20 @@ import logging
 
 from optparse import make_option
 from django.db.models import F
-from django.utils.timezone import now
 from django.core.management import call_command
 
-from utils.management.commands.base.crawl_updater import DataUpdaterCommand
+from utils.management.commands.base.crawl_updater import CrawlUpdaterCommand
 from utils.sql import execute_sql
 
 
-class Command(DataUpdaterCommand):
+class Command(CrawlUpdaterCommand):
 
     help = ("Wraps all 3 commands that need to be ran in order to "
         "calculate data for day stats.")
 
     log = logging.getLogger('mturk.arrivals')
 
-    option_list = DataUpdaterCommand.option_list + (
+    option_list = CrawlUpdaterCommand.option_list + (
         make_option("--clear-existing", dest="clear-existing", default=False,
             action="store_true",
             help='If true, related hits_posted and hits_consumed will be set '
@@ -38,23 +37,8 @@ class Command(DataUpdaterCommand):
         'db_reward_population'
     )
 
-    def chunks(self, items, chunk, overlap):
-        """ Yield successive chunks of ``chunk`` items overlapping by
-        ``overlap`` items.
-        """
-        chunk -= overlap
-        for i in xrange(1, len(items), chunk):
-            yield items[i - 1:i + chunk]
-
-    def get_elapsed(self):
-        return time.time() - self.start_time
-
-    def short_date(self):
-        return now().time().strftime('%H:%M:%S')
-
     def prepare_data(self):
-        if self.options['clear-existing']:
-            self.clear_past_results()
+        self.options['clear-existing'] and self.clear_past_results()
 
     def filter_crawls(self, crawls):
         return crawls.filter(groups_downloaded__gt=F('groups_available') * 0.9)
