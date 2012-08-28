@@ -23,7 +23,7 @@ from mturk.main.models import (HitGroupContent, HitGroupClass,
 from mturk.main.templatetags.graph import text_row_formater
 from mturk.toprequesters.reports import ToprequestersReport
 
-from utils.sql import query_to_dicts, query_to_tuples
+from utils.sql import query_to_dicts, query_to_tuples, query_to_lists
 from utils.enum import EnumMetaclass
 
 
@@ -357,10 +357,14 @@ def classification(request, classes=sum(LABELS.keys())):
     """ Displays charts with variability of classes in time. """
     all_classes = sorted(LABELS.keys())
     classes = int(classes)
-    chosen_classes = []
-    for cls in all_classes:
-        if classes & cls:
-            chosen_classes.append(cls)
+    if classes > 0:
+        chosen_classes = []
+        for cls in all_classes:
+            if classes & cls:
+                chosen_classes.append(cls)
+    else:
+        chosen_classes = [0]
+        num_classes = 1
     num_classes = len(chosen_classes)
     ctx = {
         "top_tabs": False,
@@ -379,32 +383,56 @@ def classification(request, classes=sum(LABELS.keys())):
             }
 
     date_from, date_to = get_time_interval(request.GET, ctx, days_ago=7)
-    # Create a list of columns corresponding to the available classes.
-    # This is a pivot query. For example it translates record from:
-    # crawl_id | classess | hits_available
-    # 735      | 0        | 12
-    # 735      | 1        | 18
-    # 735      | 2        | 98
-    # 736      | 0        | 7
-    # 736      | 1        | 17
-    # 736      | 2        | 99
-    # to the form that is easy to use in templates:
-    # crawl_id | 0  | 1  | 2
-    # 735      | 12 | 18 | 98
-    # 736      | 7  |17  | 99
-    # Given from http://sykosomatic.org/2011/09/pivot-tables-in-postgresql/
-    columns = map(lambda l: "COALESCE(MAX(CASE classes "
-                                "WHEN {0} THEN hits_available END"
-                            "), 0) AS \"{0}\"".format(l), chosen_classes)
+    if classes > 0:
+        # Create a list of columns corresponding to the available classes.
+        # This is a pivot query. For example it translates record from:
+        # crawl_id | classess | hits_available
+        # 735      | 0        | 12
+        # 735      | 1        | 18
+        # 735      | 2        | 98
+        # 736      | 0        | 7
+        # 736      | 1        | 17
+        # 736      | 2        | 99
+        # to the form that is easy to use in templates:
+        # crawl_id | 0  | 1  | 2
+        # 735      | 12 | 18 | 98
+        # 736      | 7  |17  | 99
+        # Given from http://sykosomatic.org/2011/09/pivot-tables-in-postgresql/
+        columns = map(lambda l: "COALESCE(MAX(CASE classes "
+                                    "WHEN {0} THEN hits_available END"
+                                "), 0) AS \"{0}\"".format(l), chosen_classes)
+        query_prefix = \
+        """
+            SELECT start_time, {}
+            FROM main_hitgroupclassaggregate
+        """.format(", ".join(columns))
+    else:
+        query_prefix = \
+        """
+            SELECT start_time, sum(hits_available) AS "0"
+            FROM main_hitgroupclassaggregate
+        """ 
     query = \
-    """
-        SELECT start_time, {}
-        FROM main_hitgroupclassaggregate
+    """ {}
         WHERE start_time >= \'{}\' AND start_time <= \'{}\'
-        GROUP BY crawl_id, start_time;
-    """.format(", ".join(columns), date_from, date_to)
+        GROUP BY crawl_id, start_time
+        ORDER BY start_time ASC;
+    """.format(query_prefix, date_from, date_to)
+    data = query_to_lists(query)
 
-    data = query_to_tuples(query)
+    def _is_anomaly(a, others):
+        mid = sum(map(lambda e: e[1], others)) / len(others)
+        return abs(mid - a[1]) > 7000
+
+    def _fixer(a, others):
+        val = sum(map(lambda e: e[1], others)) / len(others)
+        a[1] = val
+        return a
+
+    if settings.DATASMOOTHING:
+        data = plot.repair(list(data), _is_anomaly, _fixer, 2)
+    else:
+        data = list(data)
     ctx['data'] = data_formater(data)
     return direct_to_template(request, 'main/graphs/timeline.html', ctx)
 
