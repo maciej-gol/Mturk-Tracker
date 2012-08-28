@@ -13,6 +13,7 @@ LOGGING['handlers']['crawl_log']['filename'] = pjoin(LOG_DIRECTORY, 'crawl.log')
 LOGGING['handlers']['log_file']['filename'] = pjoin(LOG_DIRECTORY, 'main.log')
 LOGGING['handlers']['solr_log']['filename'] = pjoin(LOG_DIRECTORY, 'solr.log')
 LOGGING['handlers']['arrivals_log']['filename'] = pjoin(LOG_DIRECTORY, 'arrivals.log')
+LOGGING['handlers']['aggregates_log']['filename'] = pjoin(LOG_DIRECTORY, 'aggregates.log')
 LOGGING['handlers']['classification_log']['filename'] = pjoin(LOG_DIRECTORY, 'classification.log')
 LOGGING['handlers']['toprequesters_log']['filename'] = pjoin(LOG_DIRECTORY, 'toprequesters.log')
 
