@@ -368,14 +368,14 @@ def classification(request, classes=sum(LABELS.keys())):
         num_classes = 1
     num_classes = len(chosen_classes)
     ctx = {
-        "top_tabs": False,
+        "top_tabs": top_tabs,
+        "multitabs": True,
         "multichart": False,
         "columns": (("date", "Date"),) +
                    # Create a column description for a quantity of each class.
                    tuple(map(lambda c: ("number", str(c)), chosen_classes)),
         "title": "Classification",
-        "current_tab": top_tabs[0],
-        "top_tabs": top_tabs,
+        "active_tabs": chosen_classes,
     }
 
     def data_formater(input):
@@ -427,8 +427,8 @@ def classification(request, classes=sum(LABELS.keys())):
         lgt = len(others)
         siz = len(row)
         mids = [sum(map(lambda o: o[i], others)) / lgt for i in range(1, siz)]
-        abss = [abs(mids[i-1] - row[i]) for i in range(1, siz)]
-        return [i for i in range(1, siz) if abss[i-1] > 7000]
+        abss = [abs(mids[i - 1] - row[i]) for i in range(1, siz)]
+        return [i for i in range(1, siz) if abss[i - 1] > 7000]
 
     def _fixer(row, others, anomalies):
         lgt = len(others)
@@ -588,6 +588,7 @@ class ClassificationTab:
         This is only a stube. """
 
     def __init__(self, classes, value):
+        self.switch = value
         self.value = classes - value if classes & value else classes + value
         self.url = reverse("classification", args=(self.value, ))
         self.display_name = LABELS[value]
