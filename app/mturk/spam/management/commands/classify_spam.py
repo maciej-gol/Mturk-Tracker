@@ -52,7 +52,8 @@ class Command(BaseCommand):
 
             number_of_predictions = 0
 
-            for c in list(Crawl.objects.filter(is_spam_computed=False).order_by('-id')[:options['limit']]):
+            for c in list(Crawl.objects.filter(is_spam_computed=False,
+                    has_hits_mv=True).order_by('-id')[:options['limit']]):
 
                 log.info("processing %s", c)
 
@@ -69,7 +70,6 @@ class Command(BaseCommand):
 
                     if row['is_spam'] is None:
 
-                        is_spam = None
                         content = HitGroupContent.objects.get(id=row['content_id'])
 
                         if content.is_spam is None:
@@ -102,10 +102,8 @@ class Command(BaseCommand):
 
                 log.info("done classyfing crawl")
 
-                execute_sql("""UPDATE main_crawlagregates
-                    set spam_projects =
-                        ( select count(*) from hits_mv where crawl_id = %s and is_spam = true )
-                    where crawl_id = %s""" % (c.id, c.id))
+                CrawlAgregates.select_for_update().filter(crawl_id=c.id
+                    ).update(spam_projects=len(spam))
 
                 transaction.commit()
 
@@ -114,7 +112,7 @@ class Command(BaseCommand):
         except (KeyError, KeyboardInterrupt, HttpError), e:
             log.error(e)
             transaction.rollback()
+        finally:
             pid.remove_pid()
-            exit()
 
         log.info('classyfiing %s crawls took: %s s, done %s predictions', options['limit'], (time.time() - start_time), number_of_predictions)
