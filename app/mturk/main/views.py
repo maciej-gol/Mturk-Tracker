@@ -357,6 +357,7 @@ def classification(request, classes=sum(LABELS.keys())):
     """ Displays charts with variability of classes in time. """
     all_classes = sorted(LABELS.keys())
     classes = int(classes)
+    top_tabs = map(lambda c: ClassificationTab(classes, c), all_classes)
     if classes > 0:
         chosen_classes = []
         for cls in all_classes:
@@ -373,6 +374,8 @@ def classification(request, classes=sum(LABELS.keys())):
                    # Create a column description for a quantity of each class.
                    tuple(map(lambda c: ("number", str(c)), chosen_classes)),
         "title": "Classification",
+        "current_tab": top_tabs[0],
+        "top_tabs": top_tabs,
     }
 
     def data_formater(input):
@@ -420,17 +423,22 @@ def classification(request, classes=sum(LABELS.keys())):
     """.format(query_prefix, date_from, date_to)
     data = query_to_lists(query)
 
-    def _is_anomaly(a, others):
-        mid = sum(map(lambda e: e[1], others)) / len(others)
-        return abs(mid - a[1]) > 7000
+    def _anomalies(row, others):
+        lgt = len(others)
+        siz = len(row)
+        mids = [sum(map(lambda o: o[i], others)) / lgt for i in range(1, siz)]
+        abss = [abs(mids[i-1] - row[i]) for i in range(1, siz)]
+        return [i for i in range(1, siz) if abss[i-1] > 7000]
 
-    def _fixer(a, others):
-        val = sum(map(lambda e: e[1], others)) / len(others)
-        a[1] = val
-        return a
+    def _fixer(row, others, anomalies):
+        lgt = len(others)
+        for a in anomalies:
+            val = sum(map(lambda o: o[a], others)) / lgt
+            row[a] = val
+        return row
 
     if settings.DATASMOOTHING:
-        data = plot.repair(list(data), _is_anomaly, _fixer, 2)
+        data = plot.vrepair(list(data), _anomalies, _fixer, 8)
     else:
         data = list(data)
     ctx['data'] = data_formater(data)
@@ -575,6 +583,11 @@ class ArrivalsTabEnum:
         return tuple(chain(cls.graph_columns['date'] + cls.graph_columns[tab]))
 
 
-class ClassificationTabEnum:
-    """ Describes avalable tabs on the classification view. """
-    pass
+class ClassificationTab:
+    """ Describes avalable tabs on the classification view. 
+        This is only a stube. """
+
+    def __init__(self, classes, value):
+        self.value = classes - value if classes & value else classes + value
+        self.url = reverse("classification", args=(self.value, ))
+        self.display_name = LABELS[value]
