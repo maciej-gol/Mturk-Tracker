@@ -8,7 +8,7 @@ from django.core.management.base import BaseCommand
 from utils.pid import Pid
 from utils.sql import query_to_tuples, execute_sql
 
-log = logging.getLogger(__name__)
+log = logging.getLogger('mturk.aggregates')
 
 
 class Command(BaseCommand):
