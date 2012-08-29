@@ -22,6 +22,9 @@ urlpatterns = patterns('',
 
     url(r'^classification/(?P<classes>\d+)/$', 'mturk.main.views.classification',
         name='classification'),
+    url(r'^classification/report/(?P<classes>\d+)/$', 'mturk.main.views.classification_report',
+        name='classification_report'),
+
     url(r'^search/$', 'mturk.main.views.haystack_search', name='haystack_search'),
     url(r'^requester_details/(?P<requester_id>[A-Z0-9]+)/$',
         'mturk.main.views.requester_details', name='requester_details'),

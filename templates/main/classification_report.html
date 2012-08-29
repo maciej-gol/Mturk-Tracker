@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block content %}
+
+<table class="table table-bordered table-striped table-hover">
+    <thead>
+        <tr>
+            <th><span style="white-space: nowrap;">Crawl ID</span></th>
+            <th>Date</th>
+            <th>Classes</th>
+            <th>Group ID</th>
+            <th>Title &amp; description</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for d in data %}
+        <tr>
+            <td>{{ d.crawl_id }}</td>
+            <td><span style="white-space: nowrap;">{{ d.start_time|date:"Y-m-Y G:i:s" }}</span></td>
+            <td>{{ d.classes }}</td>
+            <td>{{ d.group_id }}</td>
+            <td>
+                <dl>
+                    <dt>{{ d.title }}</dt>
+                    <dd>{{ d.description }}</dd>
+                </dl>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+<div class="pagination">
+    <ul>
+        {% if not first_page or not last_page %}
+            {% if first_page %}
+        <li class="disabled">Previous</li>
+            {% else %}
+        <li>
+            <a href="{% url classification_report classes=classes %}?page={{ prev_page }}
+                    {% if size %}&size={{ size }}{% endif %}">Previous</a>
+        </li>
+            {% endif %}
+            {% if last_page %}
+        <li class="disabled">Next</li>
+            {% else %}
+        <li>
+            <a href="{% url classification_report classes %}?page={{ next_page }}
+                    {% if size %}&size={{ size }}{% endif %}">Next</a>
+        </li>
+            {% endif %}
+        {% endif %}
+    </ul>
+</div>
+{% endblock %}

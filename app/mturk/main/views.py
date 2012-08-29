@@ -8,6 +8,7 @@ from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.urlresolvers import reverse
 from django.contrib import messages
+from django.http import Http404
 from django.shortcuts import redirect
 from django.views.generic.simple import direct_to_template
 from django.views.decorators.cache import cache_page, never_cache
@@ -18,8 +19,8 @@ import plot
 
 from mturk.main.classification import NaiveBayesClassifier, LABELS
 from mturk.main.forms import HitGroupContentSearchForm
-from mturk.main.models import (HitGroupContent, HitGroupClass,
-                               RequesterProfile, DayStats)
+from mturk.main.models import DayStats, HitGroupContent, HitGroupClass, \
+                              RequesterProfile
 from mturk.main.templatetags.graph import text_row_formater
 from mturk.toprequesters.reports import ToprequestersReport
 
@@ -58,7 +59,7 @@ def date_from_str(s):
 
 def get_time_interval(get, ctx, encode=True, days_ago=30):
     """ Shortcut function that returns a time interval from the ``get``
-        dictionary, and stores it in the ``ctx`` dictionary. 
+        dictionary, and stores it in the ``ctx`` dictionary.
         The ``days_ago`` is a number of days from now, in case
         when the ``get`` does not contain any information. """
     if 'date_from' in get:
@@ -353,10 +354,13 @@ def hit_group_details(request, hit_group_id):
 
 
 @never_cache
-def classification(request, classes=sum(LABELS.keys())):
+def classification(request, classes=None):
     """ Displays charts with variability of classes in time. """
     all_classes = sorted(LABELS.keys())
-    classes = int(classes)
+    max_classes = sum(all_classes)
+    classes = int(classes) if classes is not None else 0
+    if classes > max_classes:
+        raise Http404 
     top_tabs = map(lambda c: ClassificationTab(classes, c), all_classes)
     if classes > 0:
         chosen_classes = []
@@ -378,7 +382,7 @@ def classification(request, classes=sum(LABELS.keys())):
         "active_tabs": chosen_classes,
     }
 
-    def data_formater(input):
+    def _data_formatter(input):
         for cc in input:
             yield {
                 "date": cc[0],
@@ -419,7 +423,7 @@ def classification(request, classes=sum(LABELS.keys())):
     """ {}
         WHERE start_time >= \'{}\' AND start_time <= \'{}\'
         GROUP BY crawl_id, start_time
-        ORDER BY start_time ASC;
+        ORDER BY start_time ASC
     """.format(query_prefix, date_from, date_to)
     data = query_to_lists(query)
 
@@ -441,17 +445,48 @@ def classification(request, classes=sum(LABELS.keys())):
         data = plot.vrepair(list(data), _anomalies, _fixer, 8)
     else:
         data = list(data)
-    ctx['data'] = data_formater(data)
+    ctx['data'] = _data_formatter(data)
     return direct_to_template(request, 'main/graphs/timeline.html', ctx)
 
 
+@never_cache
+def classification_report(request, classes):
+    ctx = {}
+    date_from, date_to = get_time_interval(request.REQUEST, ctx, days_ago=1)
+    page = int(request.REQUEST.get("page", 1))
+    size = int(request.REQUEST.get("size", 5))
+    query = \
+    """ SELECT hmv.crawl_id, hmv.start_time, hgcls.classes, 
+               hgcnt.group_id, hgcnt.title, hgcnt.description
+        FROM hits_mv AS hmv
+        JOIN main_hitgroupclass AS hgcls ON hmv.group_id = hgcls.group_id
+        JOIN main_hitgroupcontent AS hgcnt ON hgcls.group_id = hgcnt.group_id
+        WHERE hmv.start_time >= '{}' AND hmv.start_time < '{}' AND 
+              hgcls.classes & {} <> 0
+        ORDER BY start_time ASC
+        LIMIT {}
+        OFFSET {}
+    """.format(date_from, date_to, classes, size, (page - 1) * size)
+    data = query_to_dicts(query)
+    def _data_formatter(input):
+        for cc in input:
+            yield cc[0], cc[1], cc[2]
+    # data = _data_formatter(data)
+    ctx["data"] = data
+    ctx["classes"] = classes
+    ctx["first_page"] = page == 1
+    ctx["last_page"] = False # TODO finish it.
+    ctx["next_page"] = page + 1
+    ctx["prev_page"] = page - 1
+    if size != 5:
+        ctx["size"] = size
+    return direct_to_template(request, 'main/classification_report.html', ctx)
+
+
 def search(request):
-
     params = {}
-
     if request.method == 'POST' and 'query' in request.POST:
         params['query'] = request.POST['query']
-
     return direct_to_template(request, 'main/search.html', params)
 
 
