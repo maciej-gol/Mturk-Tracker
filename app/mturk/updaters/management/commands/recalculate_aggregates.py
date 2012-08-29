@@ -18,8 +18,8 @@ class Command(CrawlUpdaterCommand):
     log = logging.getLogger('mturk.aggregates')
 
     option_list = CrawlUpdaterCommand.option_list + (
-        make_option("--skip-existing", dest="skip-existing", default=True,
-            action="store_false",
+        make_option("--skip-existing", dest="skip-existing", default=False,
+            action="store_true",
             help='If True, related table entries will be deleted.'),
         make_option("--chunk-delete", dest="chunk-delete", default=True,
             action="store_false",
