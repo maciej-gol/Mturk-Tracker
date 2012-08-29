@@ -1,4 +1,9 @@
 server {
+    listen 80;
+    server_name www.mturk-tracker.com;
+    rewrite ^(.*)$ $scheme://mturk-tracker.com$1 permanent;
+}
+server {
         listen 80;
         server_name localhost mturk-tracker mturk-tracker.com;
 
