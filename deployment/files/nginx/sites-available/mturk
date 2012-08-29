@@ -55,7 +55,7 @@ server {
         }
 
         location = /robots.txt {
-                root   %(project_dir)s/templates/;
+                root   %(project_dir)s/code/templates/;
         }
 
 
