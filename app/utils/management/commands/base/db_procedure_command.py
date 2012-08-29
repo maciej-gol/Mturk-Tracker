@@ -6,13 +6,13 @@ from optparse import make_option
 from django.db import connection, transaction
 from django.utils.timezone import now
 
-from utils.management.commands.base.time_args_command import TimeArgsCommad
+from utils.management.commands.base.time_args_command import TimeArgsCommand
 from utils.pid import Pid
 
 log = logging.getLogger(__name__)
 
 
-class DBProcedureCommand(TimeArgsCommad):
+class DBProcedureCommand(TimeArgsCommand):
 
     help = 'Django management command for running a stored function.'
     proc_name = ''
@@ -20,7 +20,7 @@ class DBProcedureCommand(TimeArgsCommad):
     logger = log
     """Logger instance to use. Altered by command line paremeters."""
 
-    option_list = TimeArgsCommad.option_list + (
+    option_list = TimeArgsCommand.option_list + (
         make_option('--pidfile', dest="pidfile", default=None,
             help='The pidfile to use.'),
         make_option('--logger', dest="logger", default=None,
