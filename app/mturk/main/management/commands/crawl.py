@@ -130,9 +130,9 @@ class Command(BaseCommand):
 
         dbpool = ThreadedConnectionPool(10, 90,
             'dbname=%s user=%s password=%s' % (
-                settings.DATABASES['default']['name'],
-                settings.DATABASES['default']['user'],
-                settings.DATABASES['default']['password']))
+                settings.DATABASES['default']['NAME'],
+                settings.DATABASES['default']['USER'],
+                settings.DATABASES['default']['PASSWORD']))
         # collection of group_ids that were already processed - this should
         # protect us from duplicating data
         processed_groups = set()
