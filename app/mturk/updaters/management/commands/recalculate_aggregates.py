@@ -18,7 +18,7 @@ class Command(CrawlUpdaterCommand):
     log = logging.getLogger('mturk.aggregates')
 
     option_list = CrawlUpdaterCommand.option_list + (
-        make_option("--clear-existing", dest="clear-existing", default=True,
+        make_option("--skip-existing", dest="skip-existing", default=True,
             action="store_false",
             help='If True, related table entries will be deleted.'),
         make_option("--chunk-delete", dest="chunk-delete", default=True,
@@ -27,7 +27,6 @@ class Command(CrawlUpdaterCommand):
             'False to have them deleted before each chunk.')),
     )
 
-    use_date_defaults = False
     display_name = 'aggregates recaltulation'
     pid_file = 'mturk_aggregates_updater'
     crawls = 1
@@ -44,7 +43,7 @@ class Command(CrawlUpdaterCommand):
 
         """
         self.options = super(Command, self).process_options(options)
-        self.clear_existing = self.options['clear-existing']
+        self.clear_existing = not self.options['skip-existing']
         self.chunk_delete = self.options['chunk-delete']
         return self.options
 
