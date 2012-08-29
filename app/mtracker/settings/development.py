@@ -1,6 +1,19 @@
 import os
 from defaults import *
 
+DEBUG = True
+TEMPLATE_DEBUG = JS_DEBUG = DEBUG = True
+
+PIPELINE = not DEBUG
+
+STATICFILES_STORAGE = ('pipeline.storage.PipelineCachedStorage'
+                       if PIPELINE else
+                       'django.contrib.staticfiles.storage.StaticFilesStorage')
+
+LOG_LEVEL = 'DEBUG' if DEBUG else 'INFO'
+for log in [l for l in LOGGING['loggers'] if l.startswith('mturk')]:
+    LOGGING['loggers'][l]['level'] = LOG_LEVEL
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',

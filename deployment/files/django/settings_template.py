@@ -8,12 +8,7 @@ from os.path import join as pjoin
 
 LOG_DIRECTORY = "%(log_dir)s"
 
-DEBUG = False
-
 # Overriding default logger settings
-LOG_LEVEL = 'DEBUG' if DEBUG else 'INFO'
-LOGGING['loggers']['mturk.main.management.commands']['level'] = LOG_LEVEL
-LOGGING['loggers']['mturk.arrivals']['level'] = LOG_LEVEL
 LOGGING['handlers']['crawl_log']['filename'] = pjoin(LOG_DIRECTORY, 'crawl.log')
 LOGGING['handlers']['log_file']['filename'] = pjoin(LOG_DIRECTORY, 'main.log')
 LOGGING['handlers']['solr_log']['filename'] = pjoin(LOG_DIRECTORY, 'solr.log')
@@ -39,8 +34,6 @@ DATABASES.update({
 })
 
 RUN_DATA_PATH = "%(service_dir)s"
-DEBUG = False
-TEMPLATE_DEBUG = False
 
 KEEP_LOGGED_DURATION = 31 * 24 * 60 * 60
 
