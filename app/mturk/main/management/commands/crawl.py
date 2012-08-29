@@ -129,8 +129,10 @@ class Command(BaseCommand):
         reqesters = RequesterProfile.objects.all_as_dict()
 
         dbpool = ThreadedConnectionPool(10, 90,
-            'dbname=%s user=%s password=%s' % (settings.DATABASE_NAME,
-                settings.DATABASE_USER, settings.DATABASE_PASSWORD))
+            'dbname=%s user=%s password=%s' % (
+                settings.DATABASES['default']['name'],
+                settings.DATABASES['default']['user'],
+                settings.DATABASES['default']['password']))
         # collection of group_ids that were already processed - this should
         # protect us from duplicating data
         processed_groups = set()

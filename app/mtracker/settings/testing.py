@@ -28,11 +28,6 @@ DATABASES = {
     },
 }
 
-DB = DATABASES['default']
-DATABASE_NAME = DB['NAME']
-DATABASE_USER = DB['USER']
-DATABASE_PASSWORD = DB['PASSWORD']
-
 INSTALLED_APPS = tuple(list(INSTALLED_APPS) + [
     "django_jenkins",
 ])
