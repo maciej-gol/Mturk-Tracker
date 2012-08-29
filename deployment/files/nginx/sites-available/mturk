@@ -15,9 +15,15 @@ server {
         location /media  {
                 gzip on;
                 root %(project_dir)s;
-		autoindex  off;
+        		autoindex  off;
                 expires 60d;
         }
+
+        location /static {
+                autoindex off;
+                alias   %(base_dir)s/collected_static;
+        }
+
 
 	#location /admin/media {
 	#	gzip on;
