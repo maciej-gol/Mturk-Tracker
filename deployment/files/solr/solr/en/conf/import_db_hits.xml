@@ -11,19 +11,32 @@
                 holdability="CLOSE_CURSORS_AT_COMMIT"/>
     <document>
         <entity name="hitgroupcontent" dataSource="mturk_crawl" threads="2"
-            transformer="HTMLStripTransformer"
-
-                query="SELECT hgc.id as django_id, hgc.group_id,
-                      hgc.requester_id, hgc.requester_name, hgc.reward,
-                      hgc.html, hgc.description, hgc.title, hgc.keywords,
-					  hgc.qualifications, hgc.occurrence_date, hgc.time_alloted
+                transformer="HTMLStripTransformer" 
+                query="
+                    SELECT 
+                        hgcnt.id as django_id, 
+                        hgcnt.group_id,
+                        hgcnt.requester_id, 
+                        hgcnt.requester_name,
+                        hgcnt.reward,
+                        hgcnt.html, 
+                        hgcnt.description, 
+                        hgcnt.title, 
+                        hgcnt.keywords, 
+                        hgcnt.qualifications, 
+                        hgcnt.occurrence_date, 
+                        hgcnt.time_alloted,
+                        hgcls.classes
                     FROM
-                        main_hitgroupcontent hgc
+                        main_hitgroupcontent AS hgcnt
                     LEFT JOIN
-                        main_requesterprofile rp
-                        ON hgc.requester_id = rp.requester_id
+                        main_requesterprofile AS rp
+                        ON hgcnt.requester_id = rp.requester_id
+                    LEFT JOIN
+                        main_hitgroupclass AS hgcls
+                        ON hgcnt.group_id = hgcls.group_id
                     WHERE
-                        coalesce(rp.is_public, true) = true AND
+                        COALESCE(rp.is_public, true) = true AND
                         hgc.is_public = true AND
                         LENGTH(html) &lt; 9000001"
 
@@ -32,22 +45,35 @@
                 FROM
                     main_indexqueue
 				WHERE
-                    created > '${dataimporter.last_index_time}'
-                "
+                    created > '${dataimporter.last_index_time}'"
 
-                deltaImportQuery="SELECT hgc.id as django_id, hgc.group_id,
-                      hgc.requester_id, hgc.requester_name, hgc.reward,
-                      hgc.html, hgc.description, hgc.title, hgc.keywords,
-				      hgc.qualifications, hgc.occurrence_date, hgc.time_alloted
-                FROM
-                    main_hitgroupcontent hgc
-                LEFT JOIN
-                    main_requesterprofile rp
-                    ON hgc.requester_id = rp.requester_id
-                WHERE
-                    coalesce(rp.is_public, true) = true AND
-                    hgc.is_public = true
-                    AND hgc.id = ${dataimporter.delta.id}">
+                deltaImportQuery="
+                    SELECT 
+                        hgcnt.id as django_id, 
+                        hgcnt.group_id,
+                        hgcnt.requester_id, 
+                        hgcnt.requester_name,
+                        hgcnt.reward,
+                        hgcnt.html, 
+                        hgcnt.description, 
+                        hgcnt.title, 
+                        hgcnt.keywords, 
+                        hgcnt.qualifications, 
+                        hgcnt.occurrence_date, 
+                        hgcnt.time_alloted,
+                        hgcls.classes
+                    FROM
+                        main_hitgroupcontent AS hgcnt
+                    LEFT JOIN
+                        main_requesterprofile AS rp
+                        ON hgcnt.requester_id = rp.requester_id
+                    LEFT JOIN
+                        main_hitgroupclass AS hgcls
+                        ON hgcnt.group_id = hgcls.group_id
+                    WHERE
+                        COALESCE(rp.is_public, true) = true AND
+                        hgcnt.is_public = true AND 
+                        hgcnt.id = ${dataimporter.delta.id}">
 
             <field column="django_id" name="django_id" />
             <field column="group_id" name="group_id"/>
@@ -61,6 +87,7 @@
             <field column="qualifications" name="qualifications"/>
             <field column="occurrence_date" name="occurrence_date"/>
             <field column="time_alloted" name="time_alloted"/>
+            <field column="classes" name="classes"/>
 
 		</entity>
 

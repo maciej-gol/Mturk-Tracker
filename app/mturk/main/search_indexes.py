@@ -19,6 +19,7 @@ class HitGroupContentIndex(indexes.SearchIndex):
     qualifications = indexes.CharField(model_attr='qualifications', null=True)
     occurrence_date = indexes.DateTimeField(model_attr='occurrence_date')
     time_alloted = indexes.DecimalField(model_attr='time_alloted')
+    classes = indexes.IntegerField(model_attr="classes")
 
     # Additional fields for sorting.
     title_sort = indexes.CharField()
