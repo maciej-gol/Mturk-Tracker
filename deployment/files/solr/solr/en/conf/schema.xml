@@ -99,7 +99,8 @@
 		<field name="keywords" type="text_tags" indexed="true" stored="true" required="false" multiValued="true"/>
         <field name="qualifications" type="textTight" indexed="true" stored="true"/>
 		<field name="occurrence_date" type="date" indexed="true" stored="true"/>
-		<field name="time_alloted" type="int" indexed="true" stored="true"/>
+        <field name="time_alloted" type="int" indexed="true" stored="true"/>
+        <field name="classes" type="int" indexed="true" stored="true" required="false" />
 
         <field name="search_field" type="text_en" indexed="true" stored="false" multiValued="true"/>
 

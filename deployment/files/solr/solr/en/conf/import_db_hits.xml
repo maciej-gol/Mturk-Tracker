@@ -37,7 +37,7 @@
                         ON hgcnt.group_id = hgcls.group_id
                     WHERE
                         COALESCE(rp.is_public, true) = true AND
-                        hgc.is_public = true AND
+                        hgcnt.is_public = true AND
                         LENGTH(html) &lt; 9000001"
 
 				deltaQuery="SELECT DISTINCT
