@@ -54,13 +54,8 @@ class SolrDataImportCommand(BaseCommand):
             older_than = now - timedelta(days=days)
             logger.info("Removing rows from the index queue older than {}"
                         .format(older_than))
-            while True:
-                queryset = IndexQueue.objects.filter(created__lte=older_than)
-                queryset = queryset[:self.INDEX_QUEUE_BATCH_SIZE]
-                if not queryset:
-                    break
-                queryset.delete()
-            logger.info("Removing finished")
+            IndexQueue.objects.filter(created__lte=older_than).delete()
+            logger.info("Removed")
 
         logger.info("Building solr index started")
         response = urllib2.urlopen(import_url)
