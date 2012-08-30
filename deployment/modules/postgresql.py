@@ -1,6 +1,7 @@
 from os.path import join as pjoin, isdir
 from fabric.api import sudo, settings, env, hide
 from fabric.colors import yellow
+from modules import SERVICE_MANAGER
 from modules.utils import (PROPER_SUDO_PREFIX as SUDO_PREFIX, show,
     cget, local_files_dir, upload_templated_folder_with_perms,
     upload_template_with_perms)
@@ -12,7 +13,7 @@ def configure():
     local_dir = local_files_dir("postgresql")
     dest_dir = "/etc/postgresql"
     confs = cget("postgresql_files") or [local_dir]
-    show(yellow("Uploading postgresql configuration files: %s." % confs))
+    show(yellow("Uploading postgresql configuration files: {}.".format(confs)))
     for name in confs:
         source = pjoin(local_dir, name)
         destination = pjoin(dest_dir, name)
@@ -27,4 +28,4 @@ def configure():
 def reload():
     """Starts or restarts nginx."""
     with settings(hide("stderr"), sudo_prefix=SUDO_PREFIX):
-        return sudo("service postgresql reload")
+        return sudo("{}postgresql reload".format(SERVICE_MANAGER))

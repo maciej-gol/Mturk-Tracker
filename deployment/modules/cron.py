@@ -1,6 +1,7 @@
 from os.path import join as pjoin, isdir
 from fabric.api import env, sudo, settings, hide
 from fabric.colors import yellow, red
+from modules import SERVICE_MANAGER
 from modules.utils import (show, cget, create_target_directories,
     local_files_dir, upload_templated_folder_with_perms,
     upload_template_with_perms, PROPER_SUDO_PREFIX as SUDO_PREFIX)
@@ -52,6 +53,6 @@ def configure():
 
     show(yellow("Reloading cron"))
     with settings(hide("stderr"), sudo_prefix=SUDO_PREFIX, warn_only=True):
-        res = sudo("service cron reload")
+        res = sudo("{}cron reload".format(SERVICE_MANAGER))
         if res.return_code == 2:
             show(red("Error reloading cron!"))
