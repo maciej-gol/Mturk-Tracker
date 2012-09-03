@@ -124,6 +124,7 @@ See __create_procedures for more details.
 PROCEDURES_TO_CREATE = {
     'hits_temp_population.sql': create_with_date_args,
     'hits_update.sql': create_with_date_args,
+    'initial_post_hits_update.sql': create_with_date_args,
     'reward_population.sql': create_with_date_args,
 }
 

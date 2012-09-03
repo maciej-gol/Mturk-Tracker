@@ -34,6 +34,7 @@ class Command(CrawlUpdaterCommand):
     COMMANDS = (
         'db_hits_temp_population',
         'db_hits_update',
+        'db_initial_post_hits_update',
         'db_reward_population'
     )
 
