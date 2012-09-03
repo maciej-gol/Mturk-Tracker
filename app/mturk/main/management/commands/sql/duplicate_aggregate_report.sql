@@ -19,14 +19,15 @@ CREATE OR REPLACE FUNCTION count_extra(
         SELECT count(*)
         INTO total_hgs
         FROM main_hitgroupstatus
-        WHERE crawl_id > (
-                    SELECT min(id) FROM main_crawl
-                    WHERE start_time BETWEEN istart AND iend
-                ) AND
-                crawl_id < (
-                    SELECT max(id) FROM main_crawl
-                    WHERE start_time BETWEEN istart AND iend
-                );
+        WHERE
+            crawl_id >= (
+                SELECT min(id) FROM main_crawl
+                WHERE start_time BETWEEN istart AND iend
+            ) AND
+            crawl_id <= (
+                SELECT max(id) FROM main_crawl
+                WHERE start_time BETWEEN istart AND iend
+            );
 
         RAISE NOTICE ''Total:      %'', total_hgs;
 
@@ -41,6 +42,9 @@ CREATE OR REPLACE FUNCTION count_extra(
                 SELECT id FROM main_crawl
                 WHERE
                     groups_available * 0.9 > groups_downloaded AND
+                    -- this matches the
+                    -- crawl_id >= max(id).. AND crawl_id <= max(id)..
+                    -- used in queries on main_crawlagregates and and hits_mv
                     start_time BETWEEN istart AND iend
             );
         correct_hgs = total_hgs - coalesce(removed_hgs, 0) -
@@ -56,11 +60,11 @@ CREATE OR REPLACE FUNCTION count_extra(
                 SELECT group_id, crawl_id, count(*) AS extra
                 FROM main_hitgroupstatus
                 WHERE
-                    crawl_id > (
+                    crawl_id >= (
                         SELECT min(id) FROM main_crawl
                         WHERE start_time BETWEEN istart AND iend
                     ) AND
-                    crawl_id < (
+                    crawl_id <= (
                         SELECT max(id) FROM main_crawl
                         WHERE start_time BETWEEN istart AND iend
                     )
@@ -79,11 +83,11 @@ CREATE OR REPLACE FUNCTION count_extra(
         SELECT count(*)
         INTO total_hmv
         FROM hits_mv
-        WHERE crawl_id > (
+        WHERE crawl_id >= (
                     SELECT min(id) FROM main_crawl
                     WHERE start_time BETWEEN istart AND iend
                 ) AND
-                crawl_id < (
+                crawl_id <= (
                     SELECT max(id) FROM main_crawl
                     WHERE start_time BETWEEN istart AND iend
                 );
@@ -98,11 +102,11 @@ CREATE OR REPLACE FUNCTION count_extra(
                 SELECT group_id, crawl_id, count(*) AS extra
                 FROM hits_mv h
                 WHERE
-                    h.crawl_id > (
+                    h.crawl_id >= (
                         SELECT min(id) FROM main_crawl
                         WHERE start_time BETWEEN istart AND iend
                     ) AND
-                    h.crawl_id < (
+                    h.crawl_id <= (
                         SELECT max(id) FROM main_crawl
                         WHERE start_time BETWEEN istart AND iend
                     )
@@ -123,6 +127,8 @@ CREATE OR REPLACE FUNCTION count_extra(
             RAISE NOTICE ''OK! correct_hmv == correct_hgs'';
         else
             RAISE NOTICE ''ERROR! correct_hmv != correct_hgs'';
+            RAISE NOTICE ''correct_hmv - correct_hgs: '',
+                correct_hmv - correct_hgs;
         end if;
     END;
 '

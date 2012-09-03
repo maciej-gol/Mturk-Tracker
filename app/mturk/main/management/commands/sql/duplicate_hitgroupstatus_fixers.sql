@@ -95,7 +95,10 @@ select count(distinct crawl_id) as to_fix from (
 
 -- Investigating db_arrivals agregations
 SELECT crawl_id, group_id, hits_consumed, hits_posted, hits_available
-FROM hits_mv WHERE hits_posted IS NOT NULL
+FROM hits_mv
+WHERE
+    (hits_posted IS NOT NULL OR hits_consumed IS NOT NULL) AND
+    start_time BETWEEN '2012-08-01' AND '2012-08-02'
 ORDER BY group_id, crawl_id ASC;
 
 -- Hitgroupstatus count
@@ -113,3 +116,22 @@ crawl_id <= (
 --  90763030
 -- (1 row)
 -- Time: 1167808.061 ms
+
+import datetime
+from django.utils.timezone import now
+import time
+today = now().date()
+dates = [today - datetime.timedelta(days=x) for x in range(0, 200)]
+for i, dt in enumerate(dates, start=1):
+    tt = time.time()
+    print sum([
+        sum([
+            crawl.hitgroupstatus_set.get(hit_group_content__id=content.id
+            ).hits_available for content in  crawl.hitgroupcontent_set.all()
+        ]) for crawl in
+            Crawl.objects.filter(
+                start_time__gt=dt, start_time__lt=dt + datetime.timedelta(days=1))
+    ])
+    print '{0}. {1} {2} elapsed'.format(i, dt, time.time() - tt)
+
+select count(is_spam=true) from hits_mv where start_time between '2012-08-01' and '2012-08-02' group by crawl_id;
