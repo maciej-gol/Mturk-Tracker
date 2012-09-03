@@ -34,6 +34,17 @@ def query_to_tuples(query_string, *query_args):
     return
 
 
+def query_to_lists(query_string, *query_args):
+    cursor = connection.cursor()
+    cursor.execute(query_string, query_args)
+    while True:
+        row = cursor.fetchone()
+        if row is None:
+            break
+        yield list(row)
+    return
+
+
 def execute_sql(query_string, *query_args, **kwargs):
     """Executes given query providing positional args as query arguments.
 

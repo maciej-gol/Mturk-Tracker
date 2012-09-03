@@ -16,6 +16,7 @@ psycopg2
 gevent
 django-extensions
 python-dateutil
+pytz
 
 # sphinx documentation as a part of the site
 Sphinx

@@ -17,9 +17,11 @@ def print_crawls(age=datetime.timedelta(hours=2), sleep=15, limit=None):
         print '(H, M, avail, down, statuses, dev %)'
         print '------------------------------------'
         for c in crawls:
-            dev = (c.groups_available - c.groups_downloaded
-                ) * 100 / c.groups_available
-            dev = '[{0}] !!!'.format(dev) if dev > 10 else dev
+            dev = None
+            if (c.groups_available > 0 and c.groups_downloaded is not None):
+                dev = (c.groups_available - c.groups_downloaded
+                    ) * 100 / c.groups_available
+                dev = '{0}% !!!'.format(dev) if dev > 10 else dev
             pprint((c.start_time.hour, c.start_time.minute, c.groups_available,
                 c.groups_downloaded, c.hitgroupstatus_set.count(), dev))
         time.sleep(sleep)

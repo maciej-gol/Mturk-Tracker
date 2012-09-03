@@ -31,3 +31,21 @@ def repair(data, is_anomaly, fixer=None, depth=1):
                 yield fixer(mid, other)
         else:
             yield mid
+
+
+def vrepair(data, anomalies, fixer=None, depth=1):
+    iterators = []
+    for i in range(depth * 2 + 1):
+        iterators.append(itertools.islice(data, i, None))
+    items_iter = itertools.izip(*iterators)
+
+    for items in items_iter:
+        mid = items[depth]
+        other = items[:depth] + items[depth + 1:]
+        # Get list of anomalies. Do not repair everything.
+        anoms = anomalies(mid, other)
+        if anoms:
+            if fixer is not None:
+                yield fixer(mid, other, anoms)
+        else:
+            yield mid

@@ -1,4 +1,9 @@
 server {
+    listen 80;
+    server_name www.mturk-tracker.com;
+    rewrite ^(.*)$ $scheme://mturk-tracker.com$1 permanent;
+}
+server {
         listen 80;
         server_name localhost mturk-tracker mturk-tracker.com;
 
@@ -10,9 +15,15 @@ server {
         location /media  {
                 gzip on;
                 root %(project_dir)s;
-		autoindex  off;
+        		autoindex  off;
                 expires 60d;
         }
+
+        location /static {
+                autoindex off;
+                alias   %(base_dir)s/collected_static;
+        }
+
 
 	#location /admin/media {
 	#	gzip on;
@@ -50,7 +61,7 @@ server {
         }
 
         location = /robots.txt {
-                root   %(project_dir)s/templates/;
+                root   %(project_dir)s/code/templates/;
         }
 
 

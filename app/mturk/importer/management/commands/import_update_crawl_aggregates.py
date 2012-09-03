@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand
-from mturk.main.management.commands import update_crawl_agregates
+from mturk.main.management.commands.db_update_agregates import update_crawl_agregates
 from django.conf import settings
 from utils.sql import execute_sql
 import os

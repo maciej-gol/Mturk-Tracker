@@ -1,7 +1,7 @@
 import os
 import tempfile
 
-DEBUG = True
+DEBUG = False
 TEMPLATE_DEBUG = DEBUG
 JS_DEBUG = DEBUG
 
@@ -120,6 +120,8 @@ MTRACKER_APPS = (
     'mturk.importer',
     'mturk.spam',
     'mturk.toprequesters',
+    'mturk.arrivals',
+    'mturk.updaters',
 )
 
 INSTALLED_APPS = tuple(list(FOREIGN_APPS) + list(MTRACKER_APPS))
@@ -181,6 +183,14 @@ LOGGING = {
             'maxBytes': '16777216',  # 16megabytes
             'formatter': 'verbose'
         },
+        'aggregates_log': {
+            'level': LOG_LEVEL,
+            'class': 'logging.handlers.RotatingFileHandler',
+            # Override this in local settings
+            'filename': os.path.join(ROOT_PATH, 'aggregates.log'),
+            'maxBytes': '16777216',  # 16megabytes
+            'formatter': 'verbose'
+        },
         'arrivals_log': {
             'level': LOG_LEVEL,
             'class': 'logging.handlers.RotatingFileHandler',
@@ -230,6 +240,11 @@ LOGGING = {
         },
         'mturk.main.management.commands': {
             'handlers': ['crawl_log', 'console'],
+            'level': LOG_LEVEL,
+            'propagate': True,
+        },
+        'mturk.aggregates': {
+            'handlers': ['aggregates_log', 'console'],
             'level': LOG_LEVEL,
             'propagate': True,
         },
