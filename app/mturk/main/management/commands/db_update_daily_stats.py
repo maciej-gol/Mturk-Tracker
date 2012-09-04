@@ -1,10 +1,10 @@
 import datetime
 import logging
-
+import pytz
 from django.core.management.base import BaseCommand
 from django.db import transaction
 from django.db.models import Q
-
+from django.utils.timezone import make_aware
 from mturk.main.models import Crawl, DayStats, CrawlAgregates
 
 log = logging.getLogger(__name__)
@@ -44,7 +44,9 @@ class Command(BaseCommand):
 
         for i in range(0, days):
 
-            day = crawl.start_day() + datetime.timedelta(days=i)
+            day = date_to_aware_utc_datetime(
+                crawl.start_day() + datetime.timedelta(days=i))
+
             day_end = day + datetime.timedelta(days=1)
 
             # excluding objects having zero
@@ -96,3 +98,7 @@ class Command(BaseCommand):
 
         log.info('DayStat refresh finished: {0}/{1}/{2} created/updated/total '
             'objects.'.format(creates, updates, days))
+
+
+def date_to_aware_utc_datetime(dt):
+    return make_aware(datetime.datetime.combine(dt, datetime.time(0)), pytz.UTC)
