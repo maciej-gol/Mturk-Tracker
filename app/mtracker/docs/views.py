@@ -8,7 +8,16 @@ from django.conf import settings
 
 
 def doc_parts(input_string):
-    parts = core.publish_parts(source=input_string, writer_name='html')
+    """Converts the input string into html document.
+
+    If settings.DEBUG is True errors/warnings will be shown at the bottom of
+    the page.
+
+    """
+    # hide warnings
+    settings_overrides = {} if settings.DEBUG else {'report_level': 'quiet'}
+    parts = core.publish_parts(source=input_string, writer_name='html',
+        settings_overrides=settings_overrides)
     return parts
 
 

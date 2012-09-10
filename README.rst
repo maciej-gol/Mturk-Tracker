@@ -226,7 +226,7 @@ files in
 https://github.com/10clouds/Mturk-Tracker/blob/new/deployment/files/requirements/.
 
 The easiest way to install and manage python packages is by using pip for
-installing packages and virtualenv for creating a separate virtual environment.
+installing packages and virtualenv_ for creating a separate virtual environment.
 If using virtualenv, consider virtualenvwrapper packed for convenience.
 
 First, create and activate new virtual python environment::
@@ -369,3 +369,7 @@ You can also check Solr's status at any time. Simply type
 
     python manage.py solr_status
 
+
+.. _virtualenv: http://pypi.python.org/pypi/virtualenv
+.. _virtualenvwrapper: http://www.doughellmann.com/projects/virtualenvwrapper/
+.. _pip: http://pypi.python.org/pypi/pip
