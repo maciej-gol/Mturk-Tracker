@@ -5,7 +5,7 @@ def tabs(request):
     if (path.startswith('/requester_details') or path.startswith('/hit/') or
         path.startswith('/top_requesters')):
         top_tab = 'top_requesters'
-    elif path.startswith('/docs/'):
+    elif path.startswith('/documentation/'):
         top_tab = 'docs'
     elif path.startswith('/arrivals/'):
         top_tab = 'arrivals'

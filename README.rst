@@ -31,11 +31,11 @@ Documentation
 
 This file is only an introduction to the project and is also avalable at:
 
-    http://mturk-tracker.com/docs/
+    http://mturk-tracker.com/documentation/
 
 whereas the complete project sphinx documentation can be found under:
 
-    http://mturk-tracker.com/docs/mturk-tracker/
+    http://mturk-tracker.com/documentation/mturk-tracker/
 
 Sphinx documentation can be found in the repository:
 
@@ -201,7 +201,7 @@ For more information:
 
 A comprehensive description including webserver, database and crawler can be
 found in documentation's section on deployment: (todo: it is not yet there)
-http://mturk-tracker.com/docs/mturk-tracker/ .
+http://mturk-tracker.com/documentation/mturk-tracker/ .
 
 Manual setup
 ============
