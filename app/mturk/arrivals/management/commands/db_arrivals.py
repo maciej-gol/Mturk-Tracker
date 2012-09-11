@@ -40,6 +40,7 @@ class Command(CrawlUpdaterCommand):
 
     def prepare_data(self):
         self.options['clear-existing'] and self.clear_past_results()
+        execute_sql('truncate hits_temp', commit=True).close()
 
     def filter_crawls(self, crawls):
         return crawls.filter(groups_downloaded__gt=F('groups_available') * 0.9)
@@ -64,7 +65,7 @@ class Command(CrawlUpdaterCommand):
         """
         self.log.info('Clearing existiting hits_mv columns.')
         clear_time = time.time()
-        cur = execute_sql(
+        execute_sql(
         """UPDATE hits_mv SET hits_posted = 0, hits_consumed = 0
         WHERE
             crawl_id IN (
@@ -72,13 +73,13 @@ class Command(CrawlUpdaterCommand):
                 WHERE start_time BETWEEN '{0}' AND '{1}'
             ) AND
             hits_posted > 0 OR hits_consumed > 0;
-        """.format(self.start.isoformat(), self.end.isoformat(), commit=True))
+        """.format(self.start.isoformat(), self.end.isoformat()),
+        commit=True).close()
         self.log.info('{0}s elapsed.'.format(time.time() - clear_time))
-        cur.close()
 
         self.log.info('Clearing existiting main_crawlagregates columns.')
         clear_time = time.time()
-        cur = execute_sql(
+        execute_sql(
         """UPDATE main_crawlagregates
         SET
             hits_posted = 0, hits_consumed = 0,
@@ -90,6 +91,6 @@ class Command(CrawlUpdaterCommand):
             ) AND (
             hits_posted > 0 OR hits_consumed > 0 OR
             hitgroups_consumed > 0 OR hitgroups_posted > 0);
-        """.format(self.start.isoformat(), self.end.isoformat(), commit=True))
+        """.format(self.start.isoformat(), self.end.isoformat()),
+        commit=True).close()
         self.log.info('{0}s elapsed.'.format(time.time() - clear_time))
-        cur.close()
