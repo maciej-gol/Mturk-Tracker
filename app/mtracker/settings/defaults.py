@@ -106,6 +106,7 @@ FOREIGN_APPS = (
     'django.contrib.admin',
     'django.contrib.webdesign',
 
+    'tenclouds.crud',
     'haystack',
     'pipeline',
     'south',
@@ -271,6 +272,10 @@ LOGGING = {
     },
 }
 
+PIPELINE = not DEBUG
+if PIPELINE:
+    STATICFILES_STORAGE = 'pipeline.storage.PipelineCachedStorage'
+
 PIPELINE_CSS = {
     'bootstrap': {
         'source_filenames': (
@@ -312,11 +317,25 @@ PIPELINE_JS = {
         ),
         'output_filename': 'js/less.min.js',
     },
+    'crud': {
+        'source_filenames': (
+            'tenclouds/crud/js/init.js',
+            'tenclouds/crud/js/settings.js',
+            'tenclouds/crud/js/events.js',
+            'tenclouds/crud/js/models.js',
+            'tenclouds/crud/js/views.js',
+            'tenclouds/crud/js/widgets.js',
+        ),
+        'output_filename': 'js/crud.min.js',
+    },
+    'search': {
+        'source_filenames': (
+            'js/api/models.coffee',
+            'js/api/crudstart.coffee',
+        ),
+        'output_filename': 'js/crud_search.min.js'
+    }
 }
-
-PIPELINE = not DEBUG
-if PIPELINE:
-    STATICFILES_STORAGE = 'pipeline.storage.PipelineCachedStorage'
 
 PIPELINE_COMPILERS = (
     'pipeline.compilers.coffee.CoffeeScriptCompiler',

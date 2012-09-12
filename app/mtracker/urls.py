@@ -20,6 +20,7 @@ urlpatterns = patterns('mtracker',
 
 urlpatterns += patterns('',
     url('', include('mturk.main.urls')),
+    url('', include('mturk.api.urls')),
     url(r'^documentation/', include('sphinxdoc.urls')),
 )
 

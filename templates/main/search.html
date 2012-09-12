@@ -1,181 +1,24 @@
-{% extends "base.html" %}
-<!-- This dirty template is only a prototype. All inline styles and form fields
-     will be replaced by bootstrap and django automatic field generation. -->
-{% block head %}
-    <link rel="stylesheet" href="{{ STATIC_URL }}/css/chosen.css" type="text/css" />
-    <script src="{{ STATIC_URL }}/js/jquery-1.7.2.js"></script>
-    <script src="{{ STATIC_URL }}/js/chosen.jquery.js"></script>
-    <script type='text/javascript'>
-        $(document).ready(function() {
-            $(".chzn-select").chosen();
-            $(".per-page-selector").change(function(e){
-                $('#id_hits_per_page').val($(e.target.selectedOptions).val());
-                $('#search-form').submit();
-                e.preventDefault();
-            });
-        });
-    </script>
-    <style>
-        select, input[type=text] {
-            padding-top: 5px;
-            padding-bottom: 5px;
-            padding-left: 2px;
-            padding-right: 2px;
-        }
-        input[type=submit] {
-            padding-top: 4px;
-            padding-bottom: 4px;
-            padding-left: 2px;
-            padding-right: 2px;
-        }
-    </style>
+{% extends 'base.html' %}
+{% load compressed %}
+
+{% block javascript %}
+    {{ block.super }}
+    {% compressed_js "core" %}
+    {% compressed_js "crud" %}
+    {% compressed_js "search" %}
 {% endblock %}
 
 {% block content %}
-    <h2>Search</h2>
-    <hr />
-    <form id="search-form" class="form-inline" method="get" action=".">
-        <fieldset>
-            <div class="row-fluid">
-                <div class="span12 search-form-row">
-                    <label>search in:</label>
-
-                    <select multiple="multiple" name="search_in"
-                        class="chzn-select" id="id_search_in">
-                        {% for option in form.fields.search_in.choices %}
-                        <option {% if option.0 in form.cleaned_data.search_in %}selected="selected"{% endif %} value="{{ option.0 }}">{{ option.1 }}</option>
-                        {% endfor %}
-                    </select>
-
-                    <label>keywords:</label>
-
-                    <span>
-                        <input type="text" name="q" value="{{ query }}" />
-                        &nbsp;
-                        <input type="submit" value="Search" />
-                    </span>
-                </div>
-            </div>
-            <hr />
-            <div class="row-fluid">
-                <div class="span12 search-form-row">
-
-                    <label>items found: {{ total_count }}</label>
-
-                    <span class="pull-right">
-                        <label>sort by:</label>
-
-                        <select name="sort_by" id="id_sort_by">
-                            {% for option in form.fields.sort_by.choices %}
-                            <option {% if option.0 in form.cleaned_data.sort_by %}selected="selected"{% endif %} value="{{ option.0 }}">{{ option.1 }}</option>
-                            {% endfor %}
-                        </select>
-                    </span>
-
-                    {{ form.hits_per_page }}
-
-                </div>
-                <input type="text" name="models" value="main.hitgroupcontent" style="display:none;" />
-            </div>
-        </fieldset>
-    </form>
-
-    <div class="row-fluid">
-        <div class="span12">
-            {% if query %}
-                {% with page.object_list as results %}
-                    {% for result in results %}
-
-                        <table class="table table-bordered table-condensed">
-                            <tbody>
-                                <tr>
-                                    <td class="search-results-col1">
-                                        <a href="{% url hit_group_details result.group_id %}">
-                                            {{ result.title|safe }}
-                                        </a>
-                                    </td>
-                                    <td>
-                                        <a href="{% url requester_details result.requester_id %}">
-                                            {{ result.requester_name|safe }}
-                                        </a>
-                                    </td>
-
-                                    <td class="search-results-col3">
-                                        <span style="color: #AAA;">time allotted:</span>
-                                        <span style="font-weight: bold;">
-                                            {{ result.time_alloted }}
-                                        </span>
-                                    </td>
-                                </tr>
-                                    <!--
-                                    <td rowspan="2" style="vertical-align: top;">
-                                        <span>Info</span>
-                                    </td>
-                                    -->
-                                <tr>
-                                    <td class="search-results-col2" colspan="2" style="vertical-align: top;">
-                                        <span style="color: #AAA;">keywords:</span>
-                                        <span style="font-weight: bold;">
-                                        {% for keyword in result.keywords %}
-                                            {{ keyword }}{% if not forloop.last %}, {% endif %}
-                                        {% endfor %}
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <span style="color: #AAA;">reward:</span>
-                                        <span style="font-weight: bold;">
-                                            {{ result.reward }}
-                                        </span>
-                                    </td>
-                                </tr>
-                                <tr><td colspan="3">{{ result.description|safe }}</td></tr>
-                            </tbody>
-                        </table>
-                        {% empty %}
-                        <table class="table table-bordered table-condensed">
-                            <tbody><tr><td>No items found.</td></tr></tbody>
-                        </table>
-                        {# Show some example queries to run, maybe query syntax, something else? #}
-
-                    {% endfor %}
-                {% endwith %}
-            {% endif %}
-        </div>
+<div class="row-fluid">
+<!--  <div class="span3">
+    <div class="well sidebar-nav" id="hitgroupcontent-list-sidebar">
     </div>
-
+  </div> -->
+  {# <div class="span9"> #}
     <div class="row-fluid">
-        <div class="span12">
-            <div class="form-inline alert alert-info search-pagination">
-                <label>hits per page</label>
-
-                <select name="hits_per_page" class="per-page-selector" style="width:50px">
-                    {% for option in form.hits_per_page_choices %}
-                    <option {% if option.0 == form.cleaned_data.hits_per_page %}selected="selected"{% endif %} value="{{ option.0 }}">{{option.1 }}</option>
-                    {% endfor %}
-                </select>
-
-                <span class="pull-right">
-                    {% if page.has_previous or page.has_next %}
-
-                        {% if page.has_previous %}
-                            <a href="{{ submit_url }}&amp;page={{ page.previous_page_number }}">
-                        {% endif %}
-                        &laquo; Previous
-                        {% if page.has_previous %}
-                            </a>
-                        {% endif %}
-                        |
-                        {% if page.has_next %}
-                            <a href="{{ submit_url }}&amp;page={{ page.next_page_number }}">
-                        {% endif %}
-                            Next &raquo;
-                        {% if page.has_next %}
-                            </a>
-                        {% endif %}
-                    {% endif %}
-                </span>
-            </div>
-        </div>
+      <h3>Search HITs</h3>
+      <div id="hitgroupcontent-table"></div>
     </div>
-
+  {# </div> #}
+</div>
 {% endblock %}
