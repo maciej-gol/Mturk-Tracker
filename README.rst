@@ -31,11 +31,11 @@ Documentation
 
 This file is only an introduction to the project and is also avalable at:
 
-    http://mturk-tracker.com/docs/
+    http://mturk-tracker.com/documentation/
 
 whereas the complete project sphinx documentation can be found under:
 
-    http://mturk-tracker.com/docs/mturk-tracker/
+    http://mturk-tracker.com/documentation/mturk-tracker/
 
 Sphinx documentation can be found in the repository:
 
@@ -201,7 +201,7 @@ For more information:
 
 A comprehensive description including webserver, database and crawler can be
 found in documentation's section on deployment: (todo: it is not yet there)
-http://mturk-tracker.com/docs/mturk-tracker/ .
+http://mturk-tracker.com/documentation/mturk-tracker/ .
 
 Manual setup
 ============
@@ -226,7 +226,7 @@ files in
 https://github.com/10clouds/Mturk-Tracker/blob/new/deployment/files/requirements/.
 
 The easiest way to install and manage python packages is by using pip for
-installing packages and virtualenv for creating a separate virtual environment.
+installing packages and virtualenv_ for creating a separate virtual environment.
 If using virtualenv, consider virtualenvwrapper packed for convenience.
 
 First, create and activate new virtual python environment::
@@ -369,3 +369,7 @@ You can also check Solr's status at any time. Simply type
 
     python manage.py solr_status
 
+
+.. _virtualenv: http://pypi.python.org/pypi/virtualenv
+.. _virtualenvwrapper: http://www.doughellmann.com/projects/virtualenvwrapper/
+.. _pip: http://pypi.python.org/pypi/pip

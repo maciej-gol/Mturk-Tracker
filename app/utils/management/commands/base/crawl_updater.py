@@ -151,10 +151,12 @@ class CrawlUpdaterCommand(TimeArgsCommand):
                 chunk_time = time.time() - chunk_time
                 self.store_chunk_time(chunk_time)
                 done += len(chunk) - self.overlap
-                self.log.info(('Chunk processed in {0}s, total {1}s, {2}/{3}'
-                    ' done, ETA: {4} minutes.').format(chunk_time,
-                    self.get_elapsed(), done, self.total_count - self.overlap,
-                    self.get_eta() / 60))
+                self.log.info(('\n chunk {0} \n total {1} '
+                    '\n ETA   {4}, {2}/{3} done, ').format(
+                    humanized_time(chunk_time),
+                    humanized_time(self.get_elapsed()),
+                    done, self.total_count - self.overlap,
+                    humanized_time(self.get_eta())))
 
         except Exception as e:
             self.log.exception(e)
@@ -163,3 +165,10 @@ class CrawlUpdaterCommand(TimeArgsCommand):
                 self.total_count, self.get_elapsed()))
         finally:
             pid and pid.remove_pid()
+
+
+def humanized_time(seconds):
+    """Converts seconds to human readable HH:MM:SS time format."""
+    mins, secs = divmod(seconds, 60)
+    hours, mins = divmod(mins, 60)
+    return "%02d:%02d:%02d" % (hours, mins, secs)

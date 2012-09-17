@@ -14,14 +14,14 @@ urlpatterns = patterns('mtracker',
     #url(r'^$', 'main.views.index', name='index'),
 
     url(r'^admin/', include(admin.site.urls)),
-    url(r'^docs/$', 'docs.views.docs_readme', name='docs_main'),
+    url(r'^documentation/$', 'docs.views.docs_readme', name='docs_main'),
     (r'^bad/$', bad),
 )
 
 urlpatterns += patterns('',
     url(r'^api/', include('mturk.api.urls')),
     url('', include('mturk.main.urls')),
-    url(r'^docs/', include('sphinxdoc.urls')),
+    url(r'^documentation/', include('sphinxdoc.urls')),
 )
 
 ## In DEBUG mode, serve media files through Django.

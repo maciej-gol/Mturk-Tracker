@@ -95,7 +95,10 @@ select count(distinct crawl_id) as to_fix from (
 
 -- Investigating db_arrivals agregations
 SELECT crawl_id, group_id, hits_consumed, hits_posted, hits_available
-FROM hits_mv WHERE hits_posted IS NOT NULL
+FROM hits_mv
+WHERE
+    (hits_posted IS NOT NULL OR hits_consumed IS NOT NULL) AND
+    start_time BETWEEN '2012-08-01' AND '2012-08-02'
 ORDER BY group_id, crawl_id ASC;
 
 -- Hitgroupstatus count

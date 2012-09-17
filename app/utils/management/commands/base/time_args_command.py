@@ -48,7 +48,7 @@ class TimeArgsCommand(BaseCommand):
                 sys.exit(0)
 
         def subdict(keys, d):
-            return dict(zip([a for a in keys if a in d], map(d.get, keys)))
+            return dict([(k, d[k]) for k in keys if d.get(k)])
 
         if isinstance(options.get('start'), basestring):
             options['start'] = dateutil.parser.parse(options.get('start'))

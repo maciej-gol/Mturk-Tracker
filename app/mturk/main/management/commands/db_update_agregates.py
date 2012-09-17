@@ -66,7 +66,7 @@ def update_crawl_agregates(commit_threshold=1000, only_new=True,
                 crawl_id,
                 nextval('main_crawlagregates_id_seq'),
                 count(*) as "count",
-                count(is_spam = true)
+                count(CASE WHEN is_spam = TRUE then TRUE ELSE NULL END)
             FROM
                 (SELECT DISTINCT ON (group_id) * FROM hits_mv
                 WHERE crawl_id = %s) AS p
