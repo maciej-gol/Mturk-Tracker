@@ -95,6 +95,9 @@ class HitGroupContentSearchForm(SearchForm):
             cleaned_data = {}
         return cleaned_data
 
+    def no_query_found(self):
+        return self.searchqueryset.all()
+
     def search(self):
         """ Returns a search queryset. """
             
@@ -103,11 +106,9 @@ class HitGroupContentSearchForm(SearchForm):
         labels = cleaned_data.get("labels", [])
         query = cleaned_data.get("q", "")
 
-        if not query:
-            return EmptySearchQuerySet()
-
-        if not search_in:
+        if not search_in or not query:
             # The following returns result of a SearchQuerySet.autoquery()
+            # or no_query_found()
             search_queryset = super(HitGroupContentSearchForm, self).search()
         else:
             # Pass query to each field, which you want to search in.
@@ -135,9 +136,11 @@ class HitGroupContentSearchForm(SearchForm):
                             cleaned_data.get("search_in", [])))
         sort_by = "".join(map(lambda o: "&sort_by={}".format(o),
                           [cleaned_data.get("sort_by", DEFAULT_SORT_BY)]))
+        labels = "".join(map(lambda l: "&labels={}". format(l),
+                         cleaned_data.get("labels", [])))
         hits_per_page = "".join(map(lambda hpp: "&hits_per_page={}".format(hpp),
                                 [cleaned_data.get("hits_per_page", DEFAULT_HITS_PER_PAGE)]))
-        return "?q={}{}{}{}".format(query, search_in, sort_by, hits_per_page)
+        return "?q={}{}{}{}{}".format(query, search_in, labels, sort_by, hits_per_page)
 
     def hits_per_page_or_default(self):
         cleaned_data = self.cleaned_data_or_empty()

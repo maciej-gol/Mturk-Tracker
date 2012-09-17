@@ -91,64 +91,60 @@
 
     <div class="row-fluid">
         <div class="span12">
-            {% if query %}
-                {% with page.object_list as results %}
-                    {% for result in results %}
+            {% with page.object_list as results %}
+                {% for result in results %}
+                    <table class="table table-bordered table-condensed">
+                        <tbody>
+                            <tr>
+                                <td class="search-results-col1">
+                                    <a href="{% url hit_group_details result.group_id %}">
+                                        {{ result.title|safe }}
+                                    </a>
+                                </td>
+                                <td>
+                                    <a href="{% url requester_details result.requester_id %}">
+                                        {{ result.requester_name|safe }}
+                                    </a>
+                                </td>
 
-                        <table class="table table-bordered table-condensed">
-                            <tbody>
-                                <tr>
-                                    <td class="search-results-col1">
-                                        <a href="{% url hit_group_details result.group_id %}">
-                                            {{ result.title|safe }}
-                                        </a>
-                                    </td>
-                                    <td>
-                                        <a href="{% url requester_details result.requester_id %}">
-                                            {{ result.requester_name|safe }}
-                                        </a>
-                                    </td>
-
-                                    <td class="search-results-col3">
-                                        <span style="color: #AAA;">time allotted:</span>
-                                        <span style="font-weight: bold;">
-                                            {{ result.time_alloted }}
-                                        </span>
-                                    </td>
-                                </tr>
-                                    <!--
-                                    <td rowspan="2" style="vertical-align: top;">
-                                        <span>Info</span>
-                                    </td>
-                                    -->
-                                <tr>
-                                    <td class="search-results-col2" colspan="2" style="vertical-align: top;">
-                                        <span style="color: #AAA;">keywords:</span>
-                                        <span style="font-weight: bold;">
-                                        {% for keyword in result.keywords %}
-                                            {{ keyword }}{% if not forloop.last %}, {% endif %}
-                                        {% endfor %}
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <span style="color: #AAA;">reward:</span>
-                                        <span style="font-weight: bold;">
-                                            {{ result.reward }}
-                                        </span>
-                                    </td>
-                                </tr>
-                                <tr><td colspan="3">{{ result.description|safe }}</td></tr>
-                            </tbody>
-                        </table>
-                        {% empty %}
-                        <table class="table table-bordered table-condensed">
-                            <tbody><tr><td>No items found.</td></tr></tbody>
-                        </table>
-                        {# Show some example queries to run, maybe query syntax, something else? #}
-
-                    {% endfor %}
-                {% endwith %}
-            {% endif %}
+                                <td class="search-results-col3">
+                                    <span style="color: #AAA;">time allotted:</span>
+                                    <span style="font-weight: bold;">
+                                        {{ result.time_alloted }}
+                                    </span>
+                                </td>
+                            </tr>
+                                <!--
+                                <td rowspan="2" style="vertical-align: top;">
+                                    <span>Info</span>
+                                </td>
+                                -->
+                            <tr>
+                                <td class="search-results-col2" colspan="2" style="vertical-align: top;">
+                                    <span style="color: #AAA;">keywords:</span>
+                                    <span style="font-weight: bold;">
+                                    {% for keyword in result.keywords %}
+                                        {{ keyword }}{% if not forloop.last %}, {% endif %}
+                                    {% endfor %}
+                                    </span>
+                                </td>
+                                <td>
+                                    <span style="color: #AAA;">reward:</span>
+                                    <span style="font-weight: bold;">
+                                        {{ result.reward }}
+                                    </span>
+                                </td>
+                            </tr>
+                            <tr><td colspan="3">{{ result.description|safe }}</td></tr>
+                        </tbody>
+                    </table>
+                    {% empty %}
+                    <table class="table table-bordered table-condensed">
+                        <tbody><tr><td>No items found.</td></tr></tbody>
+                    </table>
+                    {# Show some example queries to run, maybe query syntax, something else? #}
+                {% endfor %}
+            {% endwith %}
         </div>
     </div>
 
