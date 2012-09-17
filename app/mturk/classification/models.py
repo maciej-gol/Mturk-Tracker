@@ -1,1 +1,1 @@
-# TODO remove appropirate models from mturk.main.
+# TODO remove models from mturk.main.

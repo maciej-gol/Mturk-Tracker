@@ -1,1 +1,1 @@
-# TODO remove appropirate views from mturk.main.
+# TODO remove views from mturk.main.

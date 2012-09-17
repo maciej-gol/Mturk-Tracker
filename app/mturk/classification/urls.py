@@ -1,1 +1,1 @@
-# TODO remove appropirate urls from mturk.main.
+# TODO remove urls from mturk.main.

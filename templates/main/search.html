@@ -54,6 +54,15 @@
                         &nbsp;
                         <input type="submit" value="Search" />
                     </span>
+
+                    <label>labels:</label>
+
+                    <select multiple="multiple" name="labels"
+                        class="chzn-select" id="id_labels">
+                        {% for option in form.fields.labels.choices %}
+                        <option {% if option.0 in form.cleaned_data.choices %}selected="selected"{% endif %} value="{{ option.0 }}">{{ option.1 }}</option>
+                        {% endfor %}
+                    </select>
                 </div>
             </div>
             <hr />

@@ -17,12 +17,12 @@ from haystack.views import SearchView
 import admin
 import plot
 
-from mturk.main.classification import NaiveBayesClassifier, LABELS
 from mturk.main.forms import HitGroupContentSearchForm
 from mturk.main.models import DayStats, HitGroupContent, HitGroupClass, \
                               RequesterProfile
 from mturk.main.templatetags.graph import text_row_formater
 from mturk.toprequesters.reports import ToprequestersReport
+from mturk.classification import NaiveBayesClassifier, LABELS
 
 from utils.sql import query_to_dicts, query_to_tuples, query_to_lists
 from utils.enum import EnumMetaclass
