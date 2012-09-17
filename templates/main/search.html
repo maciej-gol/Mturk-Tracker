@@ -8,17 +8,16 @@
     {% compressed_js "search" %}
 {% endblock %}
 
+{% block css %}
+    {{ block.super }}
+    {% compressed_css 'crud' %}}
+{% endblock %}
+
 {% block content %}
 <div class="row-fluid">
-<!--  <div class="span3">
-    <div class="well sidebar-nav" id="hitgroupcontent-list-sidebar">
-    </div>
-  </div> -->
-  {# <div class="span9"> #}
-    <div class="row-fluid">
-      <h3>Search HITs</h3>
-      <div id="hitgroupcontent-table"></div>
-    </div>
-  {# </div> #}
+  <div class="row-fluid">
+    <h3>Search HITs</h3>
+    <div id="hitgroupcontent-table"></div>
+  </div>
 </div>
 {% endblock %}

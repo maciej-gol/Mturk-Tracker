@@ -295,6 +295,17 @@ PIPELINE_CSS = {
             'rel': 'stylesheet/less',
         },
     },
+    'crud': {
+        'source_filenames': (
+            'tenclouds/crud/css/table_headers.css',
+            'tenclouds/crud/css/meta_actions.css',
+            'tenclouds/crud/css/three_state_input.css',
+        ),
+        'output_filename': 'css/base.css',
+        'extra_context': {
+            'rel': 'stylesheet/css',
+        },
+    },
 
 }
 
