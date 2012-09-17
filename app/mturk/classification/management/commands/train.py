@@ -7,7 +7,7 @@ from optparse import make_option
 from django.core.management.base import BaseCommand
 
 from mturk.main.models import HitGroupContent
-from mturk.main.classification import NaiveBayesClassifier
+from mturk.classification import NaiveBayesClassifier
 
 
 # Set limit for avaliable resources.

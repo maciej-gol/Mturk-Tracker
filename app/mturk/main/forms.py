@@ -58,7 +58,7 @@ SEARCH_IN_CHOICES = zip(
             SEARCH_IN_FIELDS
         ))
 
-LABELS_CHOICES = map(lambda key: (key, LABELS[key]), LABELS.keys())
+LABELS_CHOICES = map(lambda key: (str(key), LABELS[key]), LABELS.keys())
 
 SORT_BY_CHOICES = zip(
         map(
@@ -83,7 +83,8 @@ class HitGroupContentSearchForm(SearchForm):
     sort_by = forms.ChoiceField(choices=SORT_BY_CHOICES, required=False)
     hits_per_page = forms.CharField(required=False, widget=forms.HiddenInput,
                                     initial=HITS_PER_PAGES[0][0])
-    labels = forms.ChoiceField(required=False, choices=LABELS_CHOICES)
+    labels = forms.MultipleChoiceField(choices=LABELS_CHOICES,
+                                       required=False)
 
     hits_per_page_choices = HITS_PER_PAGE_CHOICES
 
@@ -96,9 +97,8 @@ class HitGroupContentSearchForm(SearchForm):
 
     def search(self):
         """ Returns a search queryset. """
-
+            
         cleaned_data = self.cleaned_data_or_empty()
-
         search_in = cleaned_data.get("search_in", DEFAULT_SEARCH_IN)
         labels = cleaned_data.get("labels", [])
         query = cleaned_data.get("q", "")
@@ -117,7 +117,7 @@ class HitGroupContentSearchForm(SearchForm):
                 search_queryset = search_queryset.filter_or(**{key: query})
 
         for label in labels:
-            search_queryset = search_queryset.filter_or(classes__exact=label)
+            search_queryset = search_queryset.filter_and(classes__exact=label)
 
         # Get field and order for sorting.
         sort_by = cleaned_data.get("sort_by", DEFAULT_SORT_BY).rsplit("_", 1)

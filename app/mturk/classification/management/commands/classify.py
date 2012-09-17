@@ -6,7 +6,7 @@ from optparse import make_option
 from django.core.management.base import BaseCommand
 
 from mturk.main.models import HitGroupClass, HitGroupContent
-from mturk.main.classification import NaiveBayesClassifier, EmptyBatchException
+from mturk.classification import NaiveBayesClassifier, EmptyBatchException
 
 from utils.sql import query_to_dicts
 
