@@ -79,6 +79,11 @@ class HitGroupContent(models.Model):
     is_public = models.BooleanField("Is public", default=True)
     is_spam = models.NullBooleanField("Is spam", db_index=True)
 
+    @models.permalink
+    def get_absolute_url(self):
+        """Returns url to HIT group details page."""
+        return ('hit_group_details', (), {'hit_group_id': self.group_id})
+
     def prepare_for_prediction(self):
 
         # import csv
