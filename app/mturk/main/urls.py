@@ -1,4 +1,4 @@
-from django.conf.urls.defaults import *
+from django.conf.urls.defaults import patterns, url
 from django.views.generic.simple import direct_to_template, redirect_to
 
 
@@ -20,12 +20,7 @@ urlpatterns = patterns('',
     url(r'^top_requesters/$', 'mturk.main.views.top_requesters',
         name='graphs_top_requesters'),
 
-    url(r'^classification/(?P<classes>\d+)/$', 'mturk.main.views.classification',
-        name='classification'),
-    url(r'^classification/report/(?P<classes>\d+)/$', 'mturk.main.views.classification_report',
-        name='classification_report'),
-
-    url(r'^search/$', 'mturk.main.views.haystack_search', name='haystack_search'),
+    url(r'^search/$', 'mturk.main.views.search', name='haystack_search'),
     url(r'^requester_details/(?P<requester_id>[A-Z0-9]+)/$',
         'mturk.main.views.requester_details', name='requester_details'),
     url(r'^hit/content/(?P<hit_group_id>[a-fA-Z0-9]+)/$',
