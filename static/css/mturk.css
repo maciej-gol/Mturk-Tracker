@@ -31,12 +31,11 @@ a {
 .logo img {
     margin-top: 30px;
 }
-.header {
+/*.header {
     background: url(../img/m_header_bg.png) bottom  repeat-x;
     height:92px;
     overflow:hidden;
-    /*margin:0 0 10px 0;*/
-}
+}*/
 .menu {
     background:url(../img/mturktracker_right_bg.png) left top no-repeat;
     width: 210px;
@@ -168,9 +167,6 @@ p.error {
 }
 div.chzn-container {
     vertical-align: middle;
-}
-div.search-form-row label, select, span{
-    padding: 5px;
 }
 div.search-results {
     padding: 5px;

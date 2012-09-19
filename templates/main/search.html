@@ -10,14 +10,13 @@
 
 {% block css %}
     {{ block.super }}
-    {% compressed_css 'crud' %}}
+    {% compressed_css 'crud' %}
 {% endblock %}
 
 {% block content %}
 <div class="row-fluid">
-  <div class="row-fluid">
     <h3>Search HITs</h3>
+    <div class="row-fluid filter-bar"></div>
     <div id="hitgroupcontent-table"></div>
-  </div>
 </div>
 {% endblock %}
