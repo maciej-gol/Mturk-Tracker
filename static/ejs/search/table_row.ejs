@@ -1,0 +1,45 @@
+<td>
+    <table class="table table-bordered table-condensed">
+        <tbody>
+            <tr>
+                <input type="hidden" name="item_<%= model.id %>">
+                <td class="search-results-col1">
+                    <a href="<%= model.get('group_url') %>">
+                        <%= model.get('title') %>
+                    </a>
+                </td>
+                <td>
+                    <a href="<%= model.get('requester_url') %>">
+                        <%= model.get('requester_name') %>
+                    </a>
+                </td>
+
+                <td class="search-results-col3">
+                    <span style="color: #AAA;">time allotted:</span>
+                    <span style="font-weight: bold;">
+                        <%= model.get('time_allotted') %>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="search-results-col2" colspan="2" style="vertical-align: top;">
+                    <span style="color: #AAA;">keywords:</span>
+                    <span style="font-weight: bold;">
+                        <% for (var i=0; i < model.get('keywords').length; ++i) { %>
+                            <%= model.get('keywords')[i] %><% if (i < model.get('keywords').length - 1) { %>,<% } %>
+                        <% } %>
+                    </span>
+                </td>
+                <td>
+                    <span style="color: #AAA;">reward:</span>
+                    <span style="font-weight: bold;">
+                        <%= model.get('reward') %>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="3"><%= model.get('description') %></td>
+            </tr>
+        </tbody>
+    </table>
+</td>

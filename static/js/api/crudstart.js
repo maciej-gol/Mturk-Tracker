@@ -3,16 +3,23 @@
 
   $(function() {
     var hgcs;
-    hgcs = new crud.collection.HitGroupContents;
+    hgcs = new crud.collection.HitGroupContentSearch;
     return hgcs.fetchMeta(function(meta) {
-      var hgcTable;
-      hgcTable = new crud.view.HitGroupContentTable({
+      var fV, hgcTable;
+      hgcTable = new crud.view.HitGroupContentSearchTable({
         el: $('#hitgroupcontent-table'),
         meta: meta,
         collection: hgcs
       });
+      hgcTable.removeWidget('.crud-meta-actions', 'crud.view.SelectAllWidget');
+      hgcTable.removeWidget('.crud-meta-actions', 'crud.view.SelectNoneWidget');
       hgcTable.render();
-      return hgcs.fetch();
+      hgcs.fetch();
+      fV = new crud.view.FilterList({
+        collection: hgcs,
+        filterGroups: meta.filterGroups
+      });
+      return $(".filter-bar").append(fV.render().el);
     });
   });
 

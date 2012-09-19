@@ -59,4 +59,64 @@
 
   })(crud.view.Table);
 
+  crud.model.HitGroupContentSearch = (function(_super) {
+
+    __extends(HitGroupContentSearch, _super);
+
+    function HitGroupContentSearch() {
+      return HitGroupContentSearch.__super__.constructor.apply(this, arguments);
+    }
+
+    HitGroupContentSearch.prototype.urlRoot = '/api/hitgroupcontentsearch/';
+
+    return HitGroupContentSearch;
+
+  })(crud.model.Model);
+
+  crud.collection.HitGroupContentSearch = (function(_super) {
+
+    __extends(HitGroupContentSearch, _super);
+
+    function HitGroupContentSearch() {
+      return HitGroupContentSearch.__super__.constructor.apply(this, arguments);
+    }
+
+    HitGroupContentSearch.prototype.model = crud.model.HitGroupContentSearch;
+
+    HitGroupContentSearch.prototype.urlRoot = '/api/hitgroupcontentsearch/';
+
+    return HitGroupContentSearch;
+
+  })(crud.collection.Collection);
+
+  crud.view.HitGroupContentSearchTableRow = (function(_super) {
+
+    __extends(HitGroupContentSearchTableRow, _super);
+
+    function HitGroupContentSearchTableRow() {
+      return HitGroupContentSearchTableRow.__super__.constructor.apply(this, arguments);
+    }
+
+    HitGroupContentSearchTableRow.prototype.template = crud.template('ejs/search/table_row.ejs');
+
+    return HitGroupContentSearchTableRow;
+
+  })(crud.view.TableRow);
+
+  crud.view.HitGroupContentSearchTable = (function(_super) {
+
+    __extends(HitGroupContentSearchTable, _super);
+
+    function HitGroupContentSearchTable() {
+      return HitGroupContentSearchTable.__super__.constructor.apply(this, arguments);
+    }
+
+    HitGroupContentSearchTable.prototype.itemViewClass = crud.view.HitGroupContentSearchTableRow;
+
+    HitGroupContentSearchTable.prototype.template = crud.template('ejs/search/table.ejs');
+
+    return HitGroupContentSearchTable;
+
+  })(crud.view.Table);
+
 }).call(this);
