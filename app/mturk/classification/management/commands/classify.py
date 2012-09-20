@@ -5,9 +5,8 @@ import resource
 from optparse import make_option
 from django.core.management.base import BaseCommand
 
-from mturk.main.models import HitGroupClass, HitGroupContent
+from mturk.main.models import HitGroupClass
 from mturk.classification import NaiveBayesClassifier, EmptyBatchException
-
 from utils.sql import query_to_dicts
 
 
@@ -20,14 +19,12 @@ class ClassifyCommand(BaseCommand):
     BATCH_SIZE = 1000
 
     option_list = BaseCommand.option_list + (
-        make_option("--input-path", dest="input_path", action="store",
-                    help=u"classifier path"),
-        make_option("--group-id", dest="group_id", action="store",
-                    default="", help=u"group id"),
-        make_option("--single", dest="single", action="store_true",
-                    default=False),
-        make_option("--remove", dest="remove", action="store_true",
-                    default=False),
+        make_option("--clear-all", dest="clear_all",
+                    action="store_true", default=False,
+                    help=u"clears all existing classification and exits"),
+        make_option("--classifier-path", dest="classifier_path",
+                    action="store", default="",
+                    help=u"path to the classifier json configuration file"),
     )
 
 
@@ -39,19 +36,13 @@ class ClassifyCommand(BaseCommand):
                 yield HitGroupClass(group_id=doc["group_id"],
                                     classes=NaiveBayesClassifier.most_likely(result),
                                     probabilities=json.dumps(prob))
-        if options["remove"]:
-            logger.info("Removing existing classification")
+        if options["clear_all"]:
+            logger.info("Removing all existing classification")
             HitGroupClass.objects.all().delete()
-            logger.info("Classification removed")
             return
-        with open(options["input_path"], "r") as file:
+        with open(options["classifier_path"], "r") as file:
             probabilities = json.load(file)
             classifier = NaiveBayesClassifier(probabilities=probabilities)
-            # TODO remove this -- for debug purposes only
-            if options["single"] and options["group_id"]:
-                model = HitGroupContent.objects.get(group_id=options['group_id'])
-                print classifier.classify(model)
-                return
             logger.info("Classification of hit groups started. Processing in "\
                         "batches size of {}".format(self.BATCH_SIZE))
             while True:
@@ -63,7 +54,7 @@ class ClassifyCommand(BaseCommand):
                             WHERE content.group_id = class.group_id
                         ) LIMIT {};
                     """.format(self.BATCH_SIZE))
-                logger.info("Batch classification stated")
+                logger.info("Batch classification started")
                 try:
                     results = _to_hit_group_class(classifier.classify_batch(models))
                     HitGroupClass.objects.bulk_create(results)
@@ -71,5 +62,6 @@ class ClassifyCommand(BaseCommand):
                     logger.info("Batch is empty no hit groups to classify")
                     break
                 logger.info("Batch classified successfully")
+
 
 Command = ClassifyCommand

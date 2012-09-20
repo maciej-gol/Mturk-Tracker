@@ -1,4 +1,5 @@
-from datetime import date, datetime, time, timedelta
+import time
+from datetime import date, datetime, timedelta
 
 
 def get_time_interval(get, ctx, encode=True, days_ago=30):
@@ -26,5 +27,4 @@ def get_time_interval(get, ctx, encode=True, days_ago=30):
 
 
 def date_from_str(s):
-    return datetime.datetime(
-        *time.strptime(s, '%m/%d/%Y')[:6])
+    return datetime(*time.strptime(s, '%m/%d/%Y')[:6])
