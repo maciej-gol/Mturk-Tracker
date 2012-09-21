@@ -54,14 +54,6 @@ class ClassifyCommand(BaseCommand):
             # XXX it can be slow.
             query = ''' SELECT group_id, title, description, keywords
                         FROM main_hitgroupcontent as content
-                        WHERE NOT EXISTS(
-                            SELECT * FROM main_hitgroupclass as class
-                            WHERE content.group_id = class.group_id
-                        ) LIMIT {};
-                    '''.format(self.BATCH_SIZE)
-        else:
-            query = ''' SELECT group_id, title, description, keywords
-                        FROM main_hitgroupcontent as content
                         JOIN hits_mv 
                         ON content.group_id = hits_mv.group_id
                         WHERE 
@@ -74,6 +66,14 @@ class ClassifyCommand(BaseCommand):
                         GROUP BY group_id
                         LIMIT {};
                     '''.format(options['begin'], options['end'], self.BATCH_SIZE)
+        else:
+            query = ''' SELECT group_id, title, description, keywords
+                        FROM main_hitgroupcontent as content
+                        WHERE NOT EXISTS(
+                            SELECT * FROM main_hitgroupclass as class
+                            WHERE content.group_id = class.group_id
+                        ) LIMIT {};
+                    '''.format(self.BATCH_SIZE)
         if not options['classifier_path']:
             try:
                 options['classifier_path'] = settings.CLASSIFIER_PATH
