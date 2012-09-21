@@ -11,6 +11,8 @@ def tabs(request):
         top_tab = 'arrivals'
     elif path.startswith('/general/'):
         top_tab = 'general'
+    elif path.startswith('/classification/'):
+        top_tab = 'classification'
     elif path != "/":
         top_tab = path.replace('/', '')
 
