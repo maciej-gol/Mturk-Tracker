@@ -4,6 +4,7 @@ import resource
 from datetime import datetime, timedelta
 from optparse import make_option
 
+from dateutil.parser import parse
 from django.core.management.base import BaseCommand
 from django.db.models import Max, Min
 
@@ -47,6 +48,8 @@ class CalculateClassAggregates(BaseCommand):
         # up to now.
         if end is None:
             end = datetime.now()
+        else:
+            end = parse(end)
 
         # If the begining of the time interval is not specified compute
         # from last existing aggregates.
@@ -63,6 +66,8 @@ class CalculateClassAggregates(BaseCommand):
             else:
                 logger.warn("No crawls for processing")
                 return
+        else:
+            begin = parse(begin)
 
         begin = begin.replace(tzinfo=None)
         end = end.replace(tzinfo=None)
