@@ -40,6 +40,8 @@ class ClassifyCommand(BaseCommand):
             logger.info('Removing all existing classification')
             HitGroupClass.objects.all().delete()
             return
+        if not options['classifier_path']:
+            options['classifier_path'] = '~/classifier.json'
         with open(options['classifier_path'], 'r') as file:
             probabilities = json.load(file)
             classifier = NaiveBayesClassifier(probabilities=probabilities)
