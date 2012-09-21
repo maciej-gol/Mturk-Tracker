@@ -9,7 +9,7 @@
         $(document).ready(function() {
             $(".chzn-select").chosen();
             $(".per-page-selector").change(function(e){
-                $('#id_hits_per_page').val($(e.target.selectedOptions).val());
+                $('#id_hits_per_page').val($(e.target).val());
                 $('#search-form').submit();
                 e.preventDefault();
             });
@@ -85,7 +85,7 @@
 
                 </div>
                 <input type="text" name="models" value="main.hitgroupcontent" style="display:none;" />
-            </div>
+                <input type="text" name="hits_par_page" value="5" id="id_hits_per_page", style="display:none;" />
         </fieldset>
     </form>
 
