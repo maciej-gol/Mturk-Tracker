@@ -3,7 +3,7 @@ from itertools import product
 
 from django import forms
 from haystack.forms import SearchForm
-from haystack.query import SearchQuerySet, EmptySearchQuerySet
+from haystack.query import SearchQuerySet
 
 from mturk.classification import LABELS
 
