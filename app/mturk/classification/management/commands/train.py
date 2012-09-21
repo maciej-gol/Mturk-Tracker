@@ -17,47 +17,34 @@ logger = logging.getLogger(__name__)
 class TrainCommand(BaseCommand):
 
     option_list = BaseCommand.option_list + (
-        make_option("--input-path", dest="input_path", action="store",
-                    help=u"trainig json data path"),
-        make_option("--output-path", dest="output_path", action="store",
-                    default="",
-                    help=u"trainig json data path"),
-        make_option("--display", dest="display", action="store_true",
-                    default=False,
-                    help=u"only displays training set and exits"),
-        make_option("--load", dest="load", action="store_true",
-                    default=True,
-                    help=u"input file contains only primary keys, fetch "
-                    "documents from the database"),
+        make_option('--training-set-path', dest='training_set_path', 
+                    action='store',
+                    help=u'path to the training json data'),
+        make_option('--classifier-path', dest='classifier_path', 
+                    action='store',
+                    help=u'path to the resultant classifier json '
+                    'configuration file'),
     )
 
     def handle(self, *args, **options):
 
         objects = []
-        with open(options['input_path'], "r") as file:
+        with open(options['training_set_path'], 'r') as file:
             objects = json.load(file)
-
+        logger.info('Fetching documents from a database')
         models = HitGroupContent.objects.filter(group_id__in=objects)
         training_set = map(lambda m: (m, objects[m.group_id]), models)
-
-        if options["display"]:
-            for test in training_set:
-                model = test[0]
-                print model.group_id, test[1]
-                print "\t{}\n\t{}\n\t{}\n\t{}".format(model.title,
-                                                      model.description,
-                                                      model.requester_name,
-                                                      model.keywords)
-        else:
-            classifier = NaiveBayesClassifier(training_set=training_set)
-            output_path = options["output_path"]
-            if output_path:
-                with open(options["output_path"], "w") as file:
-                    json.dump(classifier.probabilities, file,
-                              ensure_ascii=True, indent=4)
-            else:
-                json.dump(classifier.probabilities, sys.stdout,
+        logger.info('Trainig classificator')
+        classifier = NaiveBayesClassifier(training_set=training_set)
+        output_path = options['classifier_path']
+        if output_path:
+            with open(options['classifier_path'], 'w') as file:
+                json.dump(classifier.probabilities, file,
                           ensure_ascii=True, indent=4)
+        else:
+            json.dump(classifier.probabilities, sys.stdout,
+                      ensure_ascii=True, indent=4)
+        logger.info('Done')
 
 
 Command = TrainCommand
