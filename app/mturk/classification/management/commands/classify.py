@@ -9,7 +9,7 @@ from django.core.management.base import BaseCommand
 
 from mturk.main.models import HitGroupClass
 from mturk.classification import NaiveBayesClassifier, EmptyBatchException
-from utils.sql import query_to_dicts
+from utils.sql import query_to_dicts, execute_sql
 
 
 # Set limit for avaliable resources.
@@ -48,7 +48,8 @@ class ClassifyCommand(BaseCommand):
                                     probabilities=json.dumps(prob))
         if options['clear_all']:
             logger.info('Removing all existing classification')
-            HitGroupClass.objects.all().delete()
+            # HitGroupClass.objects.all().delete()
+            execute_sql('DELETE FROM main_hitgroupclass;', commit=True)
             return
         if options['begin'] and options['end']:
             # XXX it can be slow.

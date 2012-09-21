@@ -36,7 +36,8 @@ class CalculateClassAggregates(BaseCommand):
 
         if options["clear_all"]:
             logger.info("Removing all existing classification aggregates")
-            HitGroupClassAggregate.objects.all().delete()
+            # HitGroupClassAggregate.objects.all().delete()
+            execute_sql('DELETE FROM main_hitgroupclassaggregate;', commit=True)
             return
 
         begin = options["begin"]
