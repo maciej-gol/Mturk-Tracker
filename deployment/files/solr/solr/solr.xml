@@ -1,5 +1,5 @@
 <solr persistent="true" sharedLib="lib">
     <cores adminPath="/admin/cores" defaultCoreName="en">
-        <core name="en" instanceDir="en" />
+        <core name="mtracker" instanceDir="mtracker" />
     </cores>
 </solr>
