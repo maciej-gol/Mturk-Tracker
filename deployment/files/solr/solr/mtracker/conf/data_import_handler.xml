@@ -2,34 +2,29 @@
     <script><![CDATA[
 
         function LabelsToColumns(row) {
-
             var labelPref = 'label_';
             var labelVal = java.lang.Integer(0);
             // Extract labels from the query results.
             var labels = row.get('labels');
-            row.remove('classes');
-            if (labels == null) {
-                row.put(labelPref + labelVal, labelVal);
-                return row;    
-            }
-
-            // Convert those labels to the string of binary digits.
-            // Iteration over a string of bits has been chosen instead of 
-            // iteration over subsequent powers of two because it is more
-            // portable without hardcoded limits.
-            var bits = java.lang.Integer.toString(java.lang.Integer.parseInt(labels), 2); 
-
-            // Itarete over bits and add dynamic column when a particular bit is set.
-            var length = bits.length();
-            for (var i = bits.length() - 1; i >= 0; i--) {
-                if (bits.charAt(i) == '1') {
-                    labelVal = java.lang.Integer(java.lang.Math.pow(2, i));
-                    row.put(labelPref + labelVal, labelVal);
+            if (labels != null) {
+                // Convert those labels to the string of binary digits.
+                // Iteration over a string of bits has been chosen instead of 
+                // iteration over subsequent powers of two because it is more
+                // portable without hardcoded limits.
+                var bits = java.lang.Integer.toString(java.lang.Integer.parseInt(labels), 2); 
+                bits = java.lang.StringBuffer(bits).reverse().toString();
+                // Itarete over bits and add dynamic column when a particular bit is set.
+                for (var i = 0; i < bits.length(); i++) {
+                    if ("1".equals(java.lang.Character.toString(bits.charAt(i)))) {
+                        labelVal = java.lang.Integer(java.lang.Math.pow(2, i));
+                        row.put(labelPref + labelVal, labelVal);
+                    }
                 }
+            } else {
+                row.put(labelPref + labelVal, labelVal);
             }
-            row.remove('classes');
+            row.remove('labels');
             return row;
-        }
         
     ]]></script>
     <dataSource name="mturk_crawl"
@@ -45,7 +40,7 @@
                 holdability="CLOSE_CURSORS_AT_COMMIT"/>
     <document>
         <entity name="hitgroupcontent" dataSource="mturk_crawl" threads="2"
-                transformer="HTMLStripTransformer,script:labels2columns"
+                transformer="HTMLStripTransformer,script:LabelsToColumns"
                 query="
                     SELECT 
                         hgcnt.id AS django_id, 
