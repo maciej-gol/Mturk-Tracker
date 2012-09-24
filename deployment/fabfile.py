@@ -66,6 +66,9 @@ def setup_ssh():
     # TODO: Add copying files from remote folder (upload_ssh_keys_from_local).
     if cget('upload_ssh_keys_from_local') or True:
         files = cget('ssh_files')
+        if not files:
+            show(yellow("No SSH files to upload."))
+            return
         show(yellow("Uploading SSH configuration and keys"))
         for name in files:
             show(u"File: {0}".format(name))
