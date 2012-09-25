@@ -336,6 +336,7 @@ PIPELINE_JS = {
             'tenclouds/crud/js/models.js',
             'tenclouds/crud/js/views.js',
             'tenclouds/crud/js/widgets.js',
+            'tenclouds/crud/plugins/js/multi_order.js',
         ),
         'output_filename': 'js/crud.min.js',
     },

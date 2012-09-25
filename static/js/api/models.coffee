@@ -19,6 +19,7 @@ class crud.model.HitGroupContentSearch extends crud.model.Model
 class crud.collection.HitGroupContentSearch extends crud.collection.Collection
     model: crud.model.HitGroupContentSearch
     urlRoot: '/api/hitgroupcontentsearch/'
+    multi_field_ordering: true
 
 class crud.view.HitGroupContentSearchTableRow extends crud.view.TableRow
     template: crud.template('ejs/search/table_row.ejs')

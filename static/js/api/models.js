@@ -85,6 +85,8 @@
 
     HitGroupContentSearch.prototype.urlRoot = '/api/hitgroupcontentsearch/';
 
+    HitGroupContentSearch.prototype.multi_field_ordering = true;
+
     return HitGroupContentSearch;
 
   })(crud.collection.Collection);

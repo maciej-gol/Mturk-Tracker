@@ -12,6 +12,7 @@ $ ->
     # hiding the select/deselect buttons
     hgcTable.removeWidget '.crud-meta-actions', 'crud.view.SelectAllWidget'
     hgcTable.removeWidget '.crud-meta-actions', 'crud.view.SelectNoneWidget'
+    hgcTable.addWidget '.crud-meta-actions', 'crud.view.SorterSelect'
 
     hgcTable.render()
     hgcs.fetch()
