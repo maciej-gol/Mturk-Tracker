@@ -1,7 +1,6 @@
 from django.utils.html import strip_tags
 
 from haystack import indexes
-from haystack import site
 from mturk.main.models import HitGroupContent
 
 
@@ -35,8 +34,8 @@ class HitGroupContentIndex(indexes.SearchIndex):
     def prepare_keywords(self, obj):
         return obj.keywords.split(',')
 
+    def get_model(self):
+        return HitGroupContent
+
     def index_queryset(self):
-        return HitGroupContent.objects.all()
-
-
-site.register(HitGroupContent, HitGroupContentIndex)
+        return self.get_model().objects.all()
