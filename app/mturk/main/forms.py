@@ -114,12 +114,14 @@ class HitGroupContentSearchForm(SearchForm):
             for field in search_in:
                 key = "{}__exact".format(field)
                 sq = self._build_sq(sq, {key: query})
+            if sq is not None:
                 search_queryset = SearchQuerySet().filter(sq)
         sq = None 
         for label in labels:
             key = 'label_{}__exact'.format(label)
             sq = self._build_sq(sq, {key: label})
-        search_queryset = search_queryset.filter(sq)
+        if sq is not None:
+            search_queryset = search_queryset.filter(sq)
 
         # Get field and order for sorting.
         sort_by = cleaned_data.get("sort_by", DEFAULT_SORT_BY).rsplit("_", 1)
