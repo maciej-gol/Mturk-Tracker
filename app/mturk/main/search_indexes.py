@@ -4,7 +4,7 @@ from haystack import indexes
 from mturk.main.models import HitGroupContent
 
 
-class HitGroupContentIndex(indexes.SearchIndex):
+class HitGroupContentIndex(indexes.SearchIndex, indexes.Indexable):
 
     text = indexes.CharField(document=True, use_template=True)
     title = indexes.CharField(model_attr='title')
@@ -18,7 +18,6 @@ class HitGroupContentIndex(indexes.SearchIndex):
     qualifications = indexes.CharField(model_attr='qualifications', null=True)
     occurrence_date = indexes.DateTimeField(model_attr='occurrence_date')
     time_alloted = indexes.DecimalField(model_attr='time_alloted')
-    # TODO solr's dynamic field.
 
     # Additional fields for sorting.
     title_sort = indexes.CharField()

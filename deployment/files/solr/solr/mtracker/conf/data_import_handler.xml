@@ -1,6 +1,5 @@
 <dataConfig>
     <script><![CDATA[
-
         function LabelsToColumns(row) {
             var labelPref = 'label_';
             var labelVal = java.lang.Integer(0);
@@ -25,7 +24,7 @@
             }
             row.remove('labels');
             return row;
-        
+        }        
     ]]></script>
     <dataSource name="mturk_crawl"
                 driver="org.postgresql.Driver"

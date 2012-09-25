@@ -155,7 +155,7 @@
 
                 <select name="hits_per_page" class="per-page-selector" style="width:50px">
                     {% for option in form.hits_per_page_choices %}
-                    <option {% if option.0 == form.cleaned_data.hits_per_page %}selected="selected"{% endif %} value="{{ option.0 }}">{{option.1 }}</option>
+                    <option {% if option.0 == form.cleaned_data.hits_per_page %}selected="selected"{% endif %} value="{{ option.0 }}">{{ option.1 }}</option>
                     {% endfor %}
                 </select>
 

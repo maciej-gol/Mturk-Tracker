@@ -66,7 +66,7 @@ class SolrStatusParser(object):
 class SolrStatusCommand(BaseCommand):
 
     def handle(self, *args, **options):
-        status_url = "{}/import_db_hits?command=status".format(settings.SOLR_PATH)
+        status_url = "{}/data_import?command=status".format(settings.SOLR_PATH)
         response = urllib2.urlopen(status_url)
         solr_info = SolrStatusParser(response.read())
         logger.info("Solr status:\n{}".format(solr_info))
