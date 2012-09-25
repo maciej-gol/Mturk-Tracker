@@ -17,13 +17,10 @@ gevent
 django-extensions
 python-dateutil
 pytz
-
-# sphinx documentation as a part of the site
+# Sphinx documentation as a part of the site.
 Sphinx
--e hg+https://bitbucket.org/ssc/django-sphinxdoc#egg=django-sphinxdoc
-
-# django-sphinxdoc does not support Django Haystack 2.0.0-beta
-#https://github.com/toastdriven/django-haystack/zipball/master#egg=django-haystack.egg
-django-haystack==1.2.7
+# Django sphinxdoc autogeneration is forked and migrated to haystack 2.0.0.
+-e hg+https://bitbucket.org/borysiam/django-sphinxdoc#egg=django-sphinxdoc
+https://github.com/toastdriven/django-haystack/zipball/master#egg=django-haystack.egg
 pysolr
 unidecode
