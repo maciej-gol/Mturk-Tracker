@@ -3,6 +3,8 @@ from django.utils.html import strip_tags
 from haystack import indexes
 from mturk.main.models import HitGroupContent
 
+from mturk.classification import LABELS
+
 
 class HitGroupContentIndex(indexes.SearchIndex, indexes.Indexable):
 
@@ -14,7 +16,8 @@ class HitGroupContentIndex(indexes.SearchIndex, indexes.Indexable):
     requester_name = indexes.CharField(model_attr='requester_name')
     reward = indexes.DecimalField(model_attr='reward')
     content = indexes.CharField(model_attr='html')
-    keywords = indexes.MultiValueField(model_attr='keywords', faceted=True, null=True)
+    keywords = indexes.MultiValueField(model_attr='keywords', faceted=True, 
+                                       null=True)
     qualifications = indexes.CharField(model_attr='qualifications', null=True)
     occurrence_date = indexes.DateTimeField(model_attr='occurrence_date')
     time_alloted = indexes.DecimalField(model_attr='time_alloted')
@@ -23,6 +26,21 @@ class HitGroupContentIndex(indexes.SearchIndex, indexes.Indexable):
     title_sort = indexes.CharField()
     description_sort = indexes.CharField()
     requester_name = indexes.CharField()
+   
+    @property
+    def labels(self):
+        """Get list labels numerical representation.""" 
+        labels = []
+        for label in range(len(LABELS)):
+            try:
+                labels.append(getattr(self, 'label_{}'.format(label)))
+            except AttributeError:
+                pass
+        return labels
+
+    def get_labels_display(self):
+        """Get list of labels display names."""
+        return (LABELS[l] for l in self.labels)
 
     def prepare_description(self, obj):
         return strip_tags(obj.description)

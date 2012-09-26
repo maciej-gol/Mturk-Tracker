@@ -28,7 +28,11 @@ LABELS = {
 }
 
 
+# XXX nasty workaround
 class EmptyBatchException(Exception):
+    """There is no possibility to know if the batch of
+    documents is empty. It is useful in management command
+    that feeds classifier with batches of documents."""
     pass
 
 
