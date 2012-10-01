@@ -18,8 +18,8 @@ urlpatterns = patterns('mtracker',
     (r'^bad/$', bad),
 )
 
-urlpatterns += patterns('', 
-    url(r'^api/', include('mturk.api.urls')),
+urlpatterns += patterns('',
+    url(r'', include('mturk.api.urls')),
     url(r'^classification/', include('mturk.classification.urls')),
     url('', include('mturk.main.urls')),
     url(r'^documentation/', include('sphinxdoc.urls')),

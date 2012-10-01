@@ -3,7 +3,7 @@ from tenclouds.crud import fields
 from tenclouds.crud import resources
 from tenclouds.crud.qfilters import Group, ChoicesFilter, FullTextSearch
 from mturk.main.forms import SEARCH_IN_CHOICES
-from mturk.main.classification import Labels
+from mturk.classification.classifier import Labels
 from mturk.main.models import HitGroupContent
 
 
