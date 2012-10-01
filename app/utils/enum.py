@@ -48,6 +48,9 @@ class EnumMetaclass(type):
     >>> X.diplay_names
     {1: 'A', 2: 'B', 3: 'C', 4: 'Long name'}
 
+    >>> X.diplay_choices
+    [(1, 'A'), (2, 'B'), (3, 'C'), (4, 'Long name')]
+
     >>> X.slugs
     {1: 'a', 2: 'b', 3: 'c', 4: 'long-name'}
 
@@ -61,18 +64,14 @@ class EnumMetaclass(type):
 
     def __new__(cls, name, bases, d):
         names = dict()
-        pairs = []
         values = []
         trans_names = dict()
         for x in d:
             if x.isupper() and (isinstance(d[x], int) or isinstance(d[x], long)):
                 names[d[x]] = x
-                pairs.append((d[x], x))
                 values.append(d[x])
                 trans_names[d[x]] = name + u"." + x
-        pairs.sort()
         d['names'] = names
-        d['choices'] = pairs
         d['values'] = values
         d['trans_names'] = trans_names
 
@@ -82,6 +81,8 @@ class EnumMetaclass(type):
         # update with existing ones
         display_names.update(d.get('display_names', {}))
         d['display_names'] = display_names
+        d['display_choices'] = map(lambda x: (x, d['display_names'][x]),
+            sorted(d['values']))
         d['slugs'] = dict([(n[0], slugify(n[1]))
             for n in d['display_names'].items()])
         d['value_for_slug'] = dict([(n[1], n[0]) for n in d['slugs'].items()])
