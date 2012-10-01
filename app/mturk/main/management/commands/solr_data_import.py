@@ -45,7 +45,7 @@ class SolrDataImportCommand(BaseCommand):
 
         clean_index = str(options["clean_index"]).lower()
         command = str(options["import_type"]).lower()
-        import_url = "{}/import_db_hits?command={}&clean={}"\
+        import_url = "{}/data_import?command={}&clean={}"\
                      .format(settings.SOLR_PATH, command, clean_index)
         clean_queue = options["clean_queue"]
         if clean_queue:

@@ -109,9 +109,9 @@
         </httpCaching>
     </requestDispatcher>
 
-    <requestHandler name="/import_db_hits" class="org.apache.solr.handler.dataimport.DataImportHandler">
+    <requestHandler name="/data_import" class="org.apache.solr.handler.dataimport.DataImportHandler">
         <lst name="defaults">
-            <str name="config">import_db_hits.xml</str>
+            <str name="config">data_import_handler.xml</str>
         </lst>
     </requestHandler>
 

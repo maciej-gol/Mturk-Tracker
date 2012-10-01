@@ -123,6 +123,7 @@ MTRACKER_APPS = (
     'mturk.toprequesters',
     'mturk.arrivals',
     'mturk.updaters',
+    'mturk.classification',
 )
 
 INSTALLED_APPS = tuple(list(FOREIGN_APPS) + list(MTRACKER_APPS))
@@ -398,18 +399,19 @@ PREDICTION_API_CLIENT_SECRET = "cWPdUE0BCcQsbZZ_xvLO9dMI"
 
 PREDICTION_API_DATA_SET = "mturk-tracker/spam-training-data-20110506.txt"
 
-
 MTURK_AUTH_EMAIL = None
 MTURK_AUTH_PASSWORD = None
 
 SOLR_MAIN_PATH = "http://127.0.0.1:8983/solr"
-SOLR_CORE_NAME = "en"
+SOLR_CORE_NAME = "mtracker"
 SOLR_PATH = "{}/{}".format(SOLR_MAIN_PATH, SOLR_CORE_NAME)
 
-HAYSTACK_SITECONF = "mtracker.search_sites"
-HAYSTACK_SEARCH_ENGINE = 'solr'
-HAYSTACK_SOLR_URL = SOLR_PATH
-
+HAYSTACK_CONNECTIONS = {
+    'default': {
+        'ENGINE': 'haystack.backends.solr_backend.SolrEngine',
+        'URL': SOLR_PATH,
+    },
+}
 
 # Fine tuning of crawls,
 # Settings affect the number of retries and lenght of waits after failure when

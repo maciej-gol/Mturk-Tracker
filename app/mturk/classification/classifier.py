@@ -29,14 +29,15 @@ class Labels:
         NOLABEL: 'No Label'
     }
 
-NOLABEL = 0
-AUDIO = 1
-VIDEO = 2
-GRAPHICS = 4
-TEXT = 8
-INTERNET = 16
-COMPUTER = 32
-SURVEY = 64
+
+NOLABEL = 1
+AUDIO = 2
+VIDEO = 4
+GRAPHICS = 8
+TEXT = 16
+INTERNET = 32
+COMPUTER = 64
+SURVEY = 128
 
 LABELS = {
     NOLABEL: "no label",
@@ -49,8 +50,14 @@ LABELS = {
     SURVEY: "survey",
 }
 
+
+# XXX nasty workaround
 class EmptyBatchException(Exception):
+    """There is no possibility to know if the batch of
+    documents is empty. It is useful in management command
+    that feeds classifier with batches of documents."""
     pass
+
 
 class DocumentClassifier(object):
 
