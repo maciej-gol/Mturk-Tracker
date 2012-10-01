@@ -1,7 +1,9 @@
 from django.core.urlresolvers import reverse
 from tenclouds.crud import fields
 from tenclouds.crud import resources
-
+from tenclouds.crud.qfilters import Group, ChoicesFilter, FullTextSearch
+from mturk.main.forms import SEARCH_IN_CHOICES
+from mturk.main.classification import Labels
 from mturk.main.models import HitGroupContent
 
 
@@ -67,6 +69,13 @@ class HitGroupContentSearchResource(HitGroupContentResource):
             'time_allotted', 'keywords', 'reward', 'description',
             'group_url', 'requester_url',
         ]
+        filters = (
+            Group('Search in', ChoicesFilter(SEARCH_IN_CHOICES, 'search'),
+                join='or'),
+            Group('Labels', ChoicesFilter(
+                Labels.display_choices, 'labels'), join='or'),
+            Group('Keywords', FullTextSearch('title', 'title__icontains'))
+        )
 
     def dehydrate_group_url(self, bundle):
         return reverse('hit_group_details',

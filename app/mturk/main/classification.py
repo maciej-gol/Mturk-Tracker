@@ -5,6 +5,29 @@ import string
 
 from math import log
 from unidecode import unidecode
+from utils.enum import EnumMetaclass
+
+
+class Labels:
+    # I'm adding the enum to have easy access to display_names tuples.
+    # TODO: refactor - replace the references to definitions below with this
+    # enum.
+
+    __metaclass__ = EnumMetaclass
+
+    # TODO: rename this to NO_LABEL and remove explicit display_names below
+    NOLABEL = 0
+    AUDIO = 1
+    VIDEO = 2
+    GRAPHICS = 4
+    TEXT = 8
+    INTERNET = 16
+    COMPUTER = 32
+    SURVEY = 64
+
+    display_names = {
+        NOLABEL: 'No Label'
+    }
 
 NOLABEL = 0
 AUDIO = 1
