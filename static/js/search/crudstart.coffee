@@ -25,9 +25,22 @@ $ ->
         collection: hgcs
         filterGroups: meta.filterGroups
         filterGroupClass: mtracker.search.view.HorizontalFilterGroup
-
     $(".filter-bar").append fV.render().el
 
-    # activate chosen plugin
-    $(".chzn-select").chosen()
-    $(".filter-bar").append()
+    # activate chosen plugin and bind change event
+    $(".chzn-select").chosen().change (e) ->
+        vals = $(e.target).val()
+        # get get related to this filter and remove all filters
+        if vals
+            key = vals[0].split(':', 1)[0]
+        else
+            # fallback to any option if none is selected
+            key = $(e.target).children('option')[0].value
+        # remove
+        hgcs.removeFilterByKey(key.split(':', 1)[0])
+
+        # add active values
+        _.each vals, (filter) -> hgcs.addFilter(filter)
+
+        hgcs.fetch()
+

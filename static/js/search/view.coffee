@@ -31,7 +31,7 @@ class mtracker.search.view.MultiSelectFilterItem extends crud.view.ChoiceFilterI
 
 class mtracker.search.view.MultiSelectFilterGroup extends crud.view.FilterGroup
     appendTo: 'select'
-    attributes: { class: 'span row'}
+    attributes: { class: 'span row' }
     template: crud.template('ejs/search/multi_select_group.ejs')
 
     filterWidgets: _.extend(crud.view.standardFilterWidgets, {
@@ -40,3 +40,4 @@ class mtracker.search.view.MultiSelectFilterGroup extends crud.view.FilterGroup
 
 class mtracker.search.view.FilterList extends crud.view.FilterList
     attributes: { class: 'row fluid' }
+

@@ -24,8 +24,20 @@
         filterGroupClass: mtracker.search.view.HorizontalFilterGroup
       });
       $(".filter-bar").append(fV.render().el);
-      $(".chzn-select").chosen();
-      return $(".filter-bar").append();
+      return $(".chzn-select").chosen().change(function(e) {
+        var key, vals;
+        vals = $(e.target).val();
+        if (vals) {
+          key = vals[0].split(':', 1)[0];
+        } else {
+          key = $(e.target).children('option')[0].value;
+        }
+        hgcs.removeFilterByKey(key.split(':', 1)[0]);
+        _.each(vals, function(filter) {
+          return hgcs.addFilter(filter);
+        });
+        return hgcs.fetch();
+      });
     });
   });
 
