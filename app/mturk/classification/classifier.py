@@ -16,18 +16,14 @@ class Labels:
     __metaclass__ = EnumMetaclass
 
     # TODO: rename this to NO_LABEL and remove explicit display_names below
-    NOLABEL = 0
-    AUDIO = 1
-    VIDEO = 2
-    GRAPHICS = 4
-    TEXT = 8
-    INTERNET = 16
-    COMPUTER = 32
-    SURVEY = 64
-
-    display_names = {
-        NOLABEL: 'No Label'
-    }
+    NO_LABEL = 1
+    AUDIO = 2
+    VIDEO = 4
+    GRAPHICS = 8
+    TEXT = 16
+    INTERNET = 32
+    COMPUTER = 64
+    SURVEY = 128
 
 
 NOLABEL = 1
