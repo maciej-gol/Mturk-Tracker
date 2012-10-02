@@ -325,32 +325,7 @@ def hit_group_details(request, hit_group_id):
 
 @never_cache
 def search(request):
-    search_view = HitGroupContentSearchView(
-            form_class=HitGroupContentSearchForm,
-            template="main/search.html")
-    return search_view(request)
-
-
-class HitGroupContentSearchView(SearchView):
-
-    def build_page(self):
-        form = self.form
-        if form is not None:
-            self.results_per_page = form.hits_per_page_or_default()
-        return super(HitGroupContentSearchView, self).build_page()
-
-    def extra_context(self):
-        context = super(HitGroupContentSearchView, self).extra_context()
-        submit_url = ""
-        form = self.form
-        if form is not None:
-            submit_url = form.submit_url()
-        results = self.results
-        if results is None:
-            results = []
-        context.update({"submit_url": submit_url})
-        context.update({"total_count": results.count()})
-        return context
+    return direct_to_template(request, 'main/search.html')
 
 
 class GeneralTabEnum:
