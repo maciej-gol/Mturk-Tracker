@@ -38,6 +38,8 @@ RUN_DATA_PATH = "%(service_dir)s"
 
 KEEP_LOGGED_DURATION = 31 * 24 * 60 * 60
 
+CLASSIFIER_PATH = "%(project_dir)s/misc/classifier.json"
+
 ################## NO SETTINGS UNDER THIS LINE |#################
 # Import local (custom for dev machine) settings file if exists.
 # Instead of importing this module in try/except block, import this file only
