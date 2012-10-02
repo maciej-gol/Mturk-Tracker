@@ -16,7 +16,7 @@ class HitGroupContentIndex(indexes.SearchIndex, indexes.Indexable):
     requester_name = indexes.CharField(model_attr='requester_name')
     reward = indexes.DecimalField(model_attr='reward')
     content = indexes.CharField(model_attr='html')
-    keywords = indexes.MultiValueField(model_attr='keywords', faceted=True, 
+    keywords = indexes.MultiValueField(model_attr='keywords', faceted=True,
                                        null=True)
     qualifications = indexes.CharField(model_attr='qualifications', null=True)
     occurrence_date = indexes.DateTimeField(model_attr='occurrence_date')
@@ -26,10 +26,10 @@ class HitGroupContentIndex(indexes.SearchIndex, indexes.Indexable):
     title_sort = indexes.CharField()
     description_sort = indexes.CharField()
     requester_name = indexes.CharField()
-   
+
     @property
     def labels(self):
-        """Get list labels numerical representation.""" 
+        """Get list labels numerical representation."""
         labels = []
         for label in range(len(LABELS)):
             try:
