@@ -1,5 +1,6 @@
 from django.core.urlresolvers import reverse
 from haystack.query import SearchQuerySet
+from haystack.models import SearchResult
 
 from tenclouds.crud import fields
 from tenclouds.crud import resources
@@ -45,9 +46,32 @@ class HitGroupContentResource(resources.ModelResource):
         return round(float(bundle.obj.reward), 2)
 
 
-class CRUDSearchQuerySet(SearchQuerySet):
+class HitGroupContentSearchResult(SearchResult):
+
+    @property
+    def labels(self):
+        """Get list labels numerical representation."""
+        labels = []
+        for label in range(len(Labels.values)):
+            try:
+                label = getattr(self, 'label_{}'.format(label))
+                label is not None and labels.append(label)
+            except AttributeError:
+                pass
+        return labels
+
+    def get_labels_display(self):
+        """Get list of labels display names."""
+        return [Labels.display_names[l] for l in self.labels]
+
+
+class HitGroupContentSearchQuerySet(SearchQuerySet):
 
     model = HitGroupContent
+
+    def __init__(self, *args, **kwargs):
+        super(HitGroupContentSearchQuerySet, self).__init__(*args, **kwargs)
+        self.query.set_result_class(HitGroupContentSearchResult)
 
 
 class HitGroupContentSearchResource(resources.ModelResource):
@@ -70,14 +94,14 @@ class HitGroupContentSearchResource(resources.ModelResource):
     qualifications = fields.CharField(attribute='qualifications')
     date_posted = fields.DateTimeField(attribute='occurrence_date', title="Date posted")
     time_allotted = fields.DecimalField(attribute='time_alloted', title="Time allotted")
-    labels = fields.IntegerField(attribute="labels", null=True)
+    labels = fields.ListField(attribute="labels", null=True)
 
     # url fields
     group_url = fields.CharField()
     requester_url = fields.CharField()
 
     class Meta:
-        queryset = CRUDSearchQuerySet()
+        queryset = HitGroupContentSearchQuerySet()
         list_allowed_methods = ['get', ]
         per_page = [10, 20, 50]
         fields = [
@@ -93,7 +117,7 @@ class HitGroupContentSearchResource(resources.ModelResource):
         default_ordering = ['-date_posted']
         filters = (
             Group('Labels', MultiFieldChoiceFilter(
-                Labels.display_choices, 'labels', 'label_{}__iexact', choice=1),
+                Labels.display_choices, 'labels', 'label_{}__exact'),
                 join='or'
             ),
             Group('Search in', ChoicesFilter(SEARCH_IN_CHOICES, 'search'),
@@ -115,3 +139,6 @@ class HitGroupContentSearchResource(resources.ModelResource):
 
     def dehydrate_reward(self, bundle):
         return round(float(bundle.obj.reward), 2)
+
+    def dehydrate_labels(self, bundle):
+        return bundle.obj.get_labels_display()

@@ -11,7 +11,6 @@ class MultiFieldChoiceFilter(ChoicesFilter):
     choices -- (key, display_name) pairs as in ChoicesFilter
     filter_attr -- name of the filter on the SomeResource
     field_template -- template to format with choice key used for querying
-    choice -- value to get
 
     Why do this? Example:
 
@@ -32,7 +31,7 @@ class MultiFieldChoiceFilter(ChoicesFilter):
                 Group('Labels',
                     MultiFieldChoiceFilter(
                         Labels.display_choices,
-                        'labels', 'label_{}__iexact', choice=1
+                        'labels', 'label_{}__exact'
                     ),
                     join='or'
                 ),
@@ -40,14 +39,13 @@ class MultiFieldChoiceFilter(ChoicesFilter):
 
     """
 
-    def __init__(self, choices, filter_attr, field_template, choice):
+    def __init__(self, choices, filter_attr, field_template):
         self.choices = choices
         self.filter_attr = filter_attr
-        self.choice = choice
         self.field_template = field_template
 
     def filter_fields(self, request):
-        for query_value, name in self.choices:
-            query = Q(**{self.field_template.format(query_value): self.choice})
-            field = {self.filter_attr: query_value}
-            yield Filter(name, query=query, **field)
+        for choice, choice_name in self.choices:
+            query = Q(**{self.field_template.format(choice): unicode(choice)})
+            field = {self.filter_attr: choice}
+            yield Filter(choice_name, query=query, **field)

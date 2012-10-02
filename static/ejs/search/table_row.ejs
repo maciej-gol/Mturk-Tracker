@@ -24,17 +24,35 @@
             <tr>
                 <td class="search-results-col2" colspan="2" style="vertical-align: top;">
                     <span style="color: #AAA;">keywords:</span>
-                    <span style="font-weight: bold;">
+                    <% if (model.get('keywords') && model.get('keywords').length) { %>
+                        <span style="font-weight: bold;">
                         <% for (var i=0; i < model.get('keywords').length; ++i) { %>
                             <%= model.get('keywords')[i] %><% if (i < model.get('keywords').length - 1) { %>,<% } %>
                         <% } %>
-                    </span>
+                        </span>
+                    <% } else { %>
+                        <span style="color: #AAA;">none</span>
+                    <% } %>
                 </td>
-                <td>
+                <td rowspan="2">
                     <span style="color: #AAA;">reward:</span>
                     <span style="font-weight: bold;">
                         <%= model.get('reward') %>
                     </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="search-results-col2" colspan="2" style="vertical-align: top;">
+                    <span style="color: #AAA;">labels:</span>
+                    <% if (model.get('labels') && model.get('labels').length) { %>
+                        <span style="font-weight: bold;">
+                        <% for (var i=0; i < model.get('labels').length; ++i) { %>
+                            <%= model.get('labels')[i] %><% if (i < model.get('labels').length - 1) { %>,<% } %>
+                        <% } %>
+                        </span>
+                    <% } else { %>
+                        <span style="color: #AAA;">none</span>
+                    <% } %>
                 </td>
             </tr>
             <tr>

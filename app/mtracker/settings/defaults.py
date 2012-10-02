@@ -117,6 +117,7 @@ FOREIGN_APPS = (
 
 MTRACKER_APPS = (
     'mturk',
+    'mturk.api',
     'mturk.main',
     'mturk.importer',
     'mturk.spam',
