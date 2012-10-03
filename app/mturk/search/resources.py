@@ -39,6 +39,7 @@ class HitGroupContentSearchResource(resources.ModelResource):
 
     class Meta:
         queryset = HitGroupContentSearchQuerySet()
+        allowed_methods = ['get', ]
         list_allowed_methods = ['get', ]
         per_page = [10, 20, 50]
         fields = [
@@ -48,7 +49,7 @@ class HitGroupContentSearchResource(resources.ModelResource):
             'group_url', 'requester_url', 'labels'
         ]
         ordering = [
-            'id', 'date_posted', 'title', 'requester_name', 'reward',
+            'date_posted', 'title', 'requester_name', 'reward',
             'time_allotted',
         ]
         default_ordering = ['-date_posted']
