@@ -1,26 +1,35 @@
+# Django
 Django>=1.4
-python-memcached
-South
+django-extensions
 django-pipeline>=1.2
-ipdb
-ipython
-yolk
+South
 -e git+git://github.com/earle/django-bootstrap.git#egg=bootstrap
-google-api-python-client==1.0b9
-#-e hg+https://bitbucket.org/ingenieroariel/django-wapi#egg=wapi
--e hg+https://bitbucket.org/cogtree/python-solr#egg=pythonsolr
-#-e git+git@github.com:10clouds/common.git#egg=tenclouds
-BeautifulSoup
-boto>=2.4.1
+-e git+https://github.com/10clouds/dj-crud.git#egg=django-crud
+
+# Services
+python-memcached
 psycopg2
 gevent
-django-extensions
+BeautifulSoup
+boto>=2.4.1
+google-api-python-client==1.0b9
+
+# Utils
+unidecode
 python-dateutil
 pytz
+
+# Search
+-e hg+https://bitbucket.org/cogtree/python-solr#egg=pythonsolr
+https://github.com/toastdriven/django-haystack/zipball/master#egg=django-haystack.egg
+pysolr
+
 # Sphinx documentation as a part of the site.
 Sphinx
 # Django sphinxdoc autogeneration is forked and migrated to haystack 2.0.0.
 -e hg+https://bitbucket.org/borysiam/django-sphinxdoc#egg=django-sphinxdoc
-https://github.com/toastdriven/django-haystack/zipball/master#egg=django-haystack.egg
-pysolr
-unidecode
+
+# convenience
+ipdb
+ipython
+yolk
