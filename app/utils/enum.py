@@ -6,11 +6,14 @@ from django.template.defaultfilters import slugify
 class EnumMetaclass(type):
     """Metaclass for enumerations.
 
-    You must define the values using UPPERCASE names as long or int.
+    You must define the values having:
+    * UPPERCASE names,
+    * type in EnumMetaclass.ENUM_VALUE_TYPES (long, int or basestring).
 
     Generates:
     cls.names -- reverse dictionary mapping value to name
     cls.choices -- sorted list of (id, name) pairs suitable for model choices
+    cls.display_choices -- as above, but with display_name instead of name
     cls.values -- list of values defined by the enumeration
     cls.trans_name -- reverse dictionary mapping value to string ready for
     translation
@@ -61,13 +64,29 @@ class EnumMetaclass(type):
 
     ENUM_FIELDS = ['slugs', 'names', 'display_names', 'trans_names', 'urls']
     EXTRA_FIELDS = {}
+    ENUM_VALUE_TYPES = [int, long, basestring]
+
+    @classmethod
+    def is_enum_variable(cls, name, val):
+        """Decides if the given value should be considered an enum variable.
+
+        By default this means the name is UPPERCASE_NAME and the type of the
+        variable is one of the ENUM_VALUE_TYPES.
+
+        """
+        if not name.isupper():
+            return False
+        for vtype in cls.ENUM_VALUE_TYPES:
+            if isinstance(val, vtype):
+                return True
+        return False
 
     def __new__(cls, name, bases, d):
         names = dict()
         values = []
         trans_names = dict()
         for x in d:
-            if x.isupper() and (isinstance(d[x], int) or isinstance(d[x], long)):
+            if cls.is_enum_variable(x, d[x]):
                 names[d[x]] = x
                 values.append(d[x])
                 trans_names[d[x]] = name + u"." + x
