@@ -1,6 +1,6 @@
 from django.db.models import Q
+
 from tenclouds.crud.qfilters import ChoicesFilter, Filter
-# from django.models import Q
 
 
 class MultiFieldChoiceFilter(ChoicesFilter):

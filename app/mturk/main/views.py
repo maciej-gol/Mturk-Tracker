@@ -10,12 +10,10 @@ from django.contrib import messages
 from django.shortcuts import redirect
 from django.views.generic.simple import direct_to_template
 from django.views.decorators.cache import cache_page, never_cache
-from haystack.views import SearchView
 
 import admin
 import plot
 
-from mturk.main.forms import HitGroupContentSearchForm
 from mturk.main.models import DayStats, HitGroupContent, HitGroupClass, \
                               RequesterProfile
 from mturk.main.templatetags.graph import text_row_formater
@@ -321,11 +319,6 @@ def hit_group_details(request, hit_group_id):
     params['data'] = data
     params['hit_group'] = hit_group
     return direct_to_template(request, 'main/hit_group_details.html', params)
-
-
-@never_cache
-def search(request):
-    return direct_to_template(request, 'main/search.html')
 
 
 class GeneralTabEnum:
