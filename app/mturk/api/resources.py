@@ -6,25 +6,30 @@ from mturk.main.models import HitGroupContent, HitGroupStatus
 class HitGroupContentResource(resources.ModelResource):
     """Main api resource for accessing HitGroupContent."""
 
-    id = fields.IntegerField(attribute="id")
-    title = fields.CharField(attribute='title')
-    description = fields.CharField(attribute='description')
-    group_id = fields.CharField(attribute='group_id')
-    requester_id = fields.CharField(attribute='requester_id')
-    requester_name = fields.CharField(attribute='requester_name')
-    reward = fields.DecimalField(attribute='reward')
-    content = fields.CharField(attribute='html')
-    keywords = fields.CharField(attribute='keywords')
-    qualifications = fields.CharField(attribute='qualifications')
+    has_hashed_group_id = fields.BooleanField(attribute='group_id_hashed')
     date_posted = fields.DateTimeField(attribute='occurrence_date')
-    time_allotted = fields.DecimalField(attribute='time_alloted')
-
-    # TODO: add labels handling
-    # labels = fields.IntegerField(attribute="classes", null=True)
 
     class Meta:
-        queryset = HitGroupContent.objects.all()
+        queryset = HitGroupContent.objects.filter(is_public=True)
         allowed_methods = ['get', ]
+        excludes = [
+            'first_crawl', 'is_public', 'is_spam',
+        ]
+        filtering = {
+            'id': resources.ALL,
+            'group_id': resources.ALL,
+            'has_hashed_group_id': resources.ALL,
+            'requester_id': resources.ALL,
+            'requester_name': resources.ALL,
+            'reward': resources.ALL,
+            'title': resources.ALL,
+            'date_posted': resources.ALL,
+            'time_alloted': resources.ALL,
+        }
+        ordering = [
+            'id', 'title', 'group_id', 'requester_id', 'requester_name',
+            'reward', 'date_posted', 'time_alloted', 'has_hashed_group_id'
+        ]
 
     def dehydrate_keywords(self, bundle):
         return list(set(bundle.obj.keywords.split(", ")))
@@ -40,7 +45,7 @@ class HitGroupStatusResource(resources.ModelResource):
     hit_group_content_id = fields.IntegerField(attribute='hit_group_content__id')
 
     class Meta:
-        queryset = HitGroupStatus.objects.all()
+        queryset = HitGroupStatus.objects.filter(hit_group_content__is_public=True)
         allowed_methods = ['get', ]
         fields = ['id', 'group_id', 'hits_available', 'hit_expiration_date']
         filtering = {
