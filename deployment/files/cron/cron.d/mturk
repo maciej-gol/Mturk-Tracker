@@ -4,14 +4,11 @@ SCRIPT_ROOT="%(script_dir)s"
 SCRIPT_NAME="manage_py_exec_silent"
 
 */6     *       *       *       *       root    cd $PROJECT_ROOT; /$SCRIPT_ROOT/$SCRIPT_NAME crawl --workers=4;
-30      *       *       *       *       root    cd $PROJECT_ROOT; /$SCRIPT_ROOT/$SCRIPT_NAME db_remove_bad_crawl_related --fix-interrupted;
-5       *       *       *       *       root    cd $PROJECT_ROOT; /$SCRIPT_ROOT/$SCRIPT_NAME db_refresh_mviews;
-15      *       *       *       *       root    cd $PROJECT_ROOT; /$SCRIPT_ROOT/$SCRIPT_NAME db_update_agregates; /$SCRIPT_ROOT/$SCRIPT_NAME classify_spam --limit=40;
+0      *       *       *       *       root    cd $PROJECT_ROOT; /$SCRIPT_ROOT/$SCRIPT_NAME db_remove_bad_crawl_related --fix-interrupted;
+10      *       *       *       *       root    cd $PROJECT_ROOT; /$SCRIPT_ROOT/$SCRIPT_NAME db_refresh_mviews;
+20      *       *       *       *       root    cd $PROJECT_ROOT; /$SCRIPT_ROOT/$SCRIPT_NAME db_update_agregates; /$SCRIPT_ROOT/$SCRIPT_NAME classify_spam --limit=40;
 30      *       *       *       *       root    cd $PROJECT_ROOT; /$SCRIPT_ROOT/$SCRIPT_NAME db_arrivals --hours=2;
 40      *       *       *       *       root    cd $PROJECT_ROOT; /$SCRIPT_ROOT/$SCRIPT_NAME db_update_daily_stats;
-
-#15      2       *       *       *       root    cd $PROJECT_ROOT; /$SCRIPT_ROOT/$SCRIPT_NAME solr_sync --clean-queue
-#45      *       *       *       *       root    cd $PROJECT_ROOT; /$SCRIPT_ROOT/$SCRIPT_NAME solr_sync
 
 15      2       *       *       *       root    cd $PROJECT_ROOT; /$SCRIPT_ROOT/$SCRIPT_NAME solr_data_import --import-type="full-import" --clean-index --clean-queue
 45      *       *       *       *       root    cd $PROJECT_ROOT; /$SCRIPT_ROOT/$SCRIPT_NAME solr_data_import --import-type="delta-import" --clean-index --clean-queue
@@ -19,4 +16,4 @@ SCRIPT_NAME="manage_py_exec_silent"
 
 # cache_toprequesters does cache writes that have to be readable by the site - make sure the same username is used
 0       *       *       *       *       %(user)s cd $PROJECT_ROOT; /$SCRIPT_ROOT/$SCRIPT_NAME cache_toprequesters --force --report-type=0 --pidfile='cache_topreq_0' --days=5
-30      *       *       *       *       %(user)s cd $PROJECT_ROOT; /$SCRIPT_ROOT/$SCRIPT_NAME cache_toprequesters --force --report-type=1 --pidfile='cache_topreq_1' --days=5
+10      *       *       *       *       %(user)s cd $PROJECT_ROOT; /$SCRIPT_ROOT/$SCRIPT_NAME cache_toprequesters --force --report-type=1 --pidfile='cache_topreq_1' --days=5
