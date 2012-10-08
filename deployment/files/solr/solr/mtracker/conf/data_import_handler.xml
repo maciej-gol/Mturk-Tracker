@@ -33,8 +33,6 @@
                 password="%(solr_db_password)s"
                 readOnly="true"
                 autoCommit="false"
-                maxRows="1000"
-                batchSize="100"
                 transactionIsolation="TRANSACTION_READ_COMMITTED"
                 holdability="CLOSE_CURSORS_AT_COMMIT"/>
     <document>
