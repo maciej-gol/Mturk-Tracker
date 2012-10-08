@@ -16,8 +16,8 @@
       hgcTable.addWidget('.crud-meta-actions', 'crud.view.SorterSelect');
       hgcTable.render();
       hgcs.fetch();
-      meta.filterGroups[0].filterGroupClass = mtracker.search.view.MultiSelectFilterGroup;
       meta.filterGroups[1].filterGroupClass = mtracker.search.view.MultiSelectFilterGroup;
+      meta.filterGroups[2].filterGroupClass = mtracker.search.view.MultiSelectFilterGroup;
       fV = new mtracker.search.view.FilterList({
         collection: hgcs,
         filterGroups: meta.filterGroups,

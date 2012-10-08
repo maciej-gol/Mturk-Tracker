@@ -6,7 +6,8 @@ from tenclouds.crud.qfilters import Group, ChoicesFilter, FullTextSearch
 
 from mturk.classification.classifier import Labels
 
-from crud_extensions import MultiFieldChoiceFilter
+from crud_extensions import (MultiFieldChoiceFilter, InactiveFilterGroup,
+    FulltextSearchGroup)
 from search_indexes import HitGroupContentSearchQuerySet
 from enums import SearchInEnum
 
@@ -53,16 +54,20 @@ class HitGroupContentSearchResource(resources.ModelResource):
             'time_allotted',
         ]
         default_ordering = ['-date_posted']
+
+        # when editing the filters below, make sure to check if the widget
+        # assigment in js/search/crudstart.coffee shouldn't be changed too
         filters = (
+            FulltextSearchGroup('Search', FullTextSearch('search'),
+                search_in_field='search_in',
+                search_in_values=SearchInEnum.values),
+            InactiveFilterGroup('Search in',
+                ChoicesFilter(SearchInEnum.display_choices, 'search_in'),
+            ),
             Group('Labels', MultiFieldChoiceFilter(
                 Labels.display_choices, 'labels', 'label_{}__exact'),
                 join='or'
             ),
-            Group('Search in',
-                ChoicesFilter(SearchInEnum.display_choices, 'search'),
-                join='or'
-            ),
-            Group('Keywords', FullTextSearch('title', 'title__icontains')),
         )
 
     def dehydrate_keywords(self, bundle):

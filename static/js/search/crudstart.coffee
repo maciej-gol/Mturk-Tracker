@@ -18,8 +18,8 @@ $ ->
     hgcs.fetch()
 
     # override the default widgets
-    meta.filterGroups[0].filterGroupClass = mtracker.search.view.MultiSelectFilterGroup
     meta.filterGroups[1].filterGroupClass = mtracker.search.view.MultiSelectFilterGroup
+    meta.filterGroups[2].filterGroupClass = mtracker.search.view.MultiSelectFilterGroup
 
     fV = new mtracker.search.view.FilterList
         collection: hgcs
