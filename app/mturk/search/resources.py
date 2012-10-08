@@ -18,20 +18,20 @@ class HitGroupContentSearchResource(SearchResource):
 
     """
     # pk stores the database id
-    id = fields.IntegerField(attribute="pk")
+    id = fields.IntegerField(attribute="pk", null=True)
     # id stores the document id of a file in the index
-    index_id = fields.CharField(attribute="id")
-    title = fields.CharField(attribute='title')
-    description = fields.CharField(attribute='description')
-    group_id = fields.CharField(attribute='group_id', title="Group ID")
-    requester_id = fields.CharField(attribute='requester_id', title="Requester ID")
-    requester_name = fields.CharField(attribute='requester_name', title="Requester name")
-    reward = fields.DecimalField(attribute='reward')
+    index_id = fields.CharField(attribute="id", null=True)
+    title = fields.CharField(attribute='title', null=True)
+    description = fields.CharField(attribute='description', null=True)
+    group_id = fields.CharField(attribute='group_id', title="Group ID", null=True)
+    requester_id = fields.CharField(attribute='requester_id', title="Requester ID", null=True)
+    requester_name = fields.CharField(attribute='requester_name', title="Requester name", null=True)
+    reward = fields.DecimalField(attribute='reward', null=True)
     content = fields.CharField(attribute='html', null=True)
-    keywords = fields.CharField(attribute='keywords')
-    qualifications = fields.CharField(attribute='qualifications')
-    date_posted = fields.DateTimeField(attribute='occurrence_date', title="Date posted")
-    time_allotted = fields.DecimalField(attribute='time_alloted', title="Time allotted")
+    keywords = fields.CharField(attribute='keywords', null=True)
+    qualifications = fields.CharField(attribute='qualifications', null=True)
+    date_posted = fields.DateTimeField(attribute='occurrence_date', title="Date posted", null=True)
+    time_allotted = fields.DecimalField(attribute='time_alloted', title="Time allotted", null=True)
     labels = fields.ListField(attribute="labels", null=True)
 
     # url fields
