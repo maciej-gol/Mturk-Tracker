@@ -53,7 +53,7 @@ class HitGroupContentIndex(indexes.SearchIndex, indexes.Indexable):
     # Additional fields for sorting.
     title_sort = indexes.CharField()
     description_sort = indexes.CharField()
-    requester_name = indexes.CharField()
+    requester_name_sort = indexes.CharField()
 
     def prepare_description(self, obj):
         return strip_tags(obj.description)

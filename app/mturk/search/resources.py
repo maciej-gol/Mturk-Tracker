@@ -1,18 +1,18 @@
 from django.core.urlresolvers import reverse
 
 from tenclouds.crud import fields
-from tenclouds.crud import resources
+# from tenclouds.crud import resources
 from tenclouds.crud.qfilters import Group, ChoicesFilter, FullTextSearch
 
 from mturk.classification.classifier import Labels
 
 from crud_extensions import (MultiFieldChoiceFilter, InactiveFilterGroup,
-    FulltextSearchGroup)
+    FulltextSearchGroup, SearchResource)
 from search_indexes import HitGroupContentSearchQuerySet
 from enums import SearchInEnum
 
 
-class HitGroupContentSearchResource(resources.ModelResource):
+class HitGroupContentSearchResource(SearchResource):
     """Api resource for accessing HitGroupContent results stored in the search
     index.
 
@@ -38,10 +38,14 @@ class HitGroupContentSearchResource(resources.ModelResource):
     group_url = fields.CharField()
     requester_url = fields.CharField()
 
+    # dedicated fields for haystack to search on
+    title_sort = fields.CharField(attribute='title_sort', null=True)
+    description_sort = fields.CharField(attribute='description_sort', null=True)
+    requester_name_sort = fields.CharField(attribute='requester_name_sort', null=True)
+
     class Meta:
         queryset = HitGroupContentSearchQuerySet()
         allowed_methods = ['get', ]
-        list_allowed_methods = ['get', ]
         per_page = [10, 20, 50]
         fields = [
             'id', 'index_id', 'group_id', 'date_posted',
@@ -51,20 +55,26 @@ class HitGroupContentSearchResource(resources.ModelResource):
         ]
         ordering = [
             'date_posted', 'title', 'requester_name', 'reward',
-            'time_allotted',
+            'time_allotted', 'description',
+            'title_sort', 'description_sort', 'requester_name_sort',
         ]
+        search_ordering_fields_map = {
+            'title': 'title_sort',
+            'requester_name': 'requester_name_sort',
+            'description': 'description_sort',
+        }
         default_ordering = ['-date_posted']
 
         # when editing the filters below, make sure to check if the widget
-        # assigment in js/search/crudstart.coffee shouldn't be changed too
+        # assignment in js/search/crudstart.coffee shouldn't be changed too
         filters = (
             FulltextSearchGroup('Search', FullTextSearch('search'),
                 search_in_field='search_in',
                 search_in_values=SearchInEnum.values),
-            InactiveFilterGroup('Search in',
+            InactiveFilterGroup('Search in fields',
                 ChoicesFilter(SearchInEnum.display_choices, 'search_in'),
             ),
-            Group('Labels', MultiFieldChoiceFilter(
+            Group('Hit categories', MultiFieldChoiceFilter(
                 Labels.display_choices, 'labels', 'label_{}__exact'),
                 join='or'
             ),

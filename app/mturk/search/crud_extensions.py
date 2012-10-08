@@ -1,6 +1,99 @@
 from django.db.models import Q
 
 from tenclouds.crud.qfilters import ChoicesFilter, Filter, Group
+from tenclouds.crud.resources import ModelResource
+
+
+class SearchResource(ModelResource):
+    """Modifies ModelResource to allow searching over dedicated search fields.
+
+    Since it's not possible to sort over indexes' tokenized fields in Haystack
+    additional sorting fields are introduced. To keep this fact invisible from
+    the front-end api, mapping of field-to-search_field is necessary.
+
+    """
+
+    search_ordering_fields_map = None
+    """A dictionary mapping regular field to its sortable counterpart
+    (optional).
+
+    """
+
+    def __convert_ordering(self, ordering, mapping):
+        """Converts order_by '-'-prefix-able sorters according to a mapping."""
+        if isinstance(ordering, basestring):
+            ordering = [ordering]
+        new_ordering = []
+        for orderer in ordering:
+            # get filter name stripping '-' if exists
+            inverted = orderer.startswith('-')
+            name = orderer[1:] if inverted else orderer
+            # get new name if required
+            if name in mapping:
+                orderer = mapping[name]
+                orderer = '-' + orderer if inverted else orderer
+            new_ordering.append(orderer)
+        return new_ordering
+
+    def __api_ordering_to_search_ordering(self, params):
+        """Map filter field names to respective sortable field names using
+        self.Meta.search_ordering_fields_map.
+
+        """
+        # if nothing to map or no mapping, exit
+        if ('order_by' not in params or
+            not getattr(self.Meta, 'search_ordering_fields_map', None)):
+            return params
+
+        new_order_by = self.__convert_ordering(
+            dict(params).get('order_by'), self.Meta.search_ordering_fields_map)
+        if new_order_by != params['order_by']:
+            try:
+                params['order_by'] = new_order_by
+            except AttributeError:
+                params = dict(params, order_by=new_order_by)
+        return params
+
+    def __search_ordering_to_api_ordering(self, orderings):
+        """Map sortable fields to respective filter fields names using
+        self.Meta.search_ordering_fields_map.
+
+        """
+        # if nothing to map or no mapping is defined, exit
+        if (not orderings or
+            not getattr(self.Meta, 'search_ordering_fields_map')):
+            return orderings
+        reverse_map = dict([(v, k) for
+            k, v in self.Meta.search_ordering_fields_map.items()])
+        res = self.__convert_ordering(orderings, reverse_map)
+        return res
+
+    def get_ordering(self, request):
+        """Called to get a list of ordering parameters to pass to the queryset.
+
+        """
+        params = super(SearchResource, self).get_ordering(request)
+        params = self.__api_ordering_to_search_ordering(params)
+        return params
+
+    def get_ordering_in_api_names(self, ordering):
+        """Called to get ordering sent together with the request."""
+        ordering = super(SearchResource, self).get_ordering_in_api_names(ordering)
+        ordering = self.__search_ordering_to_api_ordering(ordering)
+        return ordering
+
+    def build_schema(self):
+        """Filter out all sorting-dedicated fields from schema's fieldsSortable
+        so that they won't be automatically added to the sorting widget.
+
+        """
+        res = super(SearchResource, self).build_schema()
+        if ('fieldsSortable' in res and
+                getattr(self.Meta, 'search_ordering_fields_map')):
+            bl = self.Meta.search_ordering_fields_map.values()
+            f = lambda x: x not in bl and x[1:] not in bl
+            res['fieldsSortable'] = filter(f, res['fieldsSortable'])
+        return res
 
 
 class MultiFieldChoiceFilter(ChoicesFilter):
