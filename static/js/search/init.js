@@ -3,6 +3,7 @@
 
   this.mtracker = {
     search: {
+      collection: {},
       model: {},
       view: {}
     }

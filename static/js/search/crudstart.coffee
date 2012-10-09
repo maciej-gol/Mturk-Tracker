@@ -1,6 +1,6 @@
 $ ->
 
-  hgcs = new mtracker.search.model.HitGroupContentSearch
+  hgcs = new mtracker.search.collection.HitGroupContentSearch
 
   hgcs.fetchMeta (meta) ->
 

@@ -17,7 +17,7 @@
 
   })(crud.model.Model);
 
-  mtracker.search.model.HitGroupContentSearch = (function(_super) {
+  mtracker.search.collection.HitGroupContentSearch = (function(_super) {
 
     __extends(HitGroupContentSearch, _super);
 

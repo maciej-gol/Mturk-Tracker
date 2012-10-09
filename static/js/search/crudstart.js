@@ -3,7 +3,7 @@
 
   $(function() {
     var hgcs;
-    hgcs = new mtracker.search.model.HitGroupContentSearch;
+    hgcs = new mtracker.search.collection.HitGroupContentSearch;
     return hgcs.fetchMeta(function(meta) {
       var fV, hgcTable;
       hgcTable = new mtracker.search.view.HitGroupContentSearchTable({
