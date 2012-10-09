@@ -17,7 +17,7 @@ import plot
 from mturk.main.models import DayStats, HitGroupContent, HitGroupClass, \
                               RequesterProfile
 from mturk.main.templatetags.graph import text_row_formater
-from mturk.toprequesters.reports import ToprequestersReport
+
 from mturk.classification import NaiveBayesClassifier
 
 from utils.enum import EnumMetaclass
@@ -117,59 +117,6 @@ def arrivals(request, tab_slug=None):
     data = DayStats.objects.filter(date__gte=date_from, date__lte=date_to)
     ctx['data'] = arrivals_data_formater(data, tab)
     return direct_to_template(request, 'main/graphs/timeline.html', ctx)
-
-
-@never_cache
-def top_requesters(request, tab=None):
-
-    if request.user.is_superuser:
-        return admin.top_requesters(request)
-
-    try:
-        tab = int(tab)
-    except Exception:
-        pass
-    if tab not in ToprequestersReport.values:
-        messages.warning(request, 'Unknown report type: {0}'.format(tab))
-        return redirect('graphs_top_requesters',
-                        tab=ToprequestersReport.values[0])
-
-    data = ToprequestersReport.get_report_data(tab) or []
-
-    def _top_requesters(request):
-        def row_formatter(input):
-            for cc in input:
-                row = []
-                row.append('<a href="%s">%s</a>' % (
-                    reverse('requester_details',
-                        kwargs={'requester_id': cc[0]}), cc[1]))
-                row.append(('<a href="https://www.mturk.com/mturk/searchbar?'
-                    'requesterId=%s" target="_mturk">%s</a> '
-                    '(<a href="http://feed.crowdsauced.com/r/req/%s">RSS</a>)')
-                           % (cc[0], cc[0], cc[0]))
-                row.extend(cc[2:6])
-                yield row
-
-        columns = (
-            ('string', 'Requester ID'),
-            ('string', 'Requester'),
-            ('number', '#Task'),
-            ('number', '#HITs'),
-            ('number', 'Rewards'),
-            ('datetime', 'Last Posted On')
-        )
-        ctx = {
-            'data': row_formatter(data),
-            'report_meta': ToprequestersReport.get_report_meta(tab),
-            'columns': columns,
-            'title': 'Top-1000 Recent Requesters',
-            'tab_enum': ToprequestersReport.display_names,
-            'active_tab': tab
-        }
-
-        return direct_to_template(request, 'main/toprequesters.html', ctx)
-
-    return _top_requesters(request)
 
 
 def requester_details(request, requester_id):

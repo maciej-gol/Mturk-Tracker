@@ -23,6 +23,7 @@ urlpatterns += patterns('',
     url(r'', include('mturk.search.urls')),
     url(r'^classification/', include('mturk.classification.urls')),
     url('', include('mturk.main.urls')),
+    url(r'^top_requesters/', include('mturk.toprequesters.urls')),
     url(r'^documentation/', include('sphinxdoc.urls')),
 )
 

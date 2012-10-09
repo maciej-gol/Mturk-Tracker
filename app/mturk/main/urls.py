@@ -15,11 +15,6 @@ urlpatterns = patterns('',
     url(r'^arrivals/(?P<tab_slug>[\w-]+)/$', 'mturk.main.views.arrivals',
         name='graphs_arrivals'),
 
-    url(r'^top_requesters/(?P<tab>\d+)/$', 'mturk.main.views.top_requesters',
-        name='graphs_top_requesters'),
-    url(r'^top_requesters/$', 'mturk.main.views.top_requesters',
-        name='graphs_top_requesters'),
-
     url(r'^requester_details/(?P<requester_id>[A-Z0-9]+)/$',
         'mturk.main.views.requester_details', name='requester_details'),
     url(r'^hit/content/(?P<hit_group_id>[a-fA-Z0-9]+)/$',
