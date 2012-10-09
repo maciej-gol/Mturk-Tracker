@@ -360,6 +360,15 @@ PIPELINE_JS = {
             'js/search/crudstart.coffee',
         ),
         'output_filename': 'js/crud_search.min.js'
+    },
+    'toprequesters': {
+        'source_filenames': (
+            'js/toprequesters/init.coffee',
+            'js/toprequesters/model.coffee',
+            'js/toprequesters/view.coffee',
+            'js/toprequesters/crudstart.coffee',
+        ),
+        'output_filename': 'js/crud_toprequesters.min.js'
     }
 }
 

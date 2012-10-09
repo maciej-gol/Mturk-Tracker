@@ -119,7 +119,6 @@ class Command(BaseCommand):
         """Evaluates the report and stores it under correct cache key."""
 
         display_name = ToprequestersReport.display_names[report_type]
-
         if ToprequestersReport.is_cached(report_type):
             if self.options['force']:
                 log.info('Recalculating "{0}" toprequesters report.'.format(

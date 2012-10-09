@@ -1,7 +1,7 @@
 import datetime
 from django.core.cache import cache
 
-from utils.sql import query_to_tuples
+from utils.sql import query_to_dicts
 from utils.enum import EnumMetaclass
 
 
@@ -18,7 +18,7 @@ def topreq_data_hits_available(days):
     # We are only interested in records having hits_posted > 0, thus only such
     # records will appear on the list and max(start_time) should be available at
     # all times.
-    return list(query_to_tuples("""
+    return list(query_to_dicts("""
         SELECT
             h.requester_id,
             h.requester_name,
@@ -63,7 +63,7 @@ def topreq_data_hits_posted(days):
     # We are only interested in records having hits_posted > 0, thus only such
     # records will appear on the list and max(start_time) should be available at
     # all times.
-    return list(query_to_tuples("""
+    return list(query_to_dicts("""
         SELECT
             h.requester_id,
             h.requester_name,
