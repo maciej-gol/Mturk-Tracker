@@ -4,6 +4,7 @@ import time
 import logging
 from optparse import make_option
 from django.db import transaction
+from django.conf import settings
 
 from utils.pid import Pid
 from utils.sql import execute_sql, query_to_dicts
@@ -108,9 +109,9 @@ def get_crawls(only_new=True, start=None, end=None):
         start.isoformat(), end.isoformat()))
     only_new and extra_query.append('old_id is NULL')
     query = """SELECT id FROM main_crawl p WHERE
-        p.groups_available * 0.9 < p.groups_downloaded AND
+        p.groups_available * {0} < p.groups_downloaded AND
         NOT EXISTS (SELECT id FROM main_crawlagregates WHERE crawl_id = p.id)
-        {extra_limit}"""
+        {extra_limit}""".format(settings.INCOMPLETE_CRAWL_THRESHOLD)
     extra_qstr = ' AND ' + ' AND '.join(extra_query) if extra_query else ''
     query = query.format(extra_limit=extra_qstr)
     results = query_to_dicts(query)

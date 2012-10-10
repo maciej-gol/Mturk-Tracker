@@ -2,6 +2,7 @@ import time
 import logging
 from optparse import make_option
 from django.db import transaction
+from django.conf import settings
 
 from utils.pid import Pid
 from utils.sql import execute_sql, query_to_tuples
@@ -98,10 +99,10 @@ def get_crawls_for_update(force=False, start=None, end=None):
     WHERE
         p.success = true AND
         old_id is null AND
-        p.groups_available * 0.9 < p.groups_downloaded AND
+        p.groups_available * {0} < p.groups_downloaded AND
         NOT EXISTS (SELECT id FROM main_crawlagregates WHERE crawl_id = p.id)
         {extra_query}
-    ORDER BY id DESC"""
+    ORDER BY id DESC""".format(settings.INCOMPLETE_CRAWL_THRESHOLD)
     return query_to_tuples(query.format(extra_query=extra_qstr))
 
 

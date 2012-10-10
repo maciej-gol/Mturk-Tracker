@@ -9,7 +9,8 @@ CUR1 CURSOR FOR SELECT * FROM hits_temp;
   -- WHERE crawl_id IN (
   --   SELECT id FROM main_crawl
   --   WHERE start_time BETWEEN istart AND iend) AND
-  --   groups_available * 0.9 < groups_downloaded;
+  -- -- Should this be used someday, keep the threshold in synch with settings
+  --   groups_available * {threshold} < groups_downloaded;
 
 begin
   RAISE NOTICE 'Processing crawls from % to %.', istart, iend;

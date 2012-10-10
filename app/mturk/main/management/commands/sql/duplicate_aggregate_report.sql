@@ -1,3 +1,8 @@
+--
+-- This report is managed manually, so make sure that the threshold in
+-- groups_available * 0.9 > groups_downloaded AND
+-- relates to a correct value (see settings.INCOMPLETE_CRAWL_THRESHOLD).
+--
 CREATE OR REPLACE FUNCTION count_extra(
     istart TIMESTAMP WITH TIME ZONE, iend TIMESTAMP WITH TIME ZONE)
         RETURNS VOID AS '
@@ -127,8 +132,8 @@ CREATE OR REPLACE FUNCTION count_extra(
             RAISE NOTICE ''OK! correct_hmv == correct_hgs'';
         else
             RAISE NOTICE ''ERROR! correct_hmv != correct_hgs'';
-            RAISE NOTICE ''correct_hmv - correct_hgs: '',
-                correct_hmv - correct_hgs;
+            RAISE NOTICE ''correct_hmv - correct_hgs: %'',
+                (correct_hmv - correct_hgs);
         end if;
     END;
 '

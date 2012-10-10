@@ -4,8 +4,8 @@ declare
 
 begin
 
-  RAISE NOTICE 'Processing crawls from % to % ', istart, iend;
-
+  RAISE NOTICE 'Processing crawls from % to %.', istart, iend;
+  RAISE NOTICE 'Correct crawl threshold is %.', crawl_threshold;
   -- cur_id - the one we are updating
   -- lag_id - previous correct crawl
   -- note: cur_id > lag_id
@@ -14,7 +14,7 @@ begin
      FROM main_crawl
       WHERE
         start_time BETWEEN istart AND iend AND
-        groups_available * 0.9 < groups_downloaded
+        groups_available * crawl_threshold < groups_downloaded
       ORDER BY start_time DESC)
   LOOP
     IF(lag_id IS NOT NULL AND cur_id IS NOT NULL AND lag_id <> cur_id) THEN

@@ -87,42 +87,44 @@ def __create_extra_columns():
         add_table_columns(tablename, to_create)
 
 
-def create_no_args(prname, prtext):
-    """Replaces all ' found in prtext with '' and formats an sql create
-    statement.
-
-    """
+def proc_create_query(prname, prtext, argslist=None):
+    """Base method for creating procedure with given name, body and args."""
     prtext = prtext.replace("'", "''")
     TEMPLATE = """
-    CREATE OR REPLACE FUNCTION {prname}() RETURNS VOID AS'
+    CREATE OR REPLACE FUNCTION {prname}({argstext}) RETURNS VOID AS'
         {prtext}'
     LANGUAGE plpgsql;
     """
-    return TEMPLATE.format(prname=prname, prtext=prtext)
+    argstext = ", ".join(argslist) if argslist else ''
+    return TEMPLATE.format(prname=prname, prtext=prtext, argstext=argstext)
+
+
+def create_no_args(prname, prtext):
+    return proc_create_query(prname, prtext)
 
 
 def create_with_date_args(prname, prtext):
-    """Replaces all ' found in prtext with '' and formats an sql create
-    statement.
+    argslist = [
+        "istart TIMESTAMP WITH TIME ZONE",
+        "iend TIMESTAMP WITH TIME ZONE",
+    ]
+    return proc_create_query(prname, prtext, argslist)
 
-    """
-    prtext = prtext.replace("'", "''")
-    TEMPLATE = """
-    CREATE OR REPLACE FUNCTION {prname}(istart TIMESTAMP WITH TIME ZONE,
-                                        iend TIMESTAMP WITH TIME ZONE)
-        RETURNS VOID AS'
-        {prtext}'
-    LANGUAGE plpgsql;
-    """
-    return TEMPLATE.format(prname=prname, prtext=prtext)
 
+def create_with_date_and_threshold_args(prname, prtext):
+    argslist = [
+        "istart TIMESTAMP WITH TIME ZONE",
+        "iend TIMESTAMP WITH TIME ZONE",
+        "crawl_threshold REAL",
+    ]
+    return proc_create_query(prname, prtext, argslist)
 
 """Dictionary {procedure_file_name.sql: procedure_creting_method}.
 See __create_procedures for more details.
 
 """
 PROCEDURES_TO_CREATE = {
-    'hits_temp_population.sql': create_with_date_args,
+    'hits_temp_population.sql': create_with_date_and_threshold_args,
     'hits_update.sql': create_with_date_args,
     'initial_post_hits_update.sql': create_with_date_args,
     'reward_population.sql': create_with_date_args,

@@ -431,6 +431,19 @@ HAYSTACK_CONNECTIONS = {
 CRAWLER_RETRY_SLEEP = 0.1
 CRAWLER_RETRY_COUNT = 200
 
+# Decides how many percent groups available must be successfully downloaded to
+# mark a crawl as successful and it's data to be used for further computation.
+#
+# WARNING
+# Update of this setting requires an update of stored procedures and this update
+# will NOT be automatically performed during the deployment. Use the following:
+# from mturk.main.migration_extra import procedures; procedures.create_all()
+# in a django shell to update the procedures manually.
+INCOMPLETE_CRAWL_THRESHOLD = 0.9
+# Controls which warnings are logged at the end of a crawl. 90% should fire on
+# some account/connection issues or simply due higher group count.
+INCOMPLETE_CRAWL_WARNING_THRESHOLD = 0.9
+
 # Temporarily this file is stored in the $HOME directory. In the final
 # implementation a classification algorithm will be changed, hence this file
 # probably will not be used.

@@ -5,6 +5,8 @@ from optparse import make_option
 
 from django.db import transaction
 from django.core.management.base import BaseCommand
+from django.conf import settings
+
 from utils.pid import Pid
 from utils.sql import query_to_tuples, execute_sql
 
@@ -99,7 +101,9 @@ class Command(BaseCommand):
 
     crawls_query = """
     SELECT {what} FROM main_crawl
-    WHERE {having_hits_mv} groups_available * 0.9 > groups_downloaded
+    WHERE
+        {having_hits_mv}
+        groups_available * {crawl_threshold} > groups_downloaded
     {ordering}
     """
 
@@ -110,7 +114,8 @@ class Command(BaseCommand):
         ordering = "ORDER BY start_time DESC" if ordered else ""
         hmv = 'has_hits_mv is true AND' if self.having_hits_mv else ''
         return self.crawls_query.format(what=what, ordering=ordering,
-            having_hits_mv=hmv)
+            having_hits_mv=hmv,
+            crawl_threshold=settings.INCOMPLETE_CRAWL_THRESHOLD)
 
     #
     # Deleting

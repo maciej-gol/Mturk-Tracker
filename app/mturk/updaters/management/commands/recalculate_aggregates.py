@@ -1,10 +1,10 @@
-import sys
 import time
 import logging
 
 from optparse import make_option
 from django.db.models import F
 from django.core.management import call_command
+from django.conf import settings
 
 from utils.management.commands.base.crawl_updater import CrawlUpdaterCommand
 from utils.sql import execute_sql
@@ -49,7 +49,8 @@ class Command(CrawlUpdaterCommand):
 
     def filter_crawls(self, crawls):
         """Filter crawls, excluding incomplete crawls."""
-        return crawls.filter(groups_downloaded__gt=F('groups_available') * 0.9)
+        return crawls.filter(groups_downloaded__gt=F('groups_available') *
+            settings.INCOMPLETE_CRAWL_THRESHOLD)
 
     def prepare_data(self):
         """Called before any data sie queries. This is the bulk delete option,

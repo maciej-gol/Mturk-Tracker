@@ -182,20 +182,26 @@ class Command(BaseCommand):
         log.info('hits groups available: %s', groups_available)
         log.info('work time: %.2fsec', work_time)
 
-        crawl_downloaded_pc = 0.9
+        crawl_downloaded_pc = settings.INCOMPLETE_CRAWL_THRESHOLD
+        crawl_warning_pc = settings.INCOMPLETE_CRAWL_WARNING_THRESHOLD
         crawl_time_warning = 300
+        downloaded_pc = crawl.groups_downloaded / groups_available
         if work_time > crawl_time_warning:
-            log.warning("Crawl took {0} s which seems a bit too long (more than"
-                "{0} s), you might consider checking if correct mturk account"
-                " is used.".format(crawl_time_warning))
-        if crawl.groups_downloaded < groups_available * crawl_downloaded_pc:
-            log.warning('More than 10% of hit groups were not downloaded, '
-                'please check mturk account configuration and/or if there are '
-                'any network-related problems.')
+            log.warning(("Crawl took {0}s which seems a bit too long (more "
+                "than {1}s), you might consider checking if correct mturk "
+                "account is used, ignore this if high number of groups is "
+                "experienced.").format(work_time, crawl_time_warning))
+        if downloaded_pc < crawl_warning_pc:
+            log.warning(('Only {0}% of hit groups were downloaded, below '
+                '({1}% warning threshold) please check mturk account '
+                'configuration and/or if there are any network-related '
+                'problems.').format(downloaded_pc, crawl_warning_pc))
+        if downloaded_pc < crawl_downloaded_pc:
             log.warning("This crawl contains far too few groups downloaded to "
-                "available: ({0} < {1} * {2}) and will be considered as "
-                "erroneous".format(crawl.groups_downloaded, groups_available,
-                crawl_downloaded_pc))
+                "available: {0}% < {1}% downloaded threshold and will be "
+                "considered as erroneous ({2}/{3} groups).".format(
+                    downloaded_pc, crawl_downloaded_pc,
+                    crawl.groups_downloaded, groups_available))
 
         pid.remove_pid()
 
