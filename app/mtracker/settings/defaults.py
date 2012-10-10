@@ -428,8 +428,9 @@ HAYSTACK_CONNECTIONS = {
 # Settings affect the number of retries and lenght of waits after failure when
 # requesting a hitgroup page. Increasing the value may be the solution for
 # 'limit exceeded for page xx' messages, caused by crawler timeouts.
-CRAWLER_RETRY_SLEEP = 0.1
-CRAWLER_RETRY_COUNT = 200
+CRAWLER_FETCH_TIMEOUT = 3  # seconds
+CRAWLER_RETRY_SLEEP = 0.1  # seconds
+CRAWLER_RETRY_COUNT = 1000
 
 # Decides how many percent groups available must be successfully downloaded to
 # mark a crawl as successful and it's data to be used for further computation.

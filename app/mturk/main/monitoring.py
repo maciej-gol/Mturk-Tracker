@@ -40,8 +40,12 @@ def print_crawls(age=datetime.timedelta(hours=2), sleep=15, limit=None):
                         disp = 'running'
                 else:
                     disp = '{0}%'.format(disp) + (' err' if dev < th else '')
+            if c.end_time - c.start_time < datetime.timedelta(seconds=2):
+                end_time = now()
+            else:
+                end_time = c.end_time
             elapsed = round(
-                float((c.end_time - c.start_time).total_seconds()) / 60, 1)
+                float((end_time - c.start_time).total_seconds()) / 60, 1)
             to_display = [
                 c.start_time.strftime('%y-%m-%d %H:%M'),
                 pad_string(elapsed, 5),
@@ -77,7 +81,7 @@ def get_first_crawl_hits_posted_sums(days=200):
         result = sum([
             sum([
                 crawl.hitgroupstatus_set.get(hit_group_content__id=content.id
-                ).hits_available for content in  crawl.hitgroupcontent_set.all()
+                ).hits_available for content in crawl.hitgroupcontent_set.all()
             ]) for crawl in
                 Crawl.objects.filter(
                     start_time__gt=dt,

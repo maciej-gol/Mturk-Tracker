@@ -17,15 +17,38 @@ from django.conf import settings
 log = logging.getLogger(__name__)
 
 
-def _get_html(url, timeout=10):
+def _download_html(url, timeout=10):
     """Get page code using given url. If server won't response in `timeout`
     seconds, return empty string.
     """
     try:
         return urllib2.urlopen(url, timeout=timeout).read()
-    except (urllib2.URLError, ssl.SSLError), e:
-        log.error('%s;;%s;;%s', type(e).__name__, url, e.args)
+    except (urllib2.URLError, ssl.SSLError):
+        pass
+    # except (urllib2.URLError, ssl.SSLError), e:
+    #     log.error('%s;;%s;;%s', type(e).__name__, url, e.args)
     return ''
+
+
+def _get_html(url, timeout=settings.CRAWLER_FETCH_TIMEOUT,
+        sleep=settings.CRAWLER_RETRY_SLEEP,
+        retries=settings.CRAWLER_RETRY_COUNT):
+    while retries > 0:
+        html = _download_html(url, timeout=timeout)
+        if html == '' or parser.is_limit_exceeded(html):
+            if parser.is_limit_exceeded(html):
+                log.info('Limit exceeded, retry: {0}.'.format(
+                    settings.CRAWLER_RETRY_COUNT - retries + 1))
+            log.debug(('Retrying download: {0} in {1} ({2} retries remaining)'
+                ).format(url, sleep, retries))
+            gevent.sleep(sleep)
+            retries -= 1
+        else:
+            return html
+    else:
+        log.warning('Downloader retry limit exceeded. Either the limit '
+            'is too small, some unknown bug was encountered or there is a '
+            'connection error.')
 
 
 def hitsearch_url(page=1):
@@ -83,19 +106,7 @@ def hits_groups_info(page_nr,
     log.debug('hits_groups_info done: %s;;%s', page_nr, len(rows))
 
     if not rows:
-        if retries:
-            if html == '' or parser.is_limit_exceeded(html):
-                msg = ('Refetching page: {0}, ({2} retries remaining)'
-                    ).format(page_nr, sleep, retries)
-                log.debug(msg)
-                gevent.sleep(sleep)
-                return hits_groups_info(page_nr, retries - 1)
-            else:
-                log.debug('No content in page {0}, returning'.format(page_nr))
-        else:
-            log.warning('Retry limit exceeded for page: {0}. Either the limit'
-                'is too small, some unknown bug was encountered or there is a '
-                'connection error.'.format(page_nr))
+        log.debug('No content in page {0}, returning'.format(page_nr))
 
     return rows
 

@@ -55,7 +55,7 @@ class Command(BaseCommand):
         from crawler.debug import debug_listen
         debug_listen()
 
-    def _authenticate_if_possible(self):
+    def _authenticate_if_possible(self, email, password):
         """If possible - authenticate.  Mturk requires authentication for
         listing pagination pages greater that 20
 
@@ -64,8 +64,10 @@ class Command(BaseCommand):
         """
         if self.mturk_email and self.mturk_password:
             auth.install_opener()
-            resp = auth.authenticate(email=self.mturk_email,
-                    password=self.mturk_password)
+            resp = auth.authenticate(
+                email=email or self.mturk_email,
+                password=password or self.mturk_password
+            )
             if resp.getcode() != 200:
                 raise Exception('Authentiaction error: %s' % resp.read())
             log.info('Mturk authentication done')
