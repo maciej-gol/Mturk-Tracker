@@ -38,6 +38,10 @@ class DBProcedureCommand(TimeArgsCommand):
             self.logger.setLevel(logging.WARNING)
         return self.options
 
+    def get_proc_args(self):
+        """Returns arguments for the database function call."""
+        return [self.start, self.end]
+
     def handle(self, **options):
 
         self.process_options(options)
@@ -52,7 +56,7 @@ class DBProcedureCommand(TimeArgsCommand):
             self.logger.info('Calling {0}({1}, {2}), start time: {3}.'.format(
                 self.proc_name, self.start, self.end, now()))
 
-            cur.callproc(self.proc_name, [self.start, self.end])
+            cur.callproc(self.proc_name, self.get_proc_args())
 
             transaction.commit_unless_managed()
 
