@@ -1,9 +1,16 @@
 import time
 import datetime
 import pytz
-from pprint import pprint
+
+
 from django.utils.timezone import now, make_aware
+from django.conf import settings
+
 from mturk.main.models import Crawl, HitGroupContent
+
+
+def pad_string(s, l):
+    return str(s) + ((l - len(str(s))) * ' ')
 
 
 def print_crawls(age=datetime.timedelta(hours=2), sleep=15, limit=None):
@@ -14,17 +21,36 @@ def print_crawls(age=datetime.timedelta(hours=2), sleep=15, limit=None):
             ).order_by('start_time')
         if limit:
             crawls = crawls[:limit]
-        print '------------------------------------'
-        print '(H, M, avail, down, statuses, dev %)'
-        print '------------------------------------'
-        for c in crawls:
-            dev = None
+        print '-----------------------------------------------------------'
+        print 'Time           | mins  | avail | down  | objs  | missing % '
+        print '-----------------------------------------------------------'
+        lencrawls = len(crawls)
+        for i, c in enumerate(crawls):
+            dev = 'error'
+            disp = 'error'
             if (c.groups_available > 0 and c.groups_downloaded is not None):
-                dev = (c.groups_available - c.groups_downloaded
-                    ) * 100 / c.groups_available
-                dev = '{0}% !!!'.format(dev) if dev > 10 else dev
-            pprint((c.start_time.hour, c.start_time.minute, c.groups_available,
-                c.groups_downloaded, c.hitgroupstatus_set.count(), dev))
+                dev = float(c.groups_downloaded) / c.groups_available
+                th = settings.INCOMPLETE_CRAWL_WARNING_THRESHOLD
+                disp = int((1 - dev) * 100)
+                if c.groups_available == c.groups_downloaded:
+                    if i != lencrawls - 1:
+                        # if it's not the latest it can't be running
+                        disp = 'crashed'
+                    else:
+                        disp = 'running'
+                else:
+                    disp = '{0}%'.format(disp) + (' err' if dev < th else '')
+            elapsed = round(
+                float((c.end_time - c.start_time).total_seconds()) / 60, 1)
+            to_display = [
+                c.start_time.strftime('%y-%m-%d %H:%M'),
+                pad_string(elapsed, 5),
+                pad_string(c.groups_available, 5),
+                pad_string(c.groups_downloaded, 5),
+                pad_string(c.hitgroupstatus_set.count(), 5),
+                disp,
+            ]
+            print ' | '.join(map(str, to_display))
         time.sleep(sleep)
 
 

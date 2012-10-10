@@ -185,7 +185,7 @@ class Command(BaseCommand):
         crawl_downloaded_pc = settings.INCOMPLETE_CRAWL_THRESHOLD
         crawl_warning_pc = settings.INCOMPLETE_CRAWL_WARNING_THRESHOLD
         crawl_time_warning = 300
-        downloaded_pc = crawl.groups_downloaded / groups_available
+        downloaded_pc = float(crawl.groups_downloaded) / groups_available
         if work_time > crawl_time_warning:
             log.warning(("Crawl took {0}s which seems a bit too long (more "
                 "than {1}s), you might consider checking if correct mturk "
