@@ -109,11 +109,12 @@ def get_crawls(only_new=True, start=None, end=None):
         start.isoformat(), end.isoformat()))
     only_new and extra_query.append('old_id is NULL')
     query = """SELECT id FROM main_crawl p WHERE
-        p.groups_available * {0} < p.groups_downloaded AND
+        p.groups_available * {crawl_threshold} < p.groups_downloaded AND
         NOT EXISTS (SELECT id FROM main_crawlagregates WHERE crawl_id = p.id)
-        {extra_limit}""".format(settings.INCOMPLETE_CRAWL_THRESHOLD)
+        {extra_limit}"""
     extra_qstr = ' AND ' + ' AND '.join(extra_query) if extra_query else ''
-    query = query.format(extra_limit=extra_qstr)
+    query = query.format(extra_limit=extra_qstr,
+        crawl_threshold=settings.INCOMPLETE_CRAWL_THRESHOLD)
     results = query_to_dicts(query)
     log.debug("Crawls fetched in {0}s.".format(time.time() - st))
     return results

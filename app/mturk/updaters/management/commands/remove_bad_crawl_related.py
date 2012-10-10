@@ -62,11 +62,13 @@ class Command(BaseCommand):
         self.limit = options.get('limit')
         self.fix_interrupted = options.get('fix-interrupted')
 
-        self.crawl_count = self.get_crawls_count()
-        if options.get('count-only') or self.crawl_count == 0:
-            self.handle_count_only()
-
+        # check this before counting the crawls to delete
         self.fix_interrupted and self.update_interrupted_crawl_stats()
+
+        self.crawl_count = self.get_crawls_count()
+
+        if self.crawl_count == 0 or options.get('count-only'):
+            self.handle_count_only()
 
         # if limit is specified, show X/Y instead of just Y
         log.info('Starting bad crawl related data removal, {0}{1} records will '

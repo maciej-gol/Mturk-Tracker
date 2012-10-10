@@ -99,11 +99,14 @@ def get_crawls_for_update(force=False, start=None, end=None):
     WHERE
         p.success = true AND
         old_id is null AND
-        p.groups_available * {0} < p.groups_downloaded AND
+        p.groups_available * {crawl_threshold} < p.groups_downloaded AND
         NOT EXISTS (SELECT id FROM main_crawlagregates WHERE crawl_id = p.id)
         {extra_query}
-    ORDER BY id DESC""".format(settings.INCOMPLETE_CRAWL_THRESHOLD)
-    return query_to_tuples(query.format(extra_query=extra_qstr))
+    ORDER BY id DESC"""
+    return query_to_tuples(
+        query.format(
+            extra_query=extra_qstr,
+            crawl_threshold=settings.INCOMPLETE_CRAWL_THRESHOLD))
 
 
 def create_hits_mv_record(start_time, crawl_id):
