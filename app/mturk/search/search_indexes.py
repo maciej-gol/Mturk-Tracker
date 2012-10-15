@@ -97,7 +97,8 @@ class HitGroupContentSearchResult(SearchResult):
 
     def get_labels_display(self):
         """Get list of labels display names."""
-        return [Labels.display_names[l] for l in self.labels]
+        return [Labels.display_names[l] for l in self.labels
+            if l in Labels.display_names]
 
 
 class HitGroupContentSearchQuerySet(SearchQuerySet):
