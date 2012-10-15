@@ -430,8 +430,9 @@ HAYSTACK_CONNECTIONS = {
 # 'limit exceeded for page xx' messages, caused by crawler timeouts.
 CRAWLER_FETCH_TIMEOUT = 3  # seconds
 CRAWLER_RETRY_SLEEP = 0.1  # seconds
-CRAWLER_RETRY_COUNT = 500  # max retries
-CRAWLER_RETRY_WARNING = 100  # logs warnings instead of debugs after that many
+CRAWLER_RETRY_COUNT = 1000  # max retries
+CRAWLER_RETRY_WARNING = 500  # logs warnings instead of debugs after that many
+CRAWLER_GROUP_PROCESSING_TIMEOUT = 60  # seconds
 
 # Decides how many percent groups available must be successfully downloaded to
 # mark a crawl as successful and it's data to be used for further computation.

@@ -154,7 +154,8 @@ class Command(BaseCommand):
                 jobs.append(j)
                 total_reward += hg['reward'] * hg['hits_available']
             log.debug('processing pack of hitgroups objects')
-            gevent.joinall(jobs, timeout=60)
+            gevent.joinall(
+                jobs, timeout=settings.CRAWLER_GROUP_PROCESSING_TIMEOUT)
             # check if all jobs ended successfully
             for job in jobs:
                 if not job.ready():
