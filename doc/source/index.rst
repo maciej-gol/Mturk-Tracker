@@ -6,8 +6,15 @@
 Welcome to Mturk-Tracker's documentation!
 =========================================
 
-API documentation (automatically generated)
-------------------------------------------------
+Web api documentation
+=====================
+
+.. toctree::
+
+    api/index
+
+Module documentation (automatically generated)
+----------------------------------------------
 
 .. toctree::
    :maxdepth: 4
@@ -26,6 +33,6 @@ Indices and tables
 ==================
 
 * :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+.. * :ref:`modindex`
+.. * :ref:`search`
 

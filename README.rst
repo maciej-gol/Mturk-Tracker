@@ -33,13 +33,13 @@ This file is only an introduction to the project and is also avalable at:
 
     http://mturk-tracker.com/documentation/
 
-whereas the complete project sphinx documentation can be found under:
+whereas the complete project documentation can be found at:
 
     http://mturk-tracker.com/documentation/mturk-tracker/
 
-Sphinx documentation can be found in the repository:
+The web api documentation is available at:
 
-    https://github.com/10clouds/Mturk-Tracker/tree/master/doc
+    http://mturk-tracker.com/documentation/mturk-tracker/api/
 
 How does it work?
 =================
