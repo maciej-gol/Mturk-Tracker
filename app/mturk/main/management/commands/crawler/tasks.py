@@ -35,12 +35,18 @@ def _get_html(url, timeout=settings.CRAWLER_FETCH_TIMEOUT,
         retries=settings.CRAWLER_RETRY_COUNT):
     while retries > 0:
         html = _download_html(url, timeout=timeout)
+
         if html == '' or parser.is_limit_exceeded(html):
-            if parser.is_limit_exceeded(html):
-                log.info('Limit exceeded, retry: {0}.'.format(
-                    settings.CRAWLER_RETRY_COUNT - retries + 1))
-            log.debug(('Retrying download: {0} in {1} ({2} retries remaining)'
-                ).format(url, sleep, retries))
+            rs = settings.CRAWLER_RETRY_COUNT - retries + 1
+
+            if rs > settings.CRAWLER_RETRY_WARNING:
+                level = logging.WARNING
+            else:
+                level = logging.DEBUG
+
+            log.log(level, ('Limit exceeded, retrying download: {0}/{1} ({2}'
+                ' sleep)\nurl: {3}').format(
+                rs, settings.CRAWLER_RETRY_COUNT, sleep, url))
             gevent.sleep(sleep)
             retries -= 1
         else:
