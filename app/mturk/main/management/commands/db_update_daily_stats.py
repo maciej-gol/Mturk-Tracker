@@ -7,7 +7,7 @@ from django.db.models import Q
 from django.utils.timezone import make_aware
 from mturk.main.models import Crawl, DayStats, CrawlAgregates
 
-log = logging.getLogger(__name__)
+log = logging.getLogger('mturk.aggregates')
 
 
 def get_first_crawl():
