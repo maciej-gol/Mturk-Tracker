@@ -21,10 +21,10 @@ class Command(CrawlUpdaterCommand):
         make_option("--skip-existing", dest="skip-existing", default=False,
             action="store_true",
             help='If True, related table entries will be deleted.'),
-        make_option("--chunk-delete", dest="chunk-delete", default=True,
-            action="store_false",
-            help=('If True, objects will be deleted before each chunk. Specify'
-            'False to have them deleted before each chunk.')),
+        make_option("--dont-chunk", dest="dont-chunk", default=False,
+            action="store_true",
+            help=('If True, all related objects for that period will be'
+                'deleted before proceeding.')),
     )
 
     display_name = 'aggregates recaltulation'
@@ -44,7 +44,7 @@ class Command(CrawlUpdaterCommand):
         """
         self.options = super(Command, self).process_options(options)
         self.clear_existing = not self.options['skip-existing']
-        self.chunk_delete = self.options['chunk-delete']
+        self.chunk_delete = not self.options['dont-chunk']
         return self.options
 
     def filter_crawls(self, crawls):
