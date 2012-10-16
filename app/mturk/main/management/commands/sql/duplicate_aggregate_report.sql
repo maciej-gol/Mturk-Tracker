@@ -13,6 +13,7 @@ CREATE OR REPLACE FUNCTION count_extra(
         total_hgs integer; corrected_hgs integer;
         removed_hgs integer; extra_avg_hgs float;
         bad_crawl_hgs_count integer;
+        missing_hits_available integer;
         correct_hgs integer;
     BEGIN
         RAISE NOTICE ''Counting multiplied records in main_hitgroupstatus
@@ -36,26 +37,37 @@ CREATE OR REPLACE FUNCTION count_extra(
 
         RAISE NOTICE ''Total:      %'', total_hgs;
 
-        SELECT
-            count(*)
-        INTO
-            bad_crawl_hgs_count
-        FROM
-            main_hitgroupstatus
+        SELECT count(*)
+        INTO bad_crawl_hgs_count
+        FROM main_hitgroupstatus
         WHERE
             crawl_id IN (
                 SELECT id FROM main_crawl
                 WHERE
                     groups_available * 0.9 > groups_downloaded AND
-                    -- this matches the
-                    -- crawl_id >= max(id).. AND crawl_id <= max(id)..
-                    -- used in queries on main_crawlagregates and and hits_mv
                     start_time BETWEEN istart AND iend
             );
-        correct_hgs = total_hgs - coalesce(removed_hgs, 0) -
-                      coalesce(bad_crawl_hgs_count, 0);
-
         RAISE NOTICE ''Bad crawls: %'', bad_crawl_hgs_count;
+
+        SELECT count(*)
+        INTO missing_hits_available
+        FROM main_hitgroupstatus
+        WHERE
+            crawl_id IN (
+                SELECT id FROM main_crawl
+                WHERE
+                    (groups_available IS NULL OR groups_downloaded IS NULL) AND
+                    start_time BETWEEN istart AND iend
+            );
+
+        RAISE NOTICE ''No hits_av: %'', missing_hits_available;
+
+        correct_hgs = total_hgs -
+                      coalesce(removed_hgs, 0) -
+                      coalesce(bad_crawl_hgs_count, 0) -
+                      coalesce(missing_hits_available, 0);
+
+
 
         SELECT INTO
             corrected_hgs, removed_hgs, extra_avg_hgs *
@@ -138,3 +150,4 @@ CREATE OR REPLACE FUNCTION count_extra(
     END;
 '
 LANGUAGE plpgsql;
+
