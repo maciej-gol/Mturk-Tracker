@@ -118,7 +118,7 @@ class Command(BaseCommand):
         # create crawl object that will be filled with data later
         crawl = Crawl.objects.create(
                 start_time=start_time,
-                end_time=datetime.datetime.now(),
+                end_time=start_time,
                 success=True,
                 hits_available=hits_available,
                 hits_downloaded=0,

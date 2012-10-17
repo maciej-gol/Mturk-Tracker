@@ -45,7 +45,7 @@ def print_crawls(age=datetime.timedelta(hours=2), sleep=15, limit=None):
                         disp = 'running'
                 else:
                     disp = '{0}%'.format(disp) + (' err' if dev < th else '')
-            if c.end_time - c.start_time < datetime.timedelta(seconds=2):
+            if c.end_time == c.start_time:
                 end_time = now()
             else:
                 end_time = c.end_time
