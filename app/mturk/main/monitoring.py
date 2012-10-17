@@ -16,14 +16,19 @@ def pad_string(s, l):
 def print_crawls(age=datetime.timedelta(hours=2), sleep=15, limit=None):
     """Script for displaying latest crawls and their details."""
 
+    header = [
+        '-----------------------------------------------------------',
+        'Time           | mins  | avail | down  | objs  | missing % ',
+        '-----------------------------------------------------------',
+    ]
     while True:
         crawls = Crawl.objects.filter(start_time__gt=now() - age
             ).order_by('start_time')
         if limit:
             crawls = crawls[:limit]
-        print '-----------------------------------------------------------'
-        print 'Time           | mins  | avail | down  | objs  | missing % '
-        print '-----------------------------------------------------------'
+
+        to_print = list(header)
+
         lencrawls = len(crawls)
         for i, c in enumerate(crawls):
             dev = 'error'
@@ -54,7 +59,9 @@ def print_crawls(age=datetime.timedelta(hours=2), sleep=15, limit=None):
                 pad_string(c.hitgroupstatus_set.count(), 5),
                 disp,
             ]
-            print ' | '.join(map(str, to_display))
+            to_print.append(' | '.join(map(str, to_display)))
+        for r in to_print:
+            print r
         time.sleep(sleep)
 
 
