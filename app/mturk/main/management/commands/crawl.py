@@ -179,15 +179,20 @@ class Command(BaseCommand):
         crawl.save()
 
         work_time = time.time() - _start_time
-        log.info('created crawl id: %s', crawl.id)
-        log.info('total reward value: %s', total_reward)
-        log.info('hits groups downloaded: %s', len(processed_groups))
-        log.info('hits groups available: %s', groups_available)
-        log.info('work time: %.2fsec', work_time)
+        log.info("""Crawl finished:
+        created crawl id: {crawl_id})
+        total reward value: {total_reward}
+        hits groups downloaded: {processed_groups}
+        hits groups available: {groups_available}
+        work time: {work_time:.2f} seconds
+        """.format(crawl_id=crawl.id, total_reward=total_reward,
+            processed_groups=len(processed_groups),
+            groups_available=groups_available,
+            work_time=work_time))
 
         crawl_downloaded_pc = settings.INCOMPLETE_CRAWL_THRESHOLD
         crawl_warning_pc = settings.INCOMPLETE_CRAWL_WARNING_THRESHOLD
-        crawl_time_warning = 300
+        crawl_time_warning = settings.CRAWLER_TIME_WARNING
         downloaded_pc = float(crawl.groups_downloaded) / groups_available
         if work_time > crawl_time_warning:
             log.warning(("Crawl took {0}s which seems a bit too long (more "

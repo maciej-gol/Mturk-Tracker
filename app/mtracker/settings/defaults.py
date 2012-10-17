@@ -432,6 +432,7 @@ CRAWLER_FETCH_TIMEOUT = 3  # seconds
 CRAWLER_RETRY_SLEEP = 0.1  # seconds
 CRAWLER_RETRY_COUNT = 1000  # max retries
 CRAWLER_RETRY_WARNING = 500  # logs warnings instead of debugs after that many
+CRAWLER_TIME_WARNING = 600  # seconds
 CRAWLER_GROUP_PROCESSING_TIMEOUT = 60  # seconds
 
 # Decides how many percent groups available must be successfully downloaded to
