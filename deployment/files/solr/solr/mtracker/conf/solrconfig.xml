@@ -16,11 +16,7 @@
     <lib dir="../../dist/" regex="apache-solr-dataimporthandler-\d.*\.jar"/>
     <lib dir="../../dist/" regex="postgresql.jdbc4.jar"/>
 
-    <!--
-    <dataDir>${solr.data.dir:./solr/en/data}</dataDir>
-    -->
-
-    <dataDir>/data/projects/mturktracker-staging/services/solr/solr/en/data</dataDir>
+    <dataDir>/data/projects/mturktracker-staging/services/solr/solr/mtracker/data</dataDir>
     <indexDefaults>
         <useCompoundFile>false</useCompoundFile>
 
