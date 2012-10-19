@@ -431,7 +431,7 @@ HAYSTACK_CONNECTIONS = {
 CRAWLER_FETCH_TIMEOUT = 3  # seconds
 CRAWLER_RETRY_SLEEP = 0.1  # seconds
 CRAWLER_RETRY_COUNT = 1000  # max retries
-CRAWLER_RETRY_WARNING = 500  # logs warnings instead of debugs after that many
+CRAWLER_RETRY_WARNING = 800  # logs warnings instead of debugs after that many
 CRAWLER_TIME_WARNING = 600  # seconds
 CRAWLER_GROUP_PROCESSING_TIMEOUT = 60  # seconds
 
@@ -443,7 +443,7 @@ CRAWLER_GROUP_PROCESSING_TIMEOUT = 60  # seconds
 # will NOT be automatically performed during the deployment. Use the following:
 # from mturk.main.migration_extra import procedures; procedures.create_all()
 # in a django shell to update the procedures manually.
-INCOMPLETE_CRAWL_THRESHOLD = 0.9
+INCOMPLETE_CRAWL_THRESHOLD = 0.8
 # Controls which warnings are logged at the end of a crawl. 90% should fire on
 # some account/connection issues or simply due higher group count.
 INCOMPLETE_CRAWL_WARNING_THRESHOLD = 0.9
