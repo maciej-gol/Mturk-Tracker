@@ -38,6 +38,7 @@
     <document>
         <entity name="hitgroupcontent" dataSource="mturk_crawl" threads="2"
                 transformer="HTMLStripTransformer,script:LabelsToColumns"
+                pk="id"
                 query="
                     SELECT 
                         hgcnt.id AS django_id, 
