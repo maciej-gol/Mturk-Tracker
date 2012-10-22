@@ -37,14 +37,14 @@ class Command(TimeArgsCommand):
         start_time = time.time()
 
         log.info('Updating crawl agregates')
-        update_crawl_agregates(only_new=True, start=self.start, end=self.end,
+        update_crawl_agregates(start=self.start, end=self.end,
             clear_existing=self.clear_existing)
         log.info('db_update_agregates took: %s' % (time.time() - start_time))
 
         pid.remove_pid()
 
 
-def update_crawl_agregates(commit_threshold=1000, only_new=True,
+def update_crawl_agregates(commit_threshold=1000,
         start=None, end=None, clear_existing=False):
     """Creates main_crawlagregates records for hits_mv."""
 
@@ -54,7 +54,7 @@ def update_crawl_agregates(commit_threshold=1000, only_new=True,
     clear_existing and start and end and clear_existing_rows(start, end)
 
     i = 0
-    for i, row in enumerate(get_crawls(only_new, start=start, end=end)):
+    for i, row in enumerate(get_crawls(start=start, end=end)):
         try:
             execute_sql("""
             INSERT INTO
@@ -96,11 +96,7 @@ def update_crawl_agregates(commit_threshold=1000, only_new=True,
 
 
 def get_crawls(start=None, end=None):
-    """Returns dicts containing crawl ids.
-    Keyword arguments:
-    only_new -- if True, only rows with null old_id will be returned
-
-    """
+    """Returns dicts containing crawl ids."""
     st = time.time()
     log.debug("Fetching crawls to process.")
     extra_query = []
