@@ -95,7 +95,7 @@ def update_crawl_agregates(commit_threshold=1000, only_new=True,
     transaction.commit_unless_managed()
 
 
-def get_crawls(only_new=True, start=None, end=None):
+def get_crawls(start=None, end=None):
     """Returns dicts containing crawl ids.
     Keyword arguments:
     only_new -- if True, only rows with null old_id will be returned
@@ -107,7 +107,6 @@ def get_crawls(only_new=True, start=None, end=None):
     start and end and extra_query.append(
         "p.start_time BETWEEN '{0}' AND '{1}'".format(
         start.isoformat(), end.isoformat()))
-    only_new and extra_query.append('old_id is NULL')
     query = """SELECT id FROM main_crawl p WHERE
         p.groups_available * {crawl_threshold} < p.groups_downloaded AND
         NOT EXISTS (SELECT id FROM main_crawlagregates WHERE crawl_id = p.id)

@@ -98,7 +98,6 @@ def get_crawls_for_update(force=False, start=None, end=None):
         id, start_time FROM main_crawl p
     WHERE
         p.success = true AND
-        old_id is null AND
         p.groups_available * {crawl_threshold} < p.groups_downloaded AND
         NOT EXISTS (SELECT id FROM main_crawlagregates WHERE crawl_id = p.id)
         {extra_query}
