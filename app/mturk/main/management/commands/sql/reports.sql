@@ -100,20 +100,27 @@ echo "COPY (SELECT date_trunc('month', date) as unit, count(*) as total, round(C
 --
 -- INVESTIGATING PEAK IN CRAWLS (for date 2012-02-01 to 2012-04-01)
 --
-SELECT requester_id,
-    count(*) as groups,
-    sum(hits_posted) as hits_posted,
-    sum(hits_consumed) as hits_consumed,
-    avg(hits_available) as hits_available
-FROM
-    hits_mv
-WHERE
-    start_time BETWEEN '2012-02-22' AND '2012-02-23'
-GROUP BY
-    requester_id
+SELECT hgc.requester_name, *
+FROM (
+    SELECT requester_id,
+        count(DISTINCT group_id) as groups,
+        sum(hits_posted) as hits_posted,
+        sum(hits_consumed) as hits_consumed,
+        avg(hits_available) as hits_available
+    FROM
+        hits_mv
+    WHERE
+        start_time BETWEEN '2012-02-22' AND '2012-02-23'
+    GROUP BY
+        requester_id
+) asd
+LEFT JOIN
+    main_hitgroupcontent hgc
+ON asd.requester_id = hgc.requester_id
 
-SELECT requester_id, count(*) as groups, sum(hits_posted) as hits_posted, sum(hits_consumed) as hits_consumed, avg(hits_available) as hits_available FROM hits_mv WHERE start_time BETWEEN '2012-02-22' AND '2012-02-23' GROUP BY requester_id ORDER BY hits_available
-echo "COPY (SELECT requester_id, count(*) as groups, sum(hits_posted) as hits_posted, sum(hits_consumed) as hits_consumed, avg(hits_available) as hits_available FROM hits_mv WHERE start_time BETWEEN '2012-03-05' AND '2012-03-10' GROUP BY requester_id ORDER BY hits_available) TO STDOUT WITH CSV HEADER" | psql -o '/tmp/mtracker_reports/02-22--23-topreq.csv' -d mturk_tracker_db -U mturk_tracker_db
+
+SELECT requester_id, count(DISTINCT group_id) as groups, sum(hits_posted) as hits_posted, sum(hits_consumed) as hits_consumed, avg(hits_available) as hits_available FROM hits_mv WHERE start_time BETWEEN '2012-02-22' AND '2012-02-23' GROUP BY requester_id ORDER BY hits_available
+echo "COPY (SELECT requester_id, count(DISTINCT group_id) as groups, sum(hits_posted) as hits_posted, sum(hits_consumed) as hits_consumed, avg(hits_available) as hits_available FROM hits_mv WHERE start_time BETWEEN '2012-03-05' AND '2012-03-10' GROUP BY requester_id ORDER BY hits_available) TO STDOUT WITH CSV HEADER" | psql -o '/tmp/mtracker_reports/02-22--23-topreq.csv' -d mturk_tracker_db -U mturk_tracker
 
 --
 -- requester name
@@ -126,7 +133,7 @@ select requester_name from main_hitgroupcontent where requester_id='A32TTE4XXN6M
 --
 SELECT
     date_trunc('month', start_time) as unit,
-    count(*) as groups,
+    count(distinct group_id) as groups,
     sum(hits_posted) as hits_posted,
     sum(hits_consumed) as hits_consumed,
     avg(hits_available) as hits_available
