@@ -128,6 +128,14 @@ def fetch_project_code():
                 sudo("git reset --hard %s" % rev, user=user)
 
 
+def clear_pyc():
+    """Removes all pyc file to get rid of stale modules."""
+    with settings(sudo_prefix=SUDO_PREFIX):
+        show(yellow("Clearing *.pyc files."))
+        with cd(cget("project_dir")):
+            sudo('find . -type f -name "*.pyc" -delete;')
+
+
 def upload_settings_files():
     """Uploads target specific (templated) settings files.
         If specified also uploads user supplied locals.py.
@@ -381,6 +389,9 @@ def deploy(conf_file=None, instance=None, branch=None, commit=None,
 
     # Fetch source code.
     fetch_project_code()
+
+    # Remove stale *.pyc files.
+    clear_pyc()
 
     # Upload target specific Django settings.
     upload_settings_files()
