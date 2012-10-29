@@ -51,4 +51,7 @@ deployment/files/postgresql/9.1/main/pg_hba.conf
 deployment/files/postgresql/9.1/main/postgresql.conf
 *ec2.json
 
+# ignoring generated javascript to django settings bridge
+static/js/jsconf.js
+
 *.log

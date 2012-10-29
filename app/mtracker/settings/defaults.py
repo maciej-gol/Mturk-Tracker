@@ -6,7 +6,9 @@ TEMPLATE_DEBUG = DEBUG
 JS_DEBUG = DEBUG
 
 _tempdir = tempfile.tempdir or '/tmp'
+# Mturk-Tracker/app/mtracker
 PROJECT_PATH = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
+# Mturk-Tracker/
 ROOT_PATH = os.path.abspath(os.path.dirname(os.path.dirname(PROJECT_PATH)))
 RUN_DATA_PATH = '/tmp/mturktracker/data'
 
@@ -116,6 +118,7 @@ FOREIGN_APPS = (
 )
 
 MTRACKER_APPS = (
+    'jsconf',
     'mturk',
     'mturk.api',
     'mturk.main',
@@ -323,6 +326,7 @@ PIPELINE_CSS = {
 PIPELINE_JS = {
     'core': {
         'source_filenames': (
+            'js/jsconf.js',
             'js/jquery-1.7.2.js',
             'js/ejs.js',
             'js/view.js',
@@ -452,3 +456,7 @@ INCOMPLETE_CRAWL_WARNING_THRESHOLD = 0.9
 # implementation a classification algorithm will be changed, hence this file
 # probably will not be used.
 CLASSIFIER_PATH = os.path.join("/home", "mtracker", "classifier.json")
+
+# Where the file will be generated. For deployment this must be somewhere the
+# collectstatic can find it else pipeline will raise as error.
+JSCONF_PATH = os.path.join(ROOT_PATH, 'static/js/jsconf.js')

@@ -183,6 +183,7 @@ def upload_settings_files():
 def collect_staticfiles():
     """Quietly runs `collectstatic` management command"""
     show(yellow("Collecting static files"))
+    run_django_cmd("makejsconf")
     run_django_cmd("collectstatic", args="--noinput")
 
 

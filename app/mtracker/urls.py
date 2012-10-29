@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.conf.urls import patterns, include, url
 from django.contrib import admin
+from django.core.management import call_command
 
 admin.autodiscover()
 
@@ -27,6 +28,10 @@ urlpatterns += patterns('',
     url(r'^documentation/', include('sphinxdoc.urls')),
 )
 
+#
+# POST-INIT
+#
+
 ## In DEBUG mode, serve media files through Django.
 if settings.DEBUG:
     # Remove leading and trailing slashes so the regex matches.
@@ -37,3 +42,12 @@ if settings.DEBUG:
     )
     from django.contrib.staticfiles.urls import staticfiles_urlpatterns
     urlpatterns += staticfiles_urlpatterns()
+
+if getattr(settings, 'JSCONF_DEVELOPMENT_MODE', False):
+    # the urls module always has settings loaded, so execute this command
+    # to generate jsconf each time Django starts. This way, we can serve the
+    # jsconf.js as a static file.
+    # This is enabled only for DEBUG configs, for stable you should run
+    #   ./manage.py generatejsconf
+    # after every deploy.
+    call_command('makejsconf')
