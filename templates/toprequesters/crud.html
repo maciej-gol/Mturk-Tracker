@@ -52,7 +52,9 @@
         </div>
     {% endblock %}
 
-    <div id="toprequesters-table"></div>
+    {% if report_meta %}
+        <div id="toprequesters-table"></div>
+    {% endif %}
 
     {% block content_after %}
         {% if report_meta.start_time %}
