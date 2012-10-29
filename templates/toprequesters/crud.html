@@ -4,9 +4,13 @@
 
 {% block javascript %}
     {{ block.super }}
-    {% compressed_js "core" %}
-    {% compressed_js "crud" %}
-    {% compressed_js "toprequesters" %}
+    {% if report_meta %}
+        {# core js should be in base.html #}
+        {# todo: cleanup the js structure we have #}
+        {% compressed_js "core" %}
+        {% compressed_js "crud" %}
+        {% compressed_js "toprequesters" %}
+    {% endif %}
 {% endblock %}
 
 {% block css %}
