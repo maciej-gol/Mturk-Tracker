@@ -73,3 +73,5 @@ if os.path.isfile(local_settings):
     from local import *
 
 PIPELINE = not DEBUG
+
+JSCONF_DEVELOPMENT_MODE = True
