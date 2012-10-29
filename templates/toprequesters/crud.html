@@ -19,6 +19,9 @@
 <div class="row-fluid">
     <h3>{{ title }}</h3>
 
+    {# Passing the report type to backbone. #}
+    <input type="hidden" name="report_type_hidden" value="{{ active_tab }}">
+
     {% block top_tabs %}
         <div class="row-fluid">
             <div class="span12">

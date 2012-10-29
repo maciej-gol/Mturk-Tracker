@@ -29,6 +29,14 @@
 
     Toprequesters.prototype.urlRoot = '/top_requesters/api/toprequesters/';
 
+    Toprequesters.prototype.url = function() {
+      var joiner, report_type, url;
+      url = Toprequesters.__super__.url.apply(this, arguments);
+      joiner = url.indexOf("?") !== -1 ? '&' : '?';
+      report_type = $('input[name="report_type_hidden"]')[0].value;
+      return url + joiner + "report_type=" + report_type;
+    };
+
     return Toprequesters;
 
   })(crud.collection.Collection);

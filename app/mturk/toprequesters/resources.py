@@ -2,8 +2,6 @@ import datetime
 import copy
 import pytz
 
-from django.core.urlresolvers import reverse
-
 from tenclouds.crud import fields
 from tenclouds.crud import resources
 from tenclouds.crud.queryset import QuerySetAdapter
@@ -104,15 +102,12 @@ class ToprequestersResource(resources.ModelResource):
     requester_url = fields.CharField()
 
     class Meta:
+        ## Custom get_object_list below does not require the
+        ## queryset = ... Meta argument.
         list_allowed_methods = ['get', ]
         fields = [
             'last_posted', 'hits', 'requester_name', 'reward', 'projects'
         ]
-        # TODO: Currently only one report type is returned regardless of tab
-        # need to figure out a way to make it work properly
-        queryset = ToprequestersQuerySetAdapter(
-            ToprequestersReport.get_report_data(
-                ToprequestersReport.AVAILABLE) or [])
         per_page = [15, 50, 100]
         ordering = [
             'requester_id', 'requester_name', 'last_posted', 'hits',
@@ -137,3 +132,19 @@ class ToprequestersResource(resources.ModelResource):
             return round(bundle.obj.get('reward'), 2)
         except TypeError:
             return None
+
+    def get_object_list(self, request):
+        """Overriding the default 'self._meta.queryset._clone()' with a
+        queryset based on report_type query argument.
+
+        """
+        try:
+            report_type = int(request.GET.get('report_type', None))
+        except TypeError:
+            report_type = None
+
+        if report_type not in ToprequestersReport.values:
+            report_type = ToprequestersReport.AVAILABLE
+
+        return ToprequestersQuerySetAdapter(
+            ToprequestersReport.get_report_data(report_type) or [])
