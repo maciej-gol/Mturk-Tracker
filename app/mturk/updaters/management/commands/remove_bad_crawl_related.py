@@ -54,6 +54,7 @@ class Command(BaseCommand):
 
         self.start_time = time.time()
 
+        log.info('Starting remove_bad_crawl_related, acquiring PID.')
         pid = Pid('remove_bad_crawl_related', True)
 
         self.having_hits_mv = not options.get('all')
@@ -225,5 +226,7 @@ class Command(BaseCommand):
         those values are set to be equal.
 
         """
+        log.info('--fix-interrupted specified, updating interrupted crawls to '
+            'have groups_downloaded match the actual downloaded object count.')
         execute_sql(self.recount_query)
         transaction.commit_unless_managed()
