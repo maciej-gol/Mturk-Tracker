@@ -2,6 +2,8 @@ import datetime
 import copy
 import pytz
 
+from django.core.urlresolvers import reverse
+
 from tenclouds.crud import fields
 from tenclouds.crud import resources
 from tenclouds.crud.queryset import QuerySetAdapter
@@ -92,7 +94,8 @@ class ToprequestersResource(resources.ModelResource):
 
     """
     requester_name = fields.CharField(
-        attribute='requester_name', null=True, title='Requester name')
+        attribute='requester_name', null=True, title='Requester name',
+        url='requester_url')
     last_posted = fields.DateTimeField(
         attribute='last_posted', null=True, title='Last posted')
     hits = fields.FloatField(attribute='hits', null=True)
@@ -148,3 +151,10 @@ class ToprequestersResource(resources.ModelResource):
 
         return ToprequestersQuerySetAdapter(
             ToprequestersReport.get_report_data(report_type) or [])
+
+    def dehydrate_requester_url(self, bundle):
+        rid = bundle.obj.get('requester_id')
+        return reverse('requester_details', kwargs={'requester_id': rid})
+
+    def dehydrate_last_posted(self, bundle):
+        return bundle.obj.get('last_posted').strftime("%m-%d-%Y %I:%M:%S")
