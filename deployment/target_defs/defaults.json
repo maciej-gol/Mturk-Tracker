@@ -3,7 +3,7 @@
     "django_project_name": "mtracker",
     "manage_py_dir": "app",
     "settings_name": "defaults",
-    "source_url": "git://github.com/10clouds/Mturk-Tracker.git",
+    "source_url": "https://github.com/ipeirotis/Mturk-Tracker.git",
     "default_prefix": "mturktracker",
     "projects_dir": "/home/projects",
     "project_display_name": "Mturk-Tracker",

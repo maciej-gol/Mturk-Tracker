@@ -3,7 +3,7 @@
     "settings_name": "defaults",
 
     // Hostname is connected with a setting in SSH client config.
-    "source_url": "git@github.com:10clouds/Mturk-Tracker.git",
+    "source_url": "git@github.com:ipeirotis/Mturk-Tracker.git",
 
     // Namespace prefix for a lot of things:
     "default_prefix": "mturktracker",

@@ -10,7 +10,7 @@ Source / How to get it
 
 Visit github repository at
 
-    https://github.com/10clouds/Mturk-Tracker/
+    https://github.com/ipeirotis/Mturk-Tracker/
 
 What's new
 ==========
@@ -211,7 +211,7 @@ Required libraries
 
 Mturk-Tracker requires a number of libraries that should be installed in the
 operating system. The most recent and complete list can be found in
-https://github.com/10clouds/Mturk-Tracker/blob/new/deployment/files/requirements/system_requirements.txt
+https://github.com/ipeirotis/Mturk-Tracker/tree/master/deployment/files/requirements/system_requirements.txt
 
 To install the requirements simply type (for debian-like system):
 
@@ -223,7 +223,7 @@ Python environment
 
 There is a number of python dependencies required for the project to run, see
 files in
-https://github.com/10clouds/Mturk-Tracker/blob/new/deployment/files/requirements/.
+https://github.com/ipeirotis/Mturk-Tracker/tree/master/deployment/files/requirements/.
 
 The easiest way to install and manage python packages is by using pip for
 installing packages and virtualenv_ for creating a separate virtual environment.
@@ -249,7 +249,7 @@ After that, clone mturk code from repository and install all
 dependencies using pip_ (you have to install *mercurial* and *subversion*
 first, a mentioned in Required Libraries)::
 
-	$ git clone git://github.com/10clouds/Mturk-Tracker.git src
+	$ git clone https://github.com/ipeirotis/Mturk-Tracker.git
 	$ cd src
 	$ git fetch
 	$ git checkout -b virtualenv --track origin/virtualenv
@@ -332,8 +332,8 @@ Solr setup
 Go to the Solr's page http://lucene.apache.org/solr/ for information on how to
 obtain appropirate Solr release.
 
-For properly Solr's core configuration simply copy directory
-https://github.com/10clouds/Mturk-Tracker/tree/master/deployment/files/solr/solr/
+For proper Solr's core configuration simply copy directory
+https://github.com/ipeirotis/Mturk-Tracker/tree/master/deployment/files/solr/solr/
 to ``path/to/your/solr/`` and manually replace the following
 
 ::
