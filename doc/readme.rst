@@ -47,4 +47,4 @@ Generating apidoc
 
 To create an automated api documentation, use sphinx-apidoc:
 
-    sphinx-apidoc -o doc/source/apidoc/ . -H Mturk-Tracker wapi migrations
+    sphinx-apidoc -o doc/source/apidoc/ . -H Mturk-Tracker migrations

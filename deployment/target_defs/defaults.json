@@ -7,5 +7,5 @@
     "default_prefix": "mturktracker",
     "projects_dir": "/home/projects",
     "project_display_name": "Mturk-Tracker",
-    "autodoc_excluded_apps": ["wapi", "migrations"]
+    "autodoc_excluded_apps": ["migrations"]
 }
