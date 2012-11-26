@@ -113,6 +113,7 @@ FOREIGN_APPS = (
     'bootstrap',
     'sphinxdoc',
     'django_extensions',
+    'raven.contrib.django',
 )
 
 MTRACKER_APPS = (
@@ -228,13 +229,13 @@ LOGGING = {
             'maxBytes': '16777216',  # 16megabytes
             'formatter': 'simple'
         },
-        # 'sentry': {
-        #     'level': 'WARNING',
-        #     'class': 'raven.contrib.django.handlers.SentryHandler',
-        # },
+        'sentry': {
+            'level': 'WARNING',
+            'class': 'raven.contrib.django.handlers.SentryHandler',
+        },
     },
     'root': {
-        'handlers': ['syslog', ],  # 'sentry'],
+        'handlers': ['syslog', 'sentry'],
         'level': LOG_LEVEL,
     },
     'loggers': {
@@ -272,6 +273,11 @@ LOGGING = {
             'handlers': ['toprequesters_log', 'console'],
             'level': LOG_LEVEL,
             'propagate': True,
+        },
+        'raven': {
+            'level': 'DEBUG',
+            'handlers': ['console'],
+            'propagate': False,
         },
     },
 }
@@ -424,6 +430,11 @@ HAYSTACK_CONNECTIONS = {
         'ENGINE': 'haystack.backends.solr_backend.SolrEngine',
         'URL': SOLR_PATH,
     },
+}
+
+RAVEN_CONFIG = {
+    # redefined in deployment/settings_template.py
+    'dsn': 'http://public:secret@example.com/1',
 }
 
 # Fine tuning of crawls,

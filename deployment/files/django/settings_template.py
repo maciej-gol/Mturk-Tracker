@@ -17,6 +17,9 @@ LOGGING['handlers']['aggregates_log']['filename'] = pjoin(LOG_DIRECTORY, 'aggreg
 LOGGING['handlers']['classification_log']['filename'] = pjoin(LOG_DIRECTORY, 'classification.log')
 LOGGING['handlers']['toprequesters_log']['filename'] = pjoin(LOG_DIRECTORY, 'toprequesters.log')
 
+RAVEN_CONFIG = RAVEN_CONFIG or {}
+RAVEN_CONFIG['dsn'] = "%(sentry_dsn)s"
+
 log = logging.getLogger(__name__)
 
 # sudo -u postgres psql
