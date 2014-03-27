@@ -58,8 +58,8 @@ def _get_html(url, timeout=settings.CRAWLER_FETCH_TIMEOUT,
 
 
 def hitsearch_url(page=1):
-    return '{}/mturk/viewhits?searchWords=&selectedSearchType=hitgroups&sortType=LastUpdatedTime:1&pageNumber=' + str(page) + '&searchSpec=HITGroupSearch%23T%231%2310%23-1%23T%23!%23!LastUpdatedTime!1!%23!'.format(
-        settings.MTURK_PAGE
+    return '{}/mturk/viewhits?searchWords=&selectedSearchType=hitgroups&sortType=LastUpdatedTime:1&pageNumber={}&searchSpec=HITGroupSearch%23T%231%2310%23-1%23T%23!%23!LastUpdatedTime!1!%23!'.format(
+        settings.MTURK_PAGE, page
     )
 
 
