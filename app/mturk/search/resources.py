@@ -100,7 +100,7 @@ class HitGroupContentSearchResource(SearchResource):
 
 class HitSearchResource(HitGroupContentSearchResource):
     class Meta(HitGroupContentSearchResource.Meta):
-        per_page = [6, 12, 24]
+        per_page = [6, 12, 24, 36]
 
         filters = (
             Group('Query', FullTextSearch('query',
