@@ -470,4 +470,4 @@ CLASSIFIER_PATH = os.path.join("/home", "mtracker", "classifier.json")
 # collectstatic can find it else pipeline will raise as error.
 JSCONF_PATH = os.path.join(ROOT_PATH, 'static/js/jsconf.js')
 
-MTURK_PAGE = 'https://workersandbox.mturk.com'
+MTURK_PAGE = 'https://www.mturk.com'
