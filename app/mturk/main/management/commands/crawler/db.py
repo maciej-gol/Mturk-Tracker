@@ -113,7 +113,7 @@ class DB(object):
             UPDATE main_hitgroupcontent
             SET hits_available = %(hits_available)s,
                 last_updated = %(now)s
-            WHERE hit_group_content_id = %(hit_group_content_id)s
+            WHERE id = %(hit_group_content_id)s
         ''', data)
 
         # add related hitgroupcontent id to index queue
