@@ -184,6 +184,7 @@ def process_group(hg, crawl_id, requesters, processed_groups, dbpool):
 
         hg['hit_group_content_id'] = hit_group_content_id
         hg['crawl_id'] = crawl_id
+        hg['now'] = datetime.datetime.now()
         db.insert_hit_group_status(hg)
         conn.commit()
     except Exception:
