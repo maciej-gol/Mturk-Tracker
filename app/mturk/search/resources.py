@@ -96,17 +96,3 @@ class HitGroupContentSearchResource(SearchResource):
 
     def dehydrate_labels(self, bundle):
         return bundle.obj.get_labels_display()
-
-
-class HitSearchResource(HitGroupContentSearchResource):
-    class Meta(HitGroupContentSearchResource.Meta):
-        per_page = [6, 12, 24, 36]
-
-        filters = (
-            Group('Query', FullTextSearch('query',
-                                          'title', 'description', 'content',
-                                          'keywords', 'qualifications')
-                  ),
-            Group('Requester', FullTextSearch('requester', 'requester_id'),
-                  join='or'),
-        )
