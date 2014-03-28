@@ -103,6 +103,10 @@ class HitSearchResource(HitGroupContentSearchResource):
         per_page = [6, 12, 24]
 
         filters = (
-            Group('Query', FullTextSearch('search')),
-            Group('Requester', FullTextSearch('requester_id')),
+            Group('Query', FullTextSearch('query',
+                                          'title', 'description', 'content',
+                                          'keywords', 'qualifications')
+                  ),
+            Group('Requester', FullTextSearch('requester', 'requester_id'),
+                  join='or'),
         )
