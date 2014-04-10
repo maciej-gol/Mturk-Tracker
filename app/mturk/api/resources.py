@@ -25,6 +25,7 @@ class HitGroupContentResource(resources.ModelResource):
             'title': resources.ALL,
             'date_posted': resources.ALL,
             'time_alloted': resources.ALL,
+            'last_updated': resources.ALL,
         }
         ordering = [
             'id', 'title', 'group_id', 'requester_id', 'requester_name',
